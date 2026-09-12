@@ -75,12 +75,12 @@ const NEXT_DAY := "Next day"
 # ── the season's end ─────────────────────────────────────────────────────────────────────────
 const ENDING_TITLE := "The season is over"
 
-## "Night 3 · Mittwoch · 2 waiting" — the whole top-left HUD line, built in one place so the
-## separators cannot drift between corners.
-static func hud_line(day: int, weekday: String, queue: int) -> String:
+## "Night 3 · 2 waiting" — the whole top-left HUD line, built in one place so the separators cannot
+## drift between corners. The WEEKDAY is deliberately not here: at one text size (16) the corner
+## cannot hold clock + cash + Pfand + weekday and still leave the right corner to the two meters.
+## It is on the Manage modal's title and the Summary sub-line, which is where a day is planned anyway.
+static func hud_line(day: int, queue: int) -> String:
 	var out := HUD_NIGHT % day
-	if weekday != "":
-		out += " %s %s" % [HUD_SEP, weekday]
 	if queue > 0:
 		out += " %s %s" % [HUD_SEP, HUD_QUEUE % queue]
 	return out

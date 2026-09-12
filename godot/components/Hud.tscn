@@ -93,7 +93,7 @@ layout_mode = 2
 size_flags_vertical = 4
 mouse_filter = 2
 theme_type_variation = &"TinyLabel"
-text = "Night 3 · Mittwoch"
+text = "Night 3 · 2 waiting"
 
 [node name="RightPlate" type="PanelContainer" parent="."]
 unique_name_in_owner = true

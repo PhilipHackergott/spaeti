@@ -126,6 +126,10 @@ func test_asset_sizes_match_the_spec() -> void:
 	var spec_ids := {}
 	for entry in (parsed as Dictionary)["assets"]:
 		var id := String(entry["id"])
+		# `kind: "concept"` rows are reference paintings for the art loop (concept-art/generated/*),
+		# not bitmaps a component ever asks `Assets` for — they carry no w/h and own no footprint.
+		if String(entry.get("kind", "")) == "concept":
+			continue
 		spec_ids[id] = true
 		assert_true(Assets.SIZES.has(id), "Assets.SIZES knows " + id)
 		if Assets.SIZES.has(id):

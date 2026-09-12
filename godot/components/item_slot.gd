@@ -62,7 +62,8 @@ func _refresh() -> void:
 		stock_label.add_theme_color_override("font_color", Palette.TEXT_DIM if stock > 0 else Palette.BAD)
 	var badge := get_node_or_null("%Badge") as Label
 	if badge != null:
+		# The badge cell always occupies its width (the columns must line up down the list); it is the
+		# TEXT that disappears. "18" is the age gate, a number in the till is what you already picked.
 		badge.text = str(count) if count > 0 else ("18" if bool(sku.get("restricted", false)) else "")
-		badge.visible = badge.text != ""
 		badge.add_theme_color_override("font_color", Palette.AMBER_SOFT if count > 0 else Palette.BAD)
 	theme_type_variation = &"SlotPanelPicked" if count > 0 else &"SlotPanel"

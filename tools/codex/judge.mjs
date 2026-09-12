@@ -15,7 +15,9 @@ const a = parseArgs(process.argv.slice(2));
 if (!a.candidate) { console.error('need --candidate image'); process.exit(2); }
 // The generated Berlin-Späti interaction concept (astra) becomes reference 2 as soon as it exists; the user's OG
 // interaction image stays reference 1 — the judge is told which is which.
-const GENERATED_CONCEPT = 'concept-art/generated/night_interaction.png';
+// Prefer the grid-snapped 16:9 ×4 version (the concept at the game's real density and framing) when it exists.
+const GENERATED_CONCEPT = fs.existsSync(path.resolve(REPO, 'concept-art/generated/night_interaction-grid.png'))
+  ? 'concept-art/generated/night_interaction-grid.png' : 'concept-art/generated/night_interaction.png';
 export const DEFAULT_REFS = [
   'concept-art/main character target state.png',
   ...(fs.existsSync(path.resolve(REPO, GENERATED_CONCEPT)) ? [GENERATED_CONCEPT] : []),

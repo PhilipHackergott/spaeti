@@ -1,7 +1,9 @@
 class_name Shelf
 extends GridContainer
-## The grid of ItemSlots, filled from `view.shelf` (registry order). The shelf owns no rules: it
-## re-uses its slots, keeps them in the same cells between renders, and forwards the pick.
+## The stock list: one full-width ItemSlot per SKU, in registry order, inside the ServePanel's scroll
+## window. It was a 5-wide grid of 42-px tiles; at the one text size the pool now uses (16 base px) a
+## tile that narrow could print a name OR a price, never both — and the shelf is 17 SKUs, 23 with the
+## modules. The shelf owns no rules: it re-uses its slots between renders and forwards the pick.
 
 signal picked(sku_id: String)
 

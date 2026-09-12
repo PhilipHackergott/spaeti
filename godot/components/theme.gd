@@ -62,14 +62,18 @@ const METER_EMPTY := Color(0.031, 0.027, 0.039, 0.94)
 ## simply vanished ("Mate"->"Nate", "MODULES"->"NODULES", "8"->"B"). Jersey is drawn ON a pixel grid,
 ## but ONLY at the sizes where its grid divides evenly — measured, not assumed, with
 ## `godot/tools/FontProbe.tscn` (shots/fontprobe*.png, build log 2026-09-12):
-##   Jersey 10 -> CLEAN at 12 / 16 / 20 / 25 / 50 · BROKEN at 10 ("KIEZ"->"HIEZ") and 14 ("Wasser"->"Wassor")
+##   Jersey 10 -> CLEAN at 16 / 20 / 25 / 50 · BROKEN at 10 ("KIEZ"->"HIEZ") and 14 ("Wasser"->"Wassor")
+##                 12 draws every letter but not every NUMBER: "22:41"->"ZZ41", "84,50"->"84.50" (the
+##                 comma flattens to a dot and 2 to a Z), which is unusable for a clock and for money
 ##   Jersey 20 -> BROKEN at 20 ("8"->"0"); clean at 25/50, so it earns no slot here (kept for its licence)
 ##   Jersey 25 -> caps-only display face, perfect at 50: the wordmark, nothing else
 ## Rule: a size here is one of the measured-clean sizes. Anything else is re-probed before it ships.
 ## The whole ladder is much smaller than VT323's was at the same numbers — Jersey 10 @16 has an 8-px
 ## cap where VT323 @16 had 11 — which is the Coffee Talk body size the review asked for.
-const FONT_TINY := 12    # Jersey 10 @12 — the HUD corner line, badges, table cells
-const FONT_SMALL := 12   # Jersey 10 @12
+## So there is exactly ONE text size, like Coffee Talk: everything a player reads is 16, and only the
+## lead and the wordmark step up. A "small" token stays, because half the pool asks for one.
+const FONT_TINY := 16    # Jersey 10 @16 — the HUD corner line
+const FONT_SMALL := 16   # Jersey 10 @16 — table cells, badges, captions (dim, not smaller)
 const FONT_BODY := 16    # Jersey 10 @16 — dialogue, buttons, item names
 const FONT_LEAD := 20    # Jersey 10 @20 — modal titles, the P&L bottom line
 const FONT_TITLE := 50   # Jersey 25 @50 — the wordmark only

@@ -5,9 +5,9 @@
 [ext_resource type="PackedScene" path="res://components/PixelButton.tscn" id="3_button"]
 
 [node name="Till" type="PanelContainer"]
-custom_minimum_size = Vector2(226, 100)
+custom_minimum_size = Vector2(226, 94)
 offset_right = 226.0
-offset_bottom = 100.0
+offset_bottom = 94.0
 theme = ExtResource("2_theme")
 script = ExtResource("1_script")
 
@@ -15,15 +15,9 @@ script = ExtResource("1_script")
 layout_mode = 2
 theme_override_constants/separation = 1
 
-[node name="Head" type="Label" parent="Box"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_type_variation = &"SmallLabel"
-text = "Till"
-
 [node name="Lines" type="VBoxContainer" parent="Box"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 45)
+custom_minimum_size = Vector2(0, 42)
 layout_mode = 2
 theme_override_constants/separation = 0
 

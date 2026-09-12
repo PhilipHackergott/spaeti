@@ -5,9 +5,9 @@
 
 [node name="Shelf" type="GridContainer"]
 offset_right = 218.0
-offset_bottom = 102.0
+offset_bottom = 118.0
 theme = ExtResource("2_theme")
-theme_override_constants/h_separation = 2
+theme_override_constants/h_separation = 0
 theme_override_constants/v_separation = 2
-columns = 5
+columns = 1
 script = ExtResource("1_script")

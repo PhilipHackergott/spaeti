@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dukoujes27whs"
-path="res://.godot/imported/you_neutral-r3.png-15f97c65b056d3e6cc3d39960b30f44c.ctex"
+uid="uid://17qto3au2p7q"
+path="res://.godot/imported/tobias_neutral.png-43bdfb18af320a67f4214f897bde4541.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/char/you_neutral-r3.png"
-dest_files=["res://.godot/imported/you_neutral-r3.png-15f97c65b056d3e6cc3d39960b30f44c.ctex"]
+source_file="res://assets/char/tobias_neutral.png"
+dest_files=["res://.godot/imported/tobias_neutral.png-43bdfb18af320a67f4214f897bde4541.ctex"]
 
 [params]
 
