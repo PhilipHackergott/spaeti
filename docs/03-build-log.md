@@ -863,3 +863,7 @@ the first thing it caught.
   should probably become a close affordance.
 - A neglected night piles up a long queue ("18 waiting" in `play-11-beat-choice.png`) and Kiez-Trust drops
   fast; that is the balance lane's read, not a bug, but the number is worth a look.
+
+## 2026-09-12 late — session restart + the real-Späti brief (orchestrator)
+- The Claude session restarted; art round 2 (6 lanes) and the review/polish fleet died mid-flight (no completion records). Surviving work: 10 neutral portraits (astra 62–76), SKUs (mate 84, water 83, chips 84, gummi 79, chocolate 74), scene r3 rounds (backdrop 64, counter 59, title 67 under astra). Variant files purged from godot/assets (raws kept).
+- **User feedback with six real Späti photos:** the set still read as a wooden tavern. Rewrote `docs/art-style-brief.md` (set section: fluorescent light, white/metal shelving, the cigarette wall, glass fridges, cluttered laminate counter with a white register, graffiti facade, bench — explicit NOT-list: wood panelling, beams, pendant lamps, café props) and the concept/backdrop/counter/title prompts. `concept-art/spaeti-references/` is a drop folder auto-attached to scene/concept generations. Next: concept r3 → scene layers with astra against the new brief.

@@ -31,7 +31,13 @@ const model = a.model || entry.model || (spec.modelByKind && spec.modelByKind[en
   || (['prop', 'icon', 'texture'].includes(entry.kind) ? CODEX_MODEL_SMALL : CODEX_MODEL_HERO);
 fs.mkdirSync(path.dirname(raw), { recursive: true });
 fs.mkdirSync(path.dirname(out), { recursive: true });
-const refs = (entry.refs && entry.refs.length ? entry.refs : spec.defaultRefs) || [];
+// References: the entry's own (or the spec defaults) + every photo in the user's reference drop folder for scene/concept
+// work. Missing files are skipped with a warning — a stale path must never abort a 10-minute generation.
+const dropDir = spec.referenceDir ? path.join(REPO, spec.referenceDir) : '';
+const dropRefs = dropDir && fs.existsSync(dropDir) && ['scene', 'concept'].includes(entry.kind)
+  ? fs.readdirSync(dropDir).filter((f) => /\.(png|jpe?g)$/i.test(f)).slice(0, 6).map((f) => path.join(spec.referenceDir, f)) : [];
+const refs = [...((entry.refs && entry.refs.length ? entry.refs : spec.defaultRefs) || []), ...dropRefs]
+  .filter((r) => { const ok = fs.existsSync(path.resolve(REPO, r)); if (!ok) console.error(`art: skipping missing reference ${r}`); return ok; });
 const retries = Number(a.retries ?? 1);
 const kindNotes = (spec.kinds && spec.kinds[entry.kind]) || '';
 // Chroma key used as the transparency fallback (flat backdrop the model paints when it does not use real alpha).
