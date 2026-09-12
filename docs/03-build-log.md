@@ -666,3 +666,57 @@ literals, Till Pfand rate, manage tier thresholds, close_night never dispatched,
 Conclusion: the snap is worth +2 to +5; palette quantisation is **optional, not standard** (a few points, some banding). The remaining
 gap to "authored clusters" has to come from **generation discipline** (the TRUE-PIXEL-ART / 4–6-tone / stepped-contour clauses
 that moved the backdrop 61→79) plus the judge loop — and astra as generator. `--quantize` and `--despeckle` stay available in `img.gd`.
+
+## 2026-09-12 — art round 2: sku/beer, sku/mate, sku/cola, sku/water, sku/chips (art operator)
+
+Round 1 of these five never ran (spend cap + the cross-lane `~/.codex/generated_images` bug). Both are fixed, so
+this is the first real pass. All five now sit at `godot/assets/sku/<id>.png` with a real alpha channel, judged at
+x25/x29 nearest upscale with the prop context ("only pixel_rendering, palette_lighting and berlin_reskin apply;
+the pipeline trims sprites, so margins are irrelevant"). **Five of five pass ≥ 80; no asset is blocked.**
+
+- **sku/beer — 1 round, 84 pass** (palette 80, pixel 85, berlin 91). Green stubby bottle, gold crown cap, blank
+  cream paper band, amber-lime highlight left / slate rim right. Snapped 9x36 (the drawn bottle is slimmer than
+  the 14x36 spec box — the engine must anchor SKUs bottom-centre, not by the spec rectangle). Remaining fixes
+  (not worth another round): consolidate a few near-identical glass shades; the left highlight is a touch lime
+  rather than amber; the paper label's outer columns are lit symmetrically.
+- **sku/mate — 2 rounds, 84 pass** (palette 81, pixel 88, berlin 83; r1 was 78). r2 fixed the luminous yellow
+  label slab and the opaque-looking grey neck collar. Snapped 10x36. Remaining: pale glass highlights still
+  compete with the label; the blue neck reflection reads slightly like an insert; the blank label makes it read
+  as "a brown bottle" — the judge suggests a 3-pixel dark-olive leaf mark to make the SKU distinct (no lettering).
+- **sku/cola — 1 round, 82 pass** (palette 80, pixel 84, **berlin 94** — explicitly asked about brand resemblance
+  and it came back clean: generic contour bottle, plain red band, no script/swirl). Snapped 10x36. Remaining: the
+  lower body collapses into near-black browns (lift one connected 2–3-px brown cluster a value step); the pale
+  neck reflection reads like a metal sleeve.
+- **sku/water — 2 rounds + a re-snap, 83 pass** (palette 81, pixel 84, berlin 92; r1 73, r2-lanczos 78). r2
+  restored the navy contour and the warm-ivory left reflection the first render lacked. Snapped 11x36. Remaining:
+  the label reads as a flat cuff with too heavy a bottom shadow; the cream reflection is a long solid stripe.
+- **sku/chips — 2 rounds, 84 pass** (palette 80, pixel 86, berlin 90; r1 78). r2 deepened the hot orange to
+  paprika red, made the crimped seals legible (3–4 one-pixel crimp marks + a crease) and turned the "gold badge"
+  into an asymmetric curled crisp with an ochre underside. Snapped 23x32. Remaining: a few bright orange folds on
+  the right fight the cool-right lighting; the crisp can still read as a crescent.
+
+**The finding worth keeping — for these tiny sprites the snap filter is worth more than another generation.**
+`mate` and `water` were stuck at 78 with the identical top verdict ("numerous near-identical shades → a
+downsampled-gradient look instead of deliberate clusters"). That is the *Lanczos* downscale inventing intermediate
+tones between the model's flat blocks, not the prompt. Re-snapping the **same** raw with `--filter nearest` lifted
+`pixel_rendering` 76 → 88 (mate) and 75 → 84 (water) and both to a pass, for zero Codex calls. Recommendation:
+try `"filter": "nearest"` first on any prop under ~40 base px whose raw is already large flat blocks; keep lanczos
+for busts and scene layers. `beer` (85) and `cola` (84) were left on lanczos only because they already passed and
+`godot/tools/img.gd` was mid-edit by another lane when the A/B would have run — worth the two snaps later.
+
+**Spec changes (`docs/asset-spec.json`, my five entries only; ids/sizes/kind untouched):** rewrote the `prompt`
+for `sku/mate`, `sku/water`, `sku/chips` — each now names an explicit closed palette ("USE ONLY THESE 7/9
+COLOURS", every neighbouring pair strongly separated in value so it survives the downscale), asks for the
+near-black contour **two blocks thick** (a 1-block outline is eaten by the downscale), and pins the light as one
+connected warm column left / one 1-block cool rim inside the contour right. Added `"filter": "nearest"` to
+`sku/mate` and `sku/water`, and `"bgTol": 0.25` to `sku/mate`.
+
+**Pipeline note (cost the mate round its first snap):** gpt-image painted a *checkerboard* background for `mate`
+r1 plus faint ghost smudges across the canvas. `--auto-bg` keyed the checkerboard but the ghosts survived, so the
+tight trim kept the full 1024x1536 canvas and the bottle snapped to 14x**21** — a correct-looking file that is
+silently a third of the sprite. Raising `--bg-tol` to 0.25 recovered it (430x1514 → 10x36). **Always check the
+snapped `width`/`height` in `art.mjs`'s JSON against the raw's subject aspect; a wrong aspect there means the trim
+failed, not that the art is wrong.** The r2 prompts now also forbid any mark, glow, halo or smudge outside the
+subject for exactly this reason.
+
+- **Incident 20:52–20:58:** adding `--despeckle` to `img.gd` introduced a GDScript parse error (`var p := o + d` with an untyped loop var) that broke EVERY snap for ~4 min — the art lanes logged 11 `img.gd failed` results (raws are kept; re-snap with `art.mjs --reuse-raw`). Fixed (typed loop), verified, committed. `judge.mjs` now refuses a missing candidate instead of returning a zero-filled verdict.
