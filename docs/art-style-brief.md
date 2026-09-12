@@ -27,11 +27,28 @@ Younger and softer beats older and brooding; neutral means "quietly present", no
 head-and-shoulders busts, centred, facing the viewer at the counter, slightly below eye level, like Coffee
 Talk's customers. Nothing is drawn from above or in isometric.
 
-**Berlin re-skin (content):** generic stand-in products only — never real brands: a green "Sterni"-like
-beer bottle with a plain paper label, a yellow-label "Mate"-like bottle, unbranded chips/chocolate/gum,
-tobacco pouches. Berlin texture: a U-Bahn-style sign, a techno flyer, a football scarf (no real club),
-stickers on glass, plants, a Pfand (deposit) crate of empty bottles, a glowing drinks fridge wall, a hand-
-painted "SPÄTI" sign. German flavour, no caricature.
+**The set — a REAL Berlin Späti (from the user's reference photos), not a café and not a tavern:**
+- **Light:** cool-white fluorescent tubes inside (a faint green-cyan cast) that spill onto the pavement; the warmth
+  comes from packaging colours, the neon and the blue night outside — NOT from wood or amber lamps. Keep Coffee Talk's
+  warm cluster shading, but the materials are painted plaster, laminate, cheap metal and glass.
+- **Walls:** cream/white painted plaster or laminate. Directly behind the counter the signature Späti backdrop: a
+  DENSE wall of cigarette packs and tobacco pouches in tight colourful rows (red / gold / blue / white generic packs,
+  never real brands) on white or grey metal shelving with price-tag strips; a row of small spirits bottles; lighters,
+  chewing gum and phone-cable blister packs on hooks; a small wall-mounted TV; hand-written paper price signs
+  ("0,10 €"); lotto / prepaid cards; a wall clock.
+- **Fridges:** tall glass-door drinks fridges with white interiors and blue/cyan LED strips, packed with generic
+  beer, Mate-like, cola-like and water bottles; a sticker-covered ice-cream chest freezer.
+- **Counter:** a cheap laminate counter with a WHITE cash register or a small POS terminal + card reader, stacks of
+  newspapers and magazines on the front and under the glass, open boxes of chocolate bars and sweets (Kinder/duplo-
+  like generic stand-ins), a jar of gummi or cables, a receipt roll, a Pfand crate of empty bottles on the floor.
+- **Door / window / outside:** stickers and posters on the glass, an "OPEN" neon, a bell, roller-shutter tracks;
+  outside a cream plaster facade covered in graffiti tags, a hand-painted black board with red "SPÄTI" letters (or a
+  lit box sign), a faded red awning, an ATM box, a wooden bench or beer table where people sit with bottles at night,
+  bikes, wet cobbles, a U-Bahn-style sign.
+- **Density is the point:** every shelf full, packaging colours as the palette accents against white shelving; the
+  place is cheap, bright, cluttered and alive — Coffee Talk's *rendering* on a Späti's *furniture*.
+- **NOT:** dark wood panelling, beams, a wooden bar, vintage phones, jukeboxes, framed art, mugs on shelves, hanging
+  plants as décor, pendant lamps, anything that reads as café, pub or tavern.
 
 **Character design language:** strong silhouette, one signature prop or garment per character, expressive
 faces (Coffee Talk proportions: realistic-ish heads, big readable eyes, subtle mouths), everyday clothes with
