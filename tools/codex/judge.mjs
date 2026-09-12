@@ -3,7 +3,7 @@
 //
 //   node tools/codex/judge.mjs --candidate shots/night.png [--reference img ...] [--context "what this is"]
 //        [--rubric docs/judge-rubric.md] [--out judge/night.json] [--threshold 80] [--effort high] [--full] [--refs=full]
-//        [--timeout 420 (per attempt)] [--attempts 3]
+//        [--timeout 420 (per attempt)] [--attempts 3] [--no-schema (free-form JSON; the strict schema is one stall suspect)]
 //
 // Writes a strict JSON verdict (tools/codex/verdict.schema.json). Exit 0 if overall >= threshold else 1.
 //
@@ -62,6 +62,21 @@ if (!a.full && info.width >= 1920 && info.width % 2 === 0 && info.height % 2 ===
   context += ` NOTE ON SCALE: the candidate is shown at half size (${info.width / 2}x${info.height / 2}). The game renders 480x270 game pixels at x4 = 1080p; this copy is the lossless x2 of that frame, so every 2x2 block is ONE game pixel. Judge pixel discipline on the 480x270 grid — crisp 2x2 blocks are not a defect.${hasConcept && GENERATED_CONCEPT?.includes('-x2') ? ' The generated concept (image 3) is at the same x2 scale.' : ''}`;
 }
 
+
+// Free-form replies drift on key names; map the common variants onto the schema's.
+function normalise(v) {
+  const pick = (...keys) => keys.map((k) => v[k]).find((x) => x !== undefined);
+  const out = { ...v };
+  out.overall = Number(pick('overall', 'overall_score', 'score', 'total') ?? NaN);
+  out.axes = pick('axes', 'scores', 'axis_scores', 'axes_scores') || {};
+  if (out.overall !== out.overall && typeof out.axes === 'object' && 'overall' in out.axes) out.overall = Number(out.axes.overall);
+  out.verdict = String(pick('verdict', 'decision', 'result') || (out.overall >= threshold ? 'pass' : 'revise'));
+  out.fixes = pick('fixes', 'actionable_fixes', 'recommendations', 'fix_list') || [];
+  if (!Array.isArray(out.fixes)) out.fixes = [];
+  out.fixes = out.fixes.map((f) => (typeof f === 'string' ? { what: f, where: '', how: '' } : f));
+  return out;
+}
+
 const prompt = `You are the art director for "Späti", a 2D HD pixel-art game whose locked visual target is
 "a Berlin Späti (late-night kiosk) version of Coffee Talk". You judge how close a CANDIDATE image is to
 that target and give concrete, actionable fixes. Be strict and specific — a vague "improve shading" is useless;
@@ -79,7 +94,9 @@ ${rubric}
 Score every axis 0-100 (use -1 only for an axis that genuinely does not apply to this candidate, e.g.
 character_fidelity for a bottle sprite). "overall" is your holistic call, not an average. verdict: pass (>= ${threshold},
 ship it), revise (fixable — list the fixes in priority order), reject (wrong medium/style, start over).
-List up to 8 fixes, most impactful first, each with what/where/how. Reply ONLY with the JSON object.`;
+List up to 8 fixes, most impactful first, each with what/where/how. Reply ONLY with the JSON object.${a['no-schema'] ? `
+USE EXACTLY THIS JSON SHAPE (same key names, no others):
+${fs.readFileSync(path.resolve(REPO, 'tools/codex/verdict.schema.json'), 'utf8')}` : ''}`;
 
 // STALLS: an astra request sometimes emits one reasoning item and then nothing for 15+ minutes (rollout
 // 00:24, 2026-09-13) while an identical request finished in 45 s. A stalled request is killed and retried,
@@ -89,13 +106,19 @@ const perAttempt = a.timeout ? Number(a.timeout) : 420;
 let r = null;
 let verdict = null;
 for (let i = 1; i <= attempts; i++) {
-  r = await runCodex({ prompt, images: [candidate, ...refs], schema: 'tools/codex/verdict.schema.json',
+  r = await runCodex({ prompt, images: [candidate, ...refs], schema: a['no-schema'] ? undefined : 'tools/codex/verdict.schema.json',
     sandbox: 'read-only', model: a.model || CODEX_MODEL_HERO, effort, timeout: perAttempt, quiet: true });
   if (r.blocked) {
     console.error(`judge: BLOCKED (${r.blocked}): ${r.blockLine}`);
     process.exit(75);
   }
   try { verdict = JSON.parse(r.last); } catch { verdict = null; }
+  if (!verdict && a['no-schema']) {
+    // Free-form reply: take the outermost {...} (the model may wrap it in a fence or a sentence).
+    const m = String(r.last || '').match(/{[sS]*}/);
+    if (m) { try { verdict = JSON.parse(m[0]); } catch { verdict = null; } }
+  }
+  if (verdict) verdict = normalise(verdict);
   if (verdict) break;
   console.error(`judge: attempt ${i}/${attempts} returned no verdict (exit ${r.code}, ${r.seconds}s)${i < attempts ? ' — retrying' : ''}`);
 }
