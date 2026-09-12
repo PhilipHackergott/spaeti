@@ -136,7 +136,8 @@ while (attempts <= retries) {
     filter, crop: entry.crop, 'alpha-threshold': entry.transparent ? (entry.alphaThreshold ?? 0.5) : undefined,
     trim: entry.transparent && entry.trim !== false ? 1 : undefined,
     key: entry.transparent ? keyColour : undefined, 'key-tol': entry.transparent ? keyTol : undefined, 'auto-key': entry.transparent ? 1 : undefined,
-    'auto-bg': entry.transparent ? 1 : undefined, 'bg-tol': entry.transparent ? (entry.bgTol ?? 0.16) : undefined });
+    'auto-bg': entry.transparent ? 1 : undefined, 'bg-tol': entry.transparent ? (entry.bgTol ?? 0.16) : undefined,
+    anchor: entry.anchor, 'alpha-orphans': entry.transparent ? 1 : undefined });
   let snap = snapImage(snapOpts(entry.keyTol ?? 0.18));
   // Green fringe after keying is common (35–43 edge pixels seen); widen the key tolerance once and take the cleaner result.
   if (entry.transparent && snap.fringe > 20) {

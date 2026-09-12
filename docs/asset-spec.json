@@ -63,11 +63,11 @@
       "id": "scene/counter",
       "kind": "scene",
       "w": 480,
-      "h": 140,
-      "mode": "fit",
+      "h": 130,
+      "mode": "cover",
       "filter": "nearest",
       "transparent": true,
-      "trim": true,
+      "trim": false,
       "alphaThreshold": 0.5,
       "gen": "1536x1024",
       "aspect": "landscape",
@@ -83,7 +83,8 @@
       "$conceptNote": "Image 2 (concept-art/generated/night_interaction.png) is the composed target frame — match its set dressing, lighting and pixel grid exactly.",
       "$status": "round 3: real-Späti set + hard pixel-construction clause",
       "$styleRefNote": "art/raw/scene/title.png (the title key art the user approved as a style reference) is attached: match its rendering, palette and Späti materials.",
-      "$trimNote": "trim MUST stay on: the keyed backdrop is removed first, then the strip is fitted by width; with trim off the whole canvas is fitted by height (a 210-px thumbnail)."
+      "$trimNote": "cover + anchor=bottom: fitted by width (always 480 wide), the bottom 130 rows kept, the keyed field above cropped — no trim, so the model's hairline side margins cannot shave the ends.",
+      "anchor": "bottom"
     },
     {
       "id": "scene/title",

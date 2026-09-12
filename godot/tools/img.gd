@@ -79,11 +79,24 @@ func _init() -> void:
 		var rw := maxi(1, int(round(sw * s)))
 		var rh := maxi(1, int(round(sh * s)))
 		img.resize(rw, rh, interp)
-		img = img.get_region(Rect2i((rw - tw) / 2, (rh - th) / 2, tw, th))
+		# --anchor=bottom keeps the bottom band (a counter strip: the subject sits at the foot of the canvas,
+		# the keyed sky above it is what gets cropped away); centre is the default; top is the mirror.
+		var anchor: String = a.get("anchor", "center")
+		var oy := (rh - th) / 2
+		if anchor == "bottom":
+			oy = rh - th
+		elif anchor == "top":
+			oy = 0
+		img = img.get_region(Rect2i((rw - tw) / 2, oy, tw, th))
 	else:
 		img.resize(tw, th, interp)
 	if a.has("alpha-threshold"):
 		_threshold_alpha(img, float(a["alpha-threshold"]))
+	# Alpha orphans: an opaque pixel whose four neighbours are all transparent is flood-fill debris
+	# (the specks a painted backdrop leaves around a bust), never part of a sprite.
+	var orphans := 0
+	if int(a.get("alpha-orphans", "0")) == 1:
+		orphans = _clear_alpha_orphans(img)
 	# Palette quantisation AFTER the resize: the judge's "authored pixel clusters" — painterly gradients that
 	# survive a Lanczos snap collapse into flat regions once the palette is limited.
 	var quantized := 0
@@ -101,7 +114,7 @@ func _init() -> void:
 	if a.has("key"):
 		fringe = _count_near(img, Color.html("#" + String(a["key"]).trim_prefix("#")), float(a.get("key-tol", "0.18")) + 0.12)
 	err = img.save_png(dst)
-	print("IMG err=%d in=%dx%d out=%dx%d mode=%s alpha0=%.4f keyed=%d fringe=%d palette=%d despeckled=%d file=%s" % [err, sw, sh, img.get_width(), img.get_height(), mode, alpha0, keyed, fringe, quantized, despeckled, dst])
+	print("IMG err=%d in=%dx%d out=%dx%d mode=%s alpha0=%.4f keyed=%d fringe=%d orphans=%d palette=%d despeckled=%d file=%s" % [err, sw, sh, img.get_width(), img.get_height(), mode, alpha0, keyed, fringe, orphans, quantized, despeckled, dst])
 	quit(0 if err == OK else 5)
 
 ## Median-cut palette quantisation to `n` colours (opaque pixels only). Histogram at 5 bits per channel (32768
@@ -251,6 +264,34 @@ func _despeckle(img: Image) -> int:
 			dst[o + 2] = best & 255
 			n += 1
 	img.set_data(w, h, false, Image.FORMAT_RGBA8, dst)
+	return n
+
+## Clears opaque pixels with no opaque 4-neighbour (two passes catch 2-pixel specks). Returns pixels cleared.
+func _clear_alpha_orphans(img: Image) -> int:
+	var w := img.get_width()
+	var h := img.get_height()
+	var n := 0
+	for pass_i in 2:
+		var data := img.get_data()
+		var out := data.duplicate()
+		for y in h:
+			for x in w:
+				var o := (y * w + x) * 4
+				if data[o + 3] < 128:
+					continue
+				var solid_neighbours := 0
+				if x > 0 and data[o - 4 + 3] >= 128:
+					solid_neighbours += 1
+				if x < w - 1 and data[o + 4 + 3] >= 128:
+					solid_neighbours += 1
+				if y > 0 and data[o - w * 4 + 3] >= 128:
+					solid_neighbours += 1
+				if y < h - 1 and data[o + w * 4 + 3] >= 128:
+					solid_neighbours += 1
+				if solid_neighbours == 0:
+					out[o + 3] = 0
+					n += 1
+		img.set_data(w, h, false, Image.FORMAT_RGBA8, out)
 	return n
 
 ## Opaque pixels within `tol` (normalised RGB distance) of `key` — the fringe a key-out leaves behind.
