@@ -317,3 +317,19 @@ contract relies on (`Session.dispatch` uses it).
 
 - **Promoted (provisional, orchestrator's eye — Codex judge unavailable):** `char/you_neutral` = the r2 render recovered via `--auto-bg` (158×230, real alpha). Visibly closer to the target than the 66-point r1 (younger, compact hair, simpler rendering). Known flaw: a small brand-like chest mark → regenerate with the sharpened prompt when Codex returns, then re-judge. r1 kept as `art/raw/char/you_neutral-r1.png`.
 - **Re-promoted:** the very first session's candidate 4 (`art/raw/char/you_neutral.png`, 155×230 after `--auto-bg`) replaces r2 as the provisional portrait — same likeness, no brand mark, softer clusters. r2 kept as `you_neutral-r2.png`. Codex re-judge pending the spend cap.
+
+## 2026-09-12 — provisional visual review of the first captures (orchestrator, Codex judge capped)
+Probe captures before the verify phase: `shots/probe-night.png` (customer_at_counter), `shots/probe-title.png`.
+**Night ≈ 70 (provisional):** framing matches the OG interaction concept (counter edge ≈ y 210, dialogue box over the
+band, cup + phone on the counter, wall of stuff, SPÄTI neon, Pfand crate, register). Fixes in priority order:
+1. **The customer bust is missing** — `char/lena_neutral` was never generated (spend cap) *and* the placeholder is not
+   visible. A missing portrait must render as an obvious silhouette placeholder (hashed colour, id label), never nothing.
+2. HUD is oversized: two text lines at ~30 screen px, placeholder circle icons, the second line ("Tag 3 · Donnerstag · 2
+   wartend") runs into the SPÄTI neon. Target: one compact line per corner, 16-px icons from `assets/ui`, text 4×(8–10 px).
+3. Dialogue box too tall for its text (fills the whole counter band); Coffee Talk's is ≈ 60 % of that height with the body
+   text ~1/3 of the box. Keep the name colour + ▾.
+4. Want bubble + "Bedienen" read well; keep. Counter: the dark oval smudge right of the phone (also noted by the counter operator).
+**Title ≈ 82 (provisional):** strong. Subtitle should read "eine Nacht **im** Kiez"; consider a 1-px dark outline on the
+menu text over the bright window. Menu placement over the shop window is Coffee-Talk-appropriate.
+**Language decision needed (user):** UI chrome came out fully German (Neues Spiel / Bedienen / Tag · Donnerstag); the GDD
+specified an English base with German flavour words. Flagged; string-level either way.
