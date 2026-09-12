@@ -101,7 +101,7 @@ var paused: bool                  # when true, _process does not tick
 func new_game(config := {}) -> void     func dispatch(action: Dictionary) -> bool   # false = illegal (state unchanged)
 func view() -> Dictionary               # Rules.view(state), memoised per state
 func _process(delta): if state.phase == "night" and not paused: dispatch({type:"tick", dt_ms: int(delta*1000)})
-func save() / load_save() -> JSON in user://autosave.json (`load` shadows a GDScript global) (slice: optional)
+func save() / load_save() -> JSON in user://autosave.json (`load` shadows a GDScript global). `dispatch` autosaves after every non-`tick` action; Title → Continue calls `load_save()`.
 ```
 
 ## 8. Talking to guests, the queue and the six stats → **`docs/06-dialogue-and-stats.md`**

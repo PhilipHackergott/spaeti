@@ -39,6 +39,10 @@ func dispatch(action: Dictionary) -> bool:
 	var entries: Array = next["log"]
 	for i in range(from, entries.size()):
 		event.emit(entries[i])
+	# Autosave on every player action (never on the per-frame tick): the title's "Continue" resumes the
+	# exact frame — mid-conversation included, which is what test_dialogue round-trips.
+	if String(action.get("type", "")) != "tick":
+		save()
 	return true
 
 ## Rules.view(state), memoised until the next successful dispatch — a screen may call it per frame.

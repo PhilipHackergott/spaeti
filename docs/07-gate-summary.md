@@ -41,7 +41,7 @@ snapping (+3…+15), prompt discipline; not palette quantisation (±0) or despec
 - The hero screens have not yet been judged ≥ 85; the composed frame is the number that matters and is in flight.
 - SKU sprites and HUD icons were parked when the slice refocused on conversation (the serve panel still works; 6 SKUs
   have sprites, the rest are placeholders; HUD icons are placeholder discs).
-- No audio, no save/continue, no character-creation screen (stats are defaults), only three regulars have trees.
+- No audio, no character-creation screen (stats are defaults), only three regulars have trees. Autosave lands on every player action; the title's Continue resumes it.
 - Codex concurrency: more than ~4 simultaneous astra sessions makes verdicts queue and time out; the wrappers now
   default to 1500 s for composed frames.
 
