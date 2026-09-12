@@ -43,7 +43,7 @@
       "h": 270,
       "mode": "cover",
       "crop": "16:9",
-      "filter": "lanczos",
+      "filter": "nearest",
       "transparent": false,
       "gen": "1536x1024",
       "aspect": "landscape",
@@ -65,7 +65,7 @@
       "w": 480,
       "h": 140,
       "mode": "fit",
-      "filter": "lanczos",
+      "filter": "nearest",
       "transparent": true,
       "trim": true,
       "alphaThreshold": 0.5,
@@ -77,11 +77,13 @@
         "concept-art/main character target state.png",
         "concept-art/generated/night_interaction.png",
         "concept-art/coffee talk references/{AE54C7E9-D717-4471-98C0-FA7E2F50E019}.png",
-        "art/raw/scene/title.png"
+        "art/raw/scene/title.png",
+        "art/raw/scene/counter-r5.png"
       ],
       "$conceptNote": "Image 2 (concept-art/generated/night_interaction.png) is the composed target frame — match its set dressing, lighting and pixel grid exactly.",
       "$status": "round 3: real-Späti set + hard pixel-construction clause",
-      "$styleRefNote": "art/raw/scene/title.png (the title key art the user approved as a style reference) is attached: match its rendering, palette and Späti materials."
+      "$styleRefNote": "art/raw/scene/title.png (the title key art the user approved as a style reference) is attached: match its rendering, palette and Späti materials.",
+      "$trimNote": "trim MUST stay on: the keyed backdrop is removed first, then the strip is fitted by width; with trim off the whole canvas is fitted by height (a 210-px thumbnail)."
     },
     {
       "id": "scene/title",
@@ -90,7 +92,7 @@
       "h": 270,
       "mode": "cover",
       "crop": "16:9",
-      "filter": "lanczos",
+      "filter": "nearest",
       "transparent": false,
       "gen": "1536x1024",
       "aspect": "landscape",

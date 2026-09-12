@@ -1126,3 +1126,5 @@ conversation is open — and the log rows now carry `queue` and `talking`.
 - **Art:** title r4 **86 pass** (the user's style reference; composition 94 / palette 92 / Berlin 91). Concept r3 (real-Späti set)
   74 with Lanczos — "the set correction succeeds", pixel 52 — promoted as the canonical set reference; nearest re-judge pending.
   Backdrop r5 / counter r5 generating on the corrected brief with the title + concept attached.
+
+- **Verdicts (astra), 23:xx:** current backdrop 65 (pix 43), current counter 68 (pix 51) — set right, shading "blended"; counter r5 (Lanczos) 65; portraits after nearest re-snap: you 73 · brandt 76 · tobias 75 · schulz 74 · nadia 68 (demo cast: lena 79, juergen 84 pass, mehmet 79, clubber 78, tourist 78). Scene entries switched to `filter: nearest`; counter r6 rendered on a flat key (edge-to-edge, no dark glow) — `trim` must stay ON for keyed strips (off → the whole canvas is height-fitted into a thumbnail).
