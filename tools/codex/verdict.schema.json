@@ -1,0 +1,38 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "overall": { "type": "integer", "minimum": 0, "maximum": 100, "description": "How close the candidate is to the target look; 100 = indistinguishable in quality and style from the concept art." },
+    "verdict": { "type": "string", "enum": ["pass", "revise", "reject"] },
+    "axes": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "composition": { "type": "integer", "minimum": -1, "maximum": 100 },
+        "palette_lighting": { "type": "integer", "minimum": -1, "maximum": 100 },
+        "pixel_rendering": { "type": "integer", "minimum": -1, "maximum": 100 },
+        "character_fidelity": { "type": "integer", "minimum": -1, "maximum": 100 },
+        "ui_style": { "type": "integer", "minimum": -1, "maximum": 100 },
+        "berlin_reskin": { "type": "integer", "minimum": -1, "maximum": 100 }
+      },
+      "required": ["composition", "palette_lighting", "pixel_rendering", "character_fidelity", "ui_style", "berlin_reskin"]
+    },
+    "strengths": { "type": "array", "items": { "type": "string" } },
+    "fixes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "priority": { "type": "integer", "minimum": 1, "maximum": 5 },
+          "what": { "type": "string" },
+          "where": { "type": "string" },
+          "how": { "type": "string" }
+        },
+        "required": ["priority", "what", "where", "how"]
+      }
+    },
+    "notes": { "type": "string" }
+  },
+  "required": ["overall", "verdict", "axes", "strengths", "fixes", "notes"]
+}

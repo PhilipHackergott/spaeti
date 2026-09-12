@@ -38,3 +38,8 @@ desktop.ini
 .vscode/
 *.swp
 *~
+
+# pipeline working dirs (regenerable)
+art/raw/
+shots/
+judge/
