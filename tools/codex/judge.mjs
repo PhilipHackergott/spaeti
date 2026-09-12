@@ -57,7 +57,7 @@ ship it), revise (fixable — list the fixes in priority order), reject (wrong m
 List up to 8 fixes, most impactful first, each with what/where/how. Reply ONLY with the JSON object.`;
 
 const r = await runCodex({ prompt, images: [a.candidate, ...refs], schema: 'tools/codex/verdict.schema.json',
-  sandbox: 'read-only', model: a.model || CODEX_MODEL_HERO, effort: a.effort, timeout: a.timeout ? Number(a.timeout) : 600, quiet: true });
+  sandbox: 'read-only', model: a.model || CODEX_MODEL_HERO, effort: a.effort, timeout: a.timeout ? Number(a.timeout) : 1500, quiet: true });  // composed 1080p frames at max effort took >600 s under load
 let verdict = null;
 try { verdict = JSON.parse(r.last); } catch { /* handled below */ }
 if (r.blocked) {

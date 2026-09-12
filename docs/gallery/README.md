@@ -8,3 +8,4 @@
 | play-queue.png / play-talk-choice.png | Real playthrough frames (scripted driver on the live engine) | — |
 | title-r4.png | Title key art (astra) | **86 pass** |
 | concept-r3-grid.png | Composed target concept (astra), real-Späti set, at game density | 77 |
+| night-talk_result.png | (updated) after the successful check Lena switches to her WARM expression — the per-node expression drives the Portrait | — |
