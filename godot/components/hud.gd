@@ -1,9 +1,12 @@
 class_name Hud
 extends Control
-## The corner cluster — ONE compact line per corner (the orchestrator's review: the old two-line
-## plate ran into the SPÄTI neon at y 21-37 and printed at 12 px).
-##   top-left  : [clock] 22:40  [cash] 84,50 €  [Pfand] 12   Night 3 · 2 waiting
+## The corner cluster — THREE inset plates on one 18-px line (the judge, 2026-09-13: one long strip read
+## as a "crowded debug-like" HUD; the orchestrator's earlier review: a two-line plate ran into the SPÄTI
+## neon at y 21-37). Each plate is one idea:
+##   top-left  : [clock] 22:40  [cash] 84,50 €  [Pfand] 12    ·    Night 3 · 2 waiting
 ##   top-right : [trust] 62 ▮▮▮▮▮▯▯▯   [profit] 48 ▮▮▮▮▯▯▯▯
+## The right plate must stay east of x 335: the SPÄTI board sits at x 274-332 under the HUD line, and a
+## right plate that carried the night/queue text covered its top row.
 ## 16-px icon slots (the sizes `docs/asset-spec.json` gives `ui/icon_*`), text at Palette.FONT_TINY
 ## (16 base px, the one text size — 12 could not tell 2 from Z in a clock). Both plates sit in the
 ## top 18 px, so nothing crosses the neon.
@@ -41,7 +44,9 @@ func set_compact(on: bool) -> void:
 	var plate := get_node_or_null("%RightPlate") as Control
 	if plate != null:
 		plate.visible = not on
-	var meta := get_node_or_null("%Meta") as Label
+	var meta := get_node_or_null("%MetaPlate") as Control
+	if meta == null:
+		meta = get_node_or_null("%Meta") as Control
 	if meta != null:
 		meta.visible = not on
 

@@ -13,33 +13,38 @@ mouse_filter = 2
 theme = ExtResource("2_theme")
 script = ExtResource("1_script")
 
-[node name="LeftPlate" type="PanelContainer" parent="."]
-unique_name_in_owner = true
+[node name="LeftGroup" type="HBoxContainer" parent="."]
 offset_left = 2.0
 offset_top = 1.0
 offset_right = 4.0
 offset_bottom = 3.0
 mouse_filter = 2
+theme_override_constants/separation = 4
+
+[node name="LeftPlate" type="PanelContainer" parent="LeftGroup"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
 theme_type_variation = &"HudPlate"
 
-[node name="Line" type="HBoxContainer" parent="LeftPlate"]
+[node name="Line" type="HBoxContainer" parent="LeftGroup/LeftPlate"]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 6
 
-[node name="ClockBox" type="HBoxContainer" parent="LeftPlate/Line"]
+[node name="ClockBox" type="HBoxContainer" parent="LeftGroup/LeftPlate/Line"]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 2
 
-[node name="Icon" type="TextureRect" parent="LeftPlate/Line/ClockBox"]
+[node name="Icon" type="TextureRect" parent="LeftGroup/LeftPlate/Line/ClockBox"]
 custom_minimum_size = Vector2(16, 16)
 layout_mode = 2
 size_flags_vertical = 4
 mouse_filter = 2
 stretch_mode = 3
 
-[node name="Clock" type="Label" parent="LeftPlate/Line/ClockBox"]
+[node name="Clock" type="Label" parent="LeftGroup/LeftPlate/Line/ClockBox"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 4
@@ -47,19 +52,19 @@ mouse_filter = 2
 theme_type_variation = &"TinyLabel"
 text = "22:40"
 
-[node name="CashBox" type="HBoxContainer" parent="LeftPlate/Line"]
+[node name="CashBox" type="HBoxContainer" parent="LeftGroup/LeftPlate/Line"]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 2
 
-[node name="Icon" type="TextureRect" parent="LeftPlate/Line/CashBox"]
+[node name="Icon" type="TextureRect" parent="LeftGroup/LeftPlate/Line/CashBox"]
 custom_minimum_size = Vector2(16, 16)
 layout_mode = 2
 size_flags_vertical = 4
 mouse_filter = 2
 stretch_mode = 3
 
-[node name="Cash" type="Label" parent="LeftPlate/Line/CashBox"]
+[node name="Cash" type="Label" parent="LeftGroup/LeftPlate/Line/CashBox"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 4
@@ -67,19 +72,19 @@ mouse_filter = 2
 theme_type_variation = &"TinyLabel"
 text = "84,50 €"
 
-[node name="PfandBox" type="HBoxContainer" parent="LeftPlate/Line"]
+[node name="PfandBox" type="HBoxContainer" parent="LeftGroup/LeftPlate/Line"]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 2
 
-[node name="Icon" type="TextureRect" parent="LeftPlate/Line/PfandBox"]
+[node name="Icon" type="TextureRect" parent="LeftGroup/LeftPlate/Line/PfandBox"]
 custom_minimum_size = Vector2(16, 16)
 layout_mode = 2
 size_flags_vertical = 4
 mouse_filter = 2
 stretch_mode = 3
 
-[node name="Pfand" type="Label" parent="LeftPlate/Line/PfandBox"]
+[node name="Pfand" type="Label" parent="LeftGroup/LeftPlate/Line/PfandBox"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 4
@@ -87,12 +92,13 @@ mouse_filter = 2
 theme_type_variation = &"TinyLabel"
 text = "12"
 
-[node name="Gap" type="Control" parent="LeftPlate/Line"]
-custom_minimum_size = Vector2(8, 0)
+[node name="MetaPlate" type="PanelContainer" parent="LeftGroup"]
+unique_name_in_owner = true
 layout_mode = 2
 mouse_filter = 2
+theme_type_variation = &"HudPlate"
 
-[node name="Meta" type="Label" parent="LeftPlate/Line"]
+[node name="Meta" type="Label" parent="LeftGroup/MetaPlate"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 4
