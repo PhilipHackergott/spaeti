@@ -373,6 +373,126 @@
       "aspect": "portrait",
       "id": "char/nadia_neutral",
       "prompt": "Nadia, a night-shift nurse and single mum, mid 30s: teal scrubs under an open dark parka, hair tied back tightly, tired-kind eyes with faint shadows, a lanyard, a paper coffee cup held near her chin as her signature prop. Warm but running on empty. Head-and-shoulders bust for a dialogue portrait, Coffee Talk proportions and outline weight, real alpha background."
+    },
+    {
+      "id": "char/mehmet_warm",
+      "kind": "portrait",
+      "w": 190,
+      "h": 230,
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "concept-art/main character target state.png",
+        "art/raw/char/mehmet_neutral.png"
+      ],
+      "$resumeNote": "Generate only after char/mehmet_neutral is final (its raw is the second reference image).",
+      "prompt": "Mehmet, who runs the döner shop next door — a warm, solid man in his 50s. Broad friendly face with soft cheeks, a big grey-and-black walrus moustache (clean block shapes, no wispy hairs), short greying hair under a simple white paper cook's hat, kind dark eyes with laugh lines drawn as two or three deliberate pixel lines only. His signature colour is a deep teal-blue rolled-sleeve shirt under a dark charcoal apron with a thin warm-ochre stripe; his signature prop is a tulip-shaped Turkish çay glass of amber tea held up near the chest in one hand, with a tiny pale steam wisp. Expression: calm, watchful, faintly amused — the corners of the mouth barely lifted. Image 2 is THIS character — reproduce the exact face, hair, colours and clothes; change ONLY the expression. This is the WARM expression: a genuine small smile, eyes softened, head tilted a touch. Head-and-shoulders bust for a dialogue portrait, Coffee Talk proportions and outline weight, real alpha background."
+    },
+    {
+      "id": "char/mehmet_wary",
+      "kind": "portrait",
+      "w": 190,
+      "h": 230,
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "concept-art/main character target state.png",
+        "art/raw/char/mehmet_neutral.png"
+      ],
+      "$resumeNote": "Generate only after char/mehmet_neutral is final (its raw is the second reference image).",
+      "prompt": "Mehmet, who runs the döner shop next door — a warm, solid man in his 50s. Broad friendly face with soft cheeks, a big grey-and-black walrus moustache (clean block shapes, no wispy hairs), short greying hair under a simple white paper cook's hat, kind dark eyes with laugh lines drawn as two or three deliberate pixel lines only. His signature colour is a deep teal-blue rolled-sleeve shirt under a dark charcoal apron with a thin warm-ochre stripe; his signature prop is a tulip-shaped Turkish çay glass of amber tea held up near the chest in one hand, with a tiny pale steam wisp. Expression: calm, watchful, faintly amused — the corners of the mouth barely lifted. Image 2 is THIS character — reproduce the exact face, hair, colours and clothes; change ONLY the expression. This is the WARY expression: narrowed eyes, one brow up, lips pressed, chin slightly lowered, guarded. Head-and-shoulders bust for a dialogue portrait, Coffee Talk proportions and outline weight, real alpha background."
+    },
+    {
+      "id": "char/brandt_wary",
+      "kind": "portrait",
+      "w": 190,
+      "h": 230,
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "concept-art/main character target state.png",
+        "art/raw/char/brandt_neutral.png"
+      ],
+      "$resumeNote": "Generate only after char/brandt_neutral is final (its raw is the second reference image).",
+      "prompt": "Frau Brandt, the developer's agent (the Lindner Group), late 40s: a sharp, expensive charcoal blazer over a cream blouse, a precise dark bob with a grey streak, small silver earrings, a tablet held against her chest as her signature prop. Composed, courteous, unreadable — the machine with a human face. Image 2 is THIS character — reproduce the exact face, hair, colours and clothes; change ONLY the expression. This is the WARY expression: narrowed eyes, one brow up, lips pressed, chin slightly lowered, guarded. Head-and-shoulders bust for a dialogue portrait, Coffee Talk proportions and outline weight, real alpha background."
+    },
+    {
+      "id": "char/tobias_warm",
+      "kind": "portrait",
+      "w": 190,
+      "h": 230,
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "concept-art/main character target state.png",
+        "art/raw/char/tobias_neutral.png"
+      ],
+      "$resumeNote": "Generate only after char/tobias_neutral is final (its raw is the second reference image).",
+      "prompt": "Tobias, the new-money startup transplant, early 30s: an undercut with a neat beard, a premium grey hoodie under a slim black bomber jacket, one wireless earbud in, a smart watch, an oat-milk coffee cup held up as his signature prop. Friendly, over-eager, a little oblivious. Image 2 is THIS character — reproduce the exact face, hair, colours and clothes; change ONLY the expression. This is the WARM expression: a genuine small smile, eyes softened, head tilted a touch. Head-and-shoulders bust for a dialogue portrait, Coffee Talk proportions and outline weight, real alpha background."
+    },
+    {
+      "id": "char/tobias_upset",
+      "kind": "portrait",
+      "w": 190,
+      "h": 230,
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "concept-art/main character target state.png",
+        "art/raw/char/tobias_neutral.png"
+      ],
+      "$resumeNote": "Generate only after char/tobias_neutral is final (its raw is the second reference image).",
+      "prompt": "Tobias, the new-money startup transplant, early 30s: an undercut with a neat beard, a premium grey hoodie under a slim black bomber jacket, one wireless earbud in, a smart watch, an oat-milk coffee cup held up as his signature prop. Friendly, over-eager, a little oblivious. Image 2 is THIS character — reproduce the exact face, hair, colours and clothes; change ONLY the expression. This is the UPSET expression: jaw set, brows drawn together, mouth flat, eyes cut to the side, shoulders tense. Head-and-shoulders bust for a dialogue portrait, Coffee Talk proportions and outline weight, real alpha background."
+    },
+    {
+      "id": "char/schulz_wary",
+      "kind": "portrait",
+      "w": 190,
+      "h": 230,
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "concept-art/main character target state.png",
+        "art/raw/char/schulz_neutral.png"
+      ],
+      "$resumeNote": "Generate only after char/schulz_neutral is final (its raw is the second reference image).",
+      "prompt": "Frau Schulz, an East-Berlin Oma in her late 70s: a patterned headscarf, large glasses, a knitted mustard cardigan over a floral blouse, a wheeled shopping trolley handle visible at the bottom of frame as her signature prop. Sharp eyes, a small dry smile, unbowed. Image 2 is THIS character — reproduce the exact face, hair, colours and clothes; change ONLY the expression. This is the WARY expression: narrowed eyes, one brow up, lips pressed, chin slightly lowered, guarded. Head-and-shoulders bust for a dialogue portrait, Coffee Talk proportions and outline weight, real alpha background."
+    },
+    {
+      "id": "char/nadia_warm",
+      "kind": "portrait",
+      "w": 190,
+      "h": 230,
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "concept-art/main character target state.png",
+        "art/raw/char/nadia_neutral.png"
+      ],
+      "$resumeNote": "Generate only after char/nadia_neutral is final (its raw is the second reference image).",
+      "prompt": "Nadia, a night-shift nurse and single mum, mid 30s: teal scrubs under an open dark parka, hair tied back tightly, tired-kind eyes with faint shadows, a lanyard, a paper coffee cup held near her chin as her signature prop. Warm but running on empty. Image 2 is THIS character — reproduce the exact face, hair, colours and clothes; change ONLY the expression. This is the WARM expression: a genuine small smile, eyes softened, head tilted a touch. Head-and-shoulders bust for a dialogue portrait, Coffee Talk proportions and outline weight, real alpha background."
+    },
+    {
+      "id": "char/nadia_upset",
+      "kind": "portrait",
+      "w": 190,
+      "h": 230,
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "concept-art/main character target state.png",
+        "art/raw/char/nadia_neutral.png"
+      ],
+      "$resumeNote": "Generate only after char/nadia_neutral is final (its raw is the second reference image).",
+      "prompt": "Nadia, a night-shift nurse and single mum, mid 30s: teal scrubs under an open dark parka, hair tied back tightly, tired-kind eyes with faint shadows, a lanyard, a paper coffee cup held near her chin as her signature prop. Warm but running on empty. Image 2 is THIS character — reproduce the exact face, hair, colours and clothes; change ONLY the expression. This is the UPSET expression: jaw set, brows drawn together, mouth flat, eyes cut to the side, shoulders tense. Head-and-shoulders bust for a dialogue portrait, Coffee Talk proportions and outline weight, real alpha background."
     }
   ]
 }

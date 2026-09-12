@@ -624,3 +624,21 @@ clipping checks.
   dialogue and every module name/description is English ("Second fridge", "Patience +15 % when it rains").
   The GDD flags localisation scope as an open decision (⚑) — it needs one before the content lane writes more.
 - `late_night` is graded correctly but the rain layer is invisible in the capture; docs/02 asks for rain.
+
+## 2026-09-12 — outstanding after foundations verify round 3 (orchestrator → integration lane)
+Two fix rounds cleared 8 blocking findings (portrait fallback, SIZES drift, mock/engine text mismatch, scene colour
+literals, Till Pfand rate, manage tier thresholds, close_night never dispatched, dialogue typewriter restart). Left open:
+- **BLOCKING — font glyphs destroyed:** `theme.gd::_pixelate` sets `hinting = NONE` **and** `antialiasing = NONE`; VT323's
+  one-unit middle stems fall between pixel centres and vanish at 16 px: "Mate"→"Nate", "Mittwoch"→"Nittwoch", "8"→"B",
+  "MODULE"→"NODULE" on every screen. Try `hinting = LIGHT`/`NORMAL` first (cheapest); if stems still drop, replace the face
+  with a bitmap-native pixel font at a native size (Pixel Operator (CC0) 8/16 px, or m5x7/m6x11) and record the licence.
+- Portrait is not moved when the ServePanel opens → Jürgen's bust ~55 % hidden in `pfand`; shift the bust left (~x 120) when the panel is shown.
+- `late_night` rain (26 × 1-px cyan streaks at α 0.1–0.26, drawn inside the shop) is invisible — draw it in the window/door region, brighter, before the counter.
+- `Assets._stamp_id` keeps the tail of an id on narrow placeholders ("FFEE", "TTES") — strip `sku/`, shrink, or wrap.
+- Manage restock list clips row 6 mid-widget at the scroll boundary — size the viewport to whole rows.
+- `night.gd` capitalises `character_id` for the speaker name ("Juergen") — use the registry's display name.
+- `project.godot` lacks `rendering/2d/snap/snap_2d_transforms_to_pixel=true` although docs/01 states it — add it.
+- Components still hold raw colours (scene_layers DUSK/DEEP/DAWN, modal dim, meter fill, Hud.tscn fill) — move to `Palette`.
+- Shipped art is smaller than its spec box (you_neutral 155×230, counter 480×123); placeholders use the spec size, so
+  layout must anchor busts by bottom-centre and the counter by bottom edge, not by the spec rectangle.
+- Language is mixed (German chrome, English dialogue/modules) → string table + English base per GDD (see integration brief).

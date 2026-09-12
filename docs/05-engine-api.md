@@ -70,7 +70,7 @@ cannot afford). `tick` is the only action the render loop sends on its own; ever
 ## 5. `Rules.view(s)` — the read-model scenes render from (no logic in scenes)
 
 ```
-{ phase, day, weekday_name, clock_ms, night_progress:float 0..1, time_label:"22:40", cash, pfand_held,
+{ phase, day, weekday_name, clock_ms, night_progress:float 0..1, time_label:"22:40", cash, pfand_held, pfand_rate:float (= Rules.PFAND_PER_BOTTLE — the Till quotes this, never a literal),
   reputation, hud:{ kiez_label, profit_label },
   active: {} | { customer, archetype:{id,name}, want:{sku_id,name,price,stock,icon:"sku/beer"}, portrait:"char/lena", expression, patience:float 0..1, is_story:bool },
   queue_len:int,
@@ -96,7 +96,7 @@ var paused: bool                  # when true, _process does not tick
 func new_game(config := {}) -> void     func dispatch(action: Dictionary) -> bool   # false = illegal (state unchanged)
 func view() -> Dictionary               # Rules.view(state), memoised per state
 func _process(delta): if state.phase == "night" and not paused: dispatch({type:"tick", dt_ms: int(delta*1000)})
-func save()/load() -> JSON in user://autosave.json (slice: optional)
+func save() / load_save() -> JSON in user://autosave.json (`load` shadows a GDScript global) (slice: optional)
 ```
 
 ## 8. Tests the engine lane must ship (`godot/tests/unit/`)
