@@ -29,7 +29,7 @@ text = "Cash 96,40 €"
 horizontal_alignment = 2
 
 [node name="Scroll" type="ScrollContainer" parent="."]
-custom_minimum_size = Vector2(0, 91)
+custom_minimum_size = Vector2(0, 90)
 layout_mode = 2
 horizontal_scroll_mode = 0
 

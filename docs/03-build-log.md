@@ -651,3 +651,5 @@ literals, Till Pfand rate, manage tier thresholds, close_night never dispatched,
   `concept`, entry `concept/night_interaction`).
 - Art round 2 (sol, six lanes) was already running when astra arrived; its SKU/icon lanes stay valid (sol is the right tier),
   its portrait/scene results are provisional until astra re-does the hero assets against the generated concept.
+
+- **Concept painting landed** (`concept-art/generated/night_interaction.png`, astra, 1536×1024, 187 s / 28k tokens): Lena at the counter in the Späti set, on one grid — by eye the composed target we wanted. Wired as reference 2 for scene/backdrop, scene/counter and char/lena_* and auto-added to every judge call. A false positive in the block detector (matched "usage limits" in echoed doc text) had aborted the run after the image existed — detector now only reads Codex `ERROR` lines.

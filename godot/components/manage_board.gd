@@ -7,10 +7,13 @@ extends VBoxContainer
 signal action(a: Dictionary)
 signal open_night()
 
-const STEP := Vector2(15, 13)
+const STEP := Vector2(15, 15)
 const PRICE_STEP := 0.10
-## One SKU row's height; the scroll window is a whole multiple of it (see ManageBoard.tscn).
-const ROW_H := 13
+## One SKU row's height at Jersey 10 @12 (a 12-px label plus the StepButton's 1-px border, top and
+## bottom). The scroll window in ManageBoard.tscn is a WHOLE MULTIPLE of it, so the list can never
+## slice a row in half at the boundary the way verify round 3 caught it doing.
+const ROW_H := 15
+const ROWS_VISIBLE := 6
 
 ## Restock quantities the player has clicked up this session (UI intent, echoed as `restock` actions).
 var _pending: Dictionary = {}
@@ -20,6 +23,9 @@ func _ready() -> void:
 	var rule := get_node_or_null("Rule") as ColorRect
 	if rule != null:
 		rule.color = Palette.RULE
+	var scroll := get_node_or_null("Scroll") as ScrollContainer
+	if scroll != null:
+		scroll.custom_minimum_size = Vector2(0, ROW_H * ROWS_VISIBLE)
 	_text("%Section", Strings.MANAGE_SECTION)
 	_text("%ModuleHead", Strings.MANAGE_MODULES)
 	var open := get_node_or_null("%OpenNight") as Button
@@ -57,13 +63,13 @@ func _row(entry: Dictionary) -> HBoxContainer:
 	row.add_theme_constant_override("separation", 3)
 	# Rows are a whole number of pixels tall so the scroll boundary never slices one in half.
 	row.custom_minimum_size = Vector2(0, ROW_H)
-	row.add_child(_label(String(entry.get("name", "")), 62, Palette.TEXT))
+	row.add_child(_label(String(entry.get("name", "")), 78, Palette.TEXT))
 	row.add_child(_label("x%d" % int(entry.get("stock", 0)), 22, Palette.TEXT_DIM))
-	row.add_child(_label(Strings.WHOLESALE % Palette.money(float(entry.get("cost", 0.0))), 58, Palette.TEXT_DIM))
+	row.add_child(_label(Strings.WHOLESALE % Palette.money(float(entry.get("cost", 0.0))), 56, Palette.TEXT_DIM))
 	# Only "+": a restock is a purchase the reducer has already made. There is no un-buy action in
 	# docs/05 section 3, so a "-" here could only ever dispatch something illegal.
 	var qty := int(_pending.get(sku_id, 0))
-	var qty_label := _label("+%d" % qty, 22, Palette.AMBER_SOFT if qty > 0 else Palette.TEXT_DIM)
+	var qty_label := _label("+%d" % qty, 20, Palette.AMBER_SOFT if qty > 0 else Palette.TEXT_DIM)
 	qty_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	row.add_child(qty_label)
 	row.add_child(_button("+", _on_restock.bind(sku_id, 1)))
@@ -76,7 +82,7 @@ func _row(entry: Dictionary) -> HBoxContainer:
 	row.add_child(price_label)
 	row.add_child(_button("-", _on_price.bind(sku_id, price, -PRICE_STEP)))
 	row.add_child(_button("+", _on_price.bind(sku_id, price, PRICE_STEP)))
-	row.add_child(_label("%s-%s" % [_short(lo), _short(hi)], 70, Palette.TEXT_DIM))
+	row.add_child(_label("%s-%s" % [_short(lo), _short(hi)], 62, Palette.TEXT_DIM))
 	return row
 
 func _build_modules(modules: Array) -> void:
@@ -103,7 +109,8 @@ func _build_modules(modules: Array) -> void:
 func _label(text: String, width: int, col: Color) -> Label:
 	var l := Label.new()
 	l.text = text
-	l.custom_minimum_size = Vector2(width, 0)
+	l.custom_minimum_size = Vector2(width, ROW_H)
+	l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	l.theme_type_variation = &"SmallLabel"
 	l.add_theme_color_override("font_color", col)
 	l.clip_text = true
@@ -112,8 +119,9 @@ func _label(text: String, width: int, col: Color) -> Label:
 func _button(text: String, cb: Callable) -> PixelButton:
 	var b := PixelButton.new()
 	b.text = text
-	b.theme_type_variation = &"ChoiceButton"
-	b.add_theme_font_size_override("font_size", Palette.FONT_SMALL)
+	# StepButton is the pool's zero-padding stepper: without it a -/+ is 19 px tall and a SKU row
+	# stops being a whole ROW_H (docs/04 Theme).
+	b.theme_type_variation = &"StepButton"
 	b.custom_minimum_size = STEP
 	b.pressed.connect(cb)
 	return b
