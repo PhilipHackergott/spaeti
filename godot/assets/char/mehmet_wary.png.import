@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c44n1ia0mlsqc"
-path="res://.godot/imported/backdrop-r2.png-3362f469990f210520048a81cc9736ab.ctex"
+uid="uid://hs5r20jvcm8g"
+path="res://.godot/imported/mehmet_wary.png-7b6338d1e00836275dff33456c867132.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/scene/backdrop-r2.png"
-dest_files=["res://.godot/imported/backdrop-r2.png-3362f469990f210520048a81cc9736ab.ctex"]
+source_file="res://assets/char/mehmet_wary.png"
+dest_files=["res://.godot/imported/mehmet_wary.png-7b6338d1e00836275dff33456c867132.ctex"]
 
 [params]
 
