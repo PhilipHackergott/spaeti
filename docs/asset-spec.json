@@ -333,6 +333,46 @@
       "gen": "1024x1024",
       "aspect": "square",
       "prompt": "A 16x16 HUD icon of a small cash register / till. Drawn on a STRICT 16-by-16 grid of large flat square pixels: every art pixel is one 64x64 block of the 1024x1024 canvas, hard edges, absolutely no anti-aliasing, no soft gradients, no sub-pixel detail, no rounded curves that are not made of whole blocks. Exactly 4 flat colours plus one near-black outline colour (#160f14). One single icon, centred, filling the 16x16 grid with about one pixel of breathing room. Bold readable silhouette that still reads at 64 screen pixels. Game palette: cream, amber, warm brown, cool blue-grey. A chunky warm-brown box body filling the lower two thirds with a near-black outline, a cream keypad block of 2x2 pixels on its front left, and a small raised display panel on top glowing flat mint-green with one brighter green pixel. No numbers, no text, no symbols, no receipt paper, no coins."
+    },
+    {
+      "kind": "portrait",
+      "w": 190,
+      "h": 230,
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "id": "char/brandt_neutral",
+      "prompt": "Frau Brandt, the developer's agent (the Lindner Group), late 40s: a sharp, expensive charcoal blazer over a cream blouse, a precise dark bob with a grey streak, small silver earrings, a tablet held against her chest as her signature prop. Composed, courteous, unreadable — the machine with a human face. Head-and-shoulders bust for a dialogue portrait, Coffee Talk proportions and outline weight, real alpha background."
+    },
+    {
+      "kind": "portrait",
+      "w": 190,
+      "h": 230,
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "id": "char/tobias_neutral",
+      "prompt": "Tobias, the new-money startup transplant, early 30s: an undercut with a neat beard, a premium grey hoodie under a slim black bomber jacket, one wireless earbud in, a smart watch, an oat-milk coffee cup held up as his signature prop. Friendly, over-eager, a little oblivious. Head-and-shoulders bust for a dialogue portrait, Coffee Talk proportions and outline weight, real alpha background."
+    },
+    {
+      "kind": "portrait",
+      "w": 190,
+      "h": 230,
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "id": "char/schulz_neutral",
+      "prompt": "Frau Schulz, an East-Berlin Oma in her late 70s: a patterned headscarf, large glasses, a knitted mustard cardigan over a floral blouse, a wheeled shopping trolley handle visible at the bottom of frame as her signature prop. Sharp eyes, a small dry smile, unbowed. Head-and-shoulders bust for a dialogue portrait, Coffee Talk proportions and outline weight, real alpha background."
+    },
+    {
+      "kind": "portrait",
+      "w": 190,
+      "h": 230,
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "id": "char/nadia_neutral",
+      "prompt": "Nadia, a night-shift nurse and single mum, mid 30s: teal scrubs under an open dark parka, hair tied back tightly, tired-kind eyes with faint shadows, a lanyard, a paper coffee cup held near her chin as her signature prop. Warm but running on empty. Head-and-shoulders bust for a dialogue portrait, Coffee Talk proportions and outline weight, real alpha background."
     }
   ]
 }
