@@ -655,3 +655,14 @@ literals, Till Pfand rate, manage tier thresholds, close_night never dispatched,
 - **Concept painting landed** (`concept-art/generated/night_interaction.png`, astra, 1536×1024, 187 s / 28k tokens): Lena at the counter in the Späti set, on one grid — by eye the composed target we wanted. Wired as reference 2 for scene/backdrop, scene/counter and char/lena_* and auto-added to every judge call. A false positive in the block detector (matched "usage limits" in echoed doc text) had aborted the run after the image existed — detector now only reads Codex `ERROR` lines.
 
 - **Concept r2 promoted** (astra **79**: composition 82, palette 85, pixel 65, Lena 87, Berlin 93; r1 = 76). Canonical: `concept-art/generated/night_interaction.png` (raw 1536×1024) + `night_interaction-grid.png` (16:9 centre crop snapped to 480×270 and shown ×4 — the judge prefers this one; it is the Night screen at real density). The judge's remaining fixes target the raw painting's microtexture, which the snap removes; stop iterating the concept here.
+
+## 2026-09-12 evening — calibration ladder on the concept (astra judging)
+| candidate | overall | pixel_rendering | note |
+|---|---|---|---|
+| concept r1 raw (1536×1024) | 76 | 61 | too fine/inconsistent grid, Lena staged low |
+| concept r2 raw | 79 | 65 | composition fixed; microtexture remains |
+| r2 → 16:9 crop → snap 480×270 → ×4 nearest (**the game's presentation**) | **81** | 74 | "density objection resolved; microtexture reduced, not resolved" |
+| + median-cut quantise 96 colours | 79* | 76 | marginal: "fewer colours do not reorganise painted texture into authored clusters" (*fidelity 55 was a context slip — Lena judged as 'You') |
+Conclusion: the snap is worth +2 to +5; palette quantisation is **optional, not standard** (a few points, some banding). The remaining
+gap to "authored clusters" has to come from **generation discipline** (the TRUE-PIXEL-ART / 4–6-tone / stepped-contour clauses
+that moved the backdrop 61→79) plus the judge loop — and astra as generator. `--quantize` and `--despeckle` stay available in `img.gd`.

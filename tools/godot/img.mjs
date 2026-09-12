@@ -14,7 +14,7 @@ export function snapImage(opts) {
   const out = fwd(path.resolve(REPO, opts.out));
   fs.mkdirSync(path.dirname(out), { recursive: true });
   const extra = [`--in=${inp}`, `--out=${out}`];
-  for (const k of ['w', 'h', 'mode', 'filter', 'crop', 'alpha-threshold', 'trim', 'key', 'key-tol', 'auto-key', 'auto-bg', 'bg-tol', 'quantize']) {
+  for (const k of ['w', 'h', 'mode', 'filter', 'crop', 'alpha-threshold', 'trim', 'key', 'key-tol', 'auto-key', 'auto-bg', 'bg-tol', 'quantize', 'despeckle']) {
     if (opts[k] !== undefined && opts[k] !== null && opts[k] !== '') extra.push(`--${k}=${opts[k]}`);
   }
   const r = spawnSync(godot, ['--headless', '--path', '.', '--script', 'res://tools/img.gd', '--', ...extra],

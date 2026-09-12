@@ -89,9 +89,15 @@ func _init() -> void:
 	var quantized := 0
 	if a.has("quantize"):
 		quantized = _quantize(img, int(a["quantize"]))
+	# Despeckle: orphan pixels (all four neighbours differ from it and agree with each other in majority) take the
+	# majority neighbour colour — the classic cleanup for "tiny texture specks" left by a downsampled painting.
+	var despeckled := 0
+	if int(a.get("despeckle", "0")) >= 1:
+		for pass_i in int(a["despeckle"]):
+			despeckled += _despeckle(img)
 	var alpha0 := _transparent_fraction(img)
 	err = img.save_png(dst)
-	print("IMG err=%d in=%dx%d out=%dx%d mode=%s alpha0=%.4f keyed=%d palette=%d file=%s" % [err, sw, sh, img.get_width(), img.get_height(), mode, alpha0, keyed, quantized, dst])
+	print("IMG err=%d in=%dx%d out=%dx%d mode=%s alpha0=%.4f keyed=%d palette=%d despeckled=%d file=%s" % [err, sw, sh, img.get_width(), img.get_height(), mode, alpha0, keyed, quantized, despeckled, dst])
 	quit(0 if err == OK else 5)
 
 ## Median-cut palette quantisation to `n` colours (opaque pixels only). Histogram at 5 bits per channel (32768
@@ -203,6 +209,44 @@ func _quantize(img: Image, n: int) -> int:
 		data[o + 2] = pal_b[p]
 	img.set_data(w, h, false, Image.FORMAT_RGBA8, data)
 	return boxes.size()
+
+## One despeckle pass over opaque pixels. A pixel is an orphan when none of its 4-neighbours share its colour
+## and at least two neighbours agree with each other; it takes that majority colour. Returns pixels changed.
+func _despeckle(img: Image) -> int:
+	var w := img.get_width()
+	var h := img.get_height()
+	var src := img.get_data()
+	var dst := src.duplicate()
+	var n := 0
+	for y in range(1, h - 1):
+		for x in range(1, w - 1):
+			var o := (y * w + x) * 4
+			if src[o + 3] < 128:
+				continue
+			var me := (src[o] << 16) | (src[o + 1] << 8) | src[o + 2]
+			var nb: Array[int] = []
+			for d in [-4, 4, -w * 4, w * 4]:
+				var p := o + d
+				if src[p + 3] < 128:
+					continue
+				nb.append((src[p] << 16) | (src[p + 1] << 8) | src[p + 2])
+			if nb.size() < 3 or nb.has(me):
+				continue
+			var best := -1
+			var best_n := 0
+			for c in nb:
+				var cnt := nb.count(c)
+				if cnt > best_n:
+					best_n = cnt
+					best = c
+			if best_n < 2:
+				continue
+			dst[o] = (best >> 16) & 255
+			dst[o + 1] = (best >> 8) & 255
+			dst[o + 2] = best & 255
+			n += 1
+	img.set_data(w, h, false, Image.FORMAT_RGBA8, dst)
+	return n
 
 func _threshold_alpha(img: Image, t: float) -> void:
 	for y in img.get_height():
