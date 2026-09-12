@@ -10,6 +10,8 @@ extends RefCounted
 const PRESETS := [
 	"title", "empty_counter", "customer_at_counter", "dialogue_choice",
 	"serving", "pfand", "late_night", "manage", "summary",
+	# The register screen (docs/06-dialogue-and-stats.md section 5): the line, the conversation, the roll.
+	"queue_waiting", "talk_lines", "talk_choice", "talk_result",
 ]
 
 static func presets() -> Array:
@@ -81,6 +83,39 @@ static func view(preset: String) -> Dictionary:
 				"lost": 3,
 				"kiez_delta": 2.0,
 			}
+		"queue_waiting":
+			# Three guests in the line and nobody at the counter: the "Next guest" state, and the one
+			# preset where the six stats are on screen without being asked for (docs/06 section 5).
+			_set_clock(v, "21:10", 0.18)
+			v["queue"] = [_waiting(21, "lena"), _waiting(22, "juergen"), _waiting(23, "mehmet")]
+			v["queue_len"] = 3
+		"talk_lines":
+			# Lena is talking and has not reached her choices yet: lines only, the queue still waiting.
+			_set_clock(v, "21:24", 0.22)
+			v["active"] = _lena("neutral", 0.78)
+			v["active"]["is_story"] = true
+			v["queue"] = [_waiting(22, "juergen"), _waiting(24, "")]
+			v["queue_len"] = 2
+			v["talk"] = _lena_talk(1, [], {})
+		"talk_choice":
+			# The decision: a plain line, a Charisma 12 ROLL, and a Strength 12 GATE she cannot pass.
+			_set_clock(v, "21:25", 0.23)
+			v["active"] = _lena("neutral", 0.74)
+			v["active"]["is_story"] = true
+			v["queue"] = [_waiting(22, "juergen"), _waiting(24, "")]
+			v["queue_len"] = 2
+			v["talk"] = _lena_talk(2, _lena_choices(), {})
+		"talk_result":
+			# The roll landed: 14 + 2 = 16 against DC 12. Lena warms up and the pop says why.
+			_set_clock(v, "21:26", 0.24)
+			v["active"] = _lena("warm", 0.74)
+			v["active"]["is_story"] = true
+			v["queue"] = [_waiting(22, "juergen"), _waiting(24, "")]
+			v["queue_len"] = 2
+			var talk := _lena_talk(0, [], {"stat": "cha", "roll": 14, "mod": 2, "dc": 12, "success": true})
+			talk["expression"] = "warm"
+			talk["lines"] = ["Ha. Fine — one sketch, one Mate. Don't tell Jürgen."]
+			v["talk"] = talk
 		_:
 			pass
 	return v
@@ -105,6 +140,11 @@ static func _base() -> Dictionary:
 		"hud": {"kiez_label": "Kiez-Trust 62", "profit_label": "Profit 48"},
 		"active": {},
 		"queue_len": 0,
+		# docs/06 section 4. Empty on the old presets on purpose: they are the SERVE screen's captures
+		# and predate the register, so adding a line to them would silently change nine reference shots.
+		"queue": [],
+		"talk": {},
+		"player": _player(),
 		"dialogue": {},
 		"shelf": _shelf(),
 		"summary": {},
@@ -149,6 +189,55 @@ static func _clubber(patience: float) -> Dictionary:
 		"patience": patience,
 		"is_story": false,
 	}
+
+## docs/06 section 1: 8..18, the defaults SpatiState.new_game seeds, with the 5e modifier alongside.
+static func _player() -> Dictionary:
+	var stats := {"str": 10, "dex": 11, "con": 12, "int": 13, "wis": 12, "cha": 14}
+	var mods := {}
+	for id in stats:
+		mods[id] = int(floorf((float(stats[id]) - 10.0) / 2.0))
+	return {"stats": stats, "mods": mods}
+
+## One row of `view.queue` (docs/06 section 4). An empty `character_id` is the nameless parade: the
+## one-off keeps the archetype's portrait and is named for what they are, not who they are.
+static func _waiting(id: int, character_id: String) -> Dictionary:
+	match character_id:
+		"lena":
+			return {"customer_id": id, "character_id": "lena", "name": "Lena", "portrait": "char/lena", "expression": "neutral", "is_story": true}
+		"juergen":
+			return {"customer_id": id, "character_id": "juergen", "name": "'Bottle' Jürgen", "portrait": "char/juergen", "expression": "neutral", "is_story": true}
+		"mehmet":
+			return {"customer_id": id, "character_id": "mehmet", "name": "Mehmet", "portrait": "char/mehmet", "expression": "neutral", "is_story": true}
+		_:
+			return {"customer_id": id, "character_id": "", "name": "After-club raver", "portrait": "char/oneoff_clubber", "expression": "neutral", "is_story": false}
+
+## Lena's node, at the line the preset wants. `line` is the engine's index into `lines` — the box shows
+## one line at a time and `talk_advance` walks it, so a capture is never half a paragraph ahead.
+static func _lena_talk(line: int, choices: Array, last_check: Dictionary) -> Dictionary:
+	return {
+		"speaker": "Lena",
+		"portrait": "char/lena",
+		"expression": "neutral",
+		"lines": [
+			"Mate, bitte.",
+			"…I'm fifty cents short again. Third time this week, I know.",
+			"You could just say no. People do.",
+		],
+		"line": line,
+		"choices": choices,
+		"last_check": last_check,
+	}
+
+## Three choices: one plain, one ROLL (shown with its stat tag), one GATE the player cannot pass.
+## `reason` comes from the string table so the mock cannot say a word the UI could not produce.
+static func _lena_choices() -> Array:
+	return [
+		{"label": "On the house.", "check": {}, "locked": false, "reason": ""},
+		{"label": "[Charisma 12] Pay me in a sketch.", "check": {"stat": "cha", "dc": 12, "mod": 2, "chance": 0.55}, "locked": false, "reason": ""},
+		# A GATE, not a roll: Talk.choice_views leaves check empty and writes the reason itself, so the
+		# mock does the same - the box's "locked: " frame is what makes the sentence (docs/06 section 2).
+		{"label": "[Strength 12] Shift the crate, we're square.", "check": {}, "locked": true, "reason": "%s %d needed" % [Rules.stat_name("str"), 12]},
+	]
 
 static func _shelf() -> Array:
 	return [

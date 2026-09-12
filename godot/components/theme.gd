@@ -40,6 +40,12 @@ const BAD := Color("e0645f")
 const TRUST := Color("5be7ff")
 const PROFIT := Color("6fd08c")
 const PFAND := Color("9fd4ff")
+## The check/gate accent: a stat tag on a dialogue choice and the d20 pop are the same colour, so a
+## roll is recognisable before it is read (the value and the word carry the meaning too).
+const ACCENT := NEON_CYAN
+## The d20 itself: a code-drawn polygon filled with the accent, its number punched out in the night.
+const DICE_FILL := NEON_CYAN
+const DICE_NUMBER := NIGHT_DEEP
 
 # --- the set (docs/04 rule 1: a COMPONENT may not write a raw hex either) --------------
 ## Time-of-night tint, dusk -> deep night -> cold pre-dawn (SceneLayers.set_time).
@@ -109,6 +115,34 @@ const PORTRAIT_CENTRE_X := 250
 const PORTRAIT_CENTRE_X_SERVING := 118
 const PAD := 6
 const GAP := 4
+
+# --- the register screen (docs/06-dialogue-and-stats.md section 5) ----------------------
+## The night is a CONVERSATION screen now, so the frame is split into three columns that may never
+## trade places: the queue owns the right edge, the six stats the left edge, and the bust + the
+## dialogue box keep the middle. Every rectangle below was measured against the two things already
+## nailed down — the SPÄTI neon (x 124-224, y 20-62, SceneLayers.NeonGlow) and the active bust
+## (bottom-centred on PORTRAIT_CENTRE_X 250, up to 190 px wide, so x 155-345) — because the brief is
+## explicit that the queue may cover neither.
+## The right column, top to bottom: the d20 result, then the line (name over busts) with the
+## "Next guest" button under it. The button sits at the BOTTOM of the strip on purpose - the want
+## bubble stands at y 74..120 beside the bust, and a button at the top of the column covered it.
+const DICE_RECT := Rect2i(346, 42, 132, 42)
+## The queue strip's own rect holds all three of its parts (button / name / chips), so the line does
+## not reflow when the button hides — its bottom sits exactly on COUNTER_TOP, i.e. the guests stand
+## at the counter's right end rather than floating over it.
+const QUEUE_RECT := Rect2i(346, 86, 132, 84)
+const QUEUE_CHIP := Vector2i(28, 38)
+const QUEUE_GAP := 5
+## Four slots: three guests and, when the night has piled up, a "+N" chip. More than that is a number,
+## not a queue you can read at 480x270.
+const QUEUE_SLOTS := 4
+## Six stats down the left edge, BELOW the neon (y 62) and LEFT of the bust (x 155). Toggled with Tab.
+const STATS_RECT := Rect2i(2, 64, 136, 98)
+## The serve panel is a secondary affordance now (docs/06 section 5: "reachable, not the demo path"),
+## so its toggle is a small plate tucked under the HUD instead of a button in the middle of the set.
+const SERVE_TOGGLE_RECT := Rect2i(2, 21, 62, 18)
+## The dialogue box hands the right column back to the queue whenever the line is on screen.
+const DIALOGUE_W_QUEUE := 300
 
 # --- accessibility --------------------------------------------------------------------
 ## Scenes and components check this before starting rain / flicker / breathing tweens.

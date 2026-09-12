@@ -40,6 +40,44 @@ const CHOICE_NUMBER := "%d. %s"                 # how a dialogue choice is numbe
 const STOCK_COUNT := "x%d"                      # how many of a SKU are on the shelf
 const RESTRICTED := "18"                        # the age gate badge on a restricted SKU
 
+# ── the register: the queue, the six stats, the checks (docs/06-dialogue-and-stats.md) ───
+const NEXT_GUEST := "Next guest"                # take the first guest in line (talk_next)
+const QUEUE_MORE := "+%d"                       # the overflow chip when the line is longer than the strip
+const NUMBER := "%d"                            # a bare stat value
+const MODIFIER := "%+d"                         # D&D 5e: floor((stat - 10) / 2), signed even at zero
+
+## The six stats. The full names are what the player reads (docs/06 §1); the ids are the engine's
+## (`state.player.stats`), and the order is the one every character sheet uses. The engine names them
+## too (`Rules.STAT_NAMES`, for the reason it writes into a locked choice) — `test_scenes.gd::
+## test_the_two_stat_tables_agree` is what stops the two from drifting apart.
+const STAT_ORDER := ["str", "dex", "con", "int", "wis", "cha"]
+const STAT_STRENGTH := "Strength"
+const STAT_DEXTERITY := "Dexterity"
+const STAT_CONSTITUTION := "Constitution"
+const STAT_INTELLIGENCE := "Intelligence"
+const STAT_WISDOM := "Wisdom"
+const STAT_CHARISMA := "Charisma"
+const STAT_NAMES := {
+	"str": STAT_STRENGTH, "dex": STAT_DEXTERITY, "con": STAT_CONSTITUTION,
+	"int": STAT_INTELLIGENCE, "wis": STAT_WISDOM, "cha": STAT_CHARISMA,
+}
+
+## A choice that ROLLS: "[Charisma 12]" beside the line, in the accent colour.
+const CHECK_TAG := "[%s %d]"
+## A choice that is GATED, not rolled: shown, greyed, and told why (docs/06 §2). Two forms, because
+## the reason can come from either side of the contract — `LOCKED_NEEDS` is the sentence the UI
+## composes when the view hands it the gate itself (`requires: {stat, min}`), and `LOCKED` frames
+## `choice.reason` when the engine composed the words ("Strength 12 needed"). Either way the word
+## "locked" is written HERE, so a greyed choice always opens the same way.
+const LOCKED_NEEDS := "locked: needs %s %d"
+const LOCKED := "locked: %s"
+const CHECK_SUCCESS := "success"
+const CHECK_FAILED := "failed"
+## The d20 pop beside the dialogue box: "d20 14 + 2 = 16" over "vs 12 — success".
+const DICE_PLUS := "d20 %d + %d = %d"
+const DICE_MINUS := "d20 %d - %d = %d"
+const DICE_VS := "vs %d — %s"
+
 # ── the till ─────────────────────────────────────────────────────────────────────────────────
 const TILL := "Till"
 const TILL_EMPTY := "nothing picked yet"
@@ -91,3 +129,30 @@ static func hud_line(day: int, queue: int) -> String:
 ## The summary's sub-line, with the separators kept out of the format string's way.
 static func summary_sub(weekday: String, sold: int, missed: int, kiez_delta: int) -> String:
 	return SUMMARY_SUB % [weekday, HUD_SEP, sold, HUD_SEP, missed, HUD_SEP, kiez_delta]
+
+## The name the player reads for a stat id. An id the table does not know prints itself rather than
+## an empty cell — a missing stat is a content bug you want to SEE, not one that silently vanishes.
+static func stat_name(stat_id: String) -> String:
+	return String(STAT_NAMES.get(stat_id, stat_id))
+
+## "[Charisma 12]" — the tag a rolled choice carries in its own colour.
+static func check_tag(stat_id: String, dc: int) -> String:
+	return CHECK_TAG % [stat_name(stat_id), dc]
+
+## "locked: needs Strength 12" — why a gated choice is greyed out, composed from the gate itself.
+static func locked_reason(stat_id: String, min_value: int) -> String:
+	return LOCKED_NEEDS % [stat_name(stat_id), min_value]
+
+## "locked: Strength 12 needed" — the same sentence when the engine wrote the second half of it
+## (`view.talk.choices[].reason`, docs/06 §4).
+static func locked(reason: String) -> String:
+	return LOCKED % reason
+
+## "d20 14 + 2 = 16". The modifier is signed in the SENTENCE, not by a %+d slot, so a negative reads
+## "d20 9 - 1 = 8" instead of the "9 + -1" a format slot would print.
+static func dice_line(roll: int, mod: int, total: int) -> String:
+	return (DICE_PLUS if mod >= 0 else DICE_MINUS) % [roll, absi(mod), total]
+
+## "vs 12 — success".
+static func dice_verdict(dc: int, success: bool) -> String:
+	return DICE_VS % [dc, CHECK_SUCCESS if success else CHECK_FAILED]

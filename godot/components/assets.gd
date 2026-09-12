@@ -104,8 +104,14 @@ static func portrait(portrait_id: String, expression: String = "neutral") -> Tex
 	# documented size for is not a portrait we know at all, so it falls back to _neutral (docs/05 §6)
 	# — otherwise the placeholder would come back at FALLBACK_SIZE and the bust would shrink to 32px.
 	var id := pid + "_" + exp_name
-	if not is_real(id) and not SIZES.has(id):
-		id = pid + "_neutral"
+	var neutral := pid + "_neutral"
+	# docs/05 section 6: a missing expression falls back to _neutral. There are two ways it can be
+	# missing - no spec entry at all (a placeholder would then collapse to FALLBACK_SIZE), or a spec
+	# entry whose PNG the art lane has not drawn yet while the neutral one IS on disk. The second is
+	# the common case mid-production, and a stamped placeholder beside a finished bust reads as a
+	# broken character rather than as an unfinished expression (talk_result, first capture).
+	if not is_real(id) and (not SIZES.has(id) or is_real(neutral)):
+		id = neutral
 	return texture(id)
 
 static func clear_cache() -> void:

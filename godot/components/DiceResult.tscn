@@ -1,0 +1,72 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://components/dice_result.gd" id="1_script"]
+[ext_resource type="Theme" path="res://components/Theme.tres" id="2_theme"]
+
+[node name="DiceResult" type="Control"]
+visible = false
+offset_left = 346.0
+offset_top = 42.0
+offset_right = 478.0
+offset_bottom = 84.0
+mouse_filter = 2
+theme = ExtResource("2_theme")
+script = ExtResource("1_script")
+
+[node name="Plate" type="PanelContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"HudPlate"
+
+[node name="Row" type="HBoxContainer" parent="Plate"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 4
+
+[node name="Die" type="Control" parent="Plate/Row"]
+custom_minimum_size = Vector2(18, 22)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+
+[node name="Shape" type="Polygon2D" parent="Plate/Row/Die"]
+unique_name_in_owner = true
+polygon = PackedVector2Array(9, 0, 18, 5, 18, 17, 9, 22, 0, 17, 0, 5)
+
+[node name="Roll" type="Label" parent="Plate/Row/Die"]
+unique_name_in_owner = true
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"TinyLabel"
+text = "14"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Text" type="VBoxContainer" parent="Plate/Row"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+mouse_filter = 2
+theme_override_constants/separation = 0
+
+[node name="Line" type="Label" parent="Plate/Row/Text"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"TinyLabel"
+text = "d20 14 + 2 = 16"
+clip_text = true
+
+[node name="Verdict" type="Label" parent="Plate/Row/Text"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"TinyLabel"
+text = "vs 12 — success"
+clip_text = true

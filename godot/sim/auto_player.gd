@@ -8,6 +8,8 @@ const DEFAULT_MARKUP := 2.5
 const DEFAULT_PAR := 22
 const DEFAULT_DT_MS := 1000
 const TICK_GUARD := 100000
+## A conversation is 5-8 nodes; this only catches a cycle in badly authored data.
+const TALK_GUARD := 128
 
 static func _round2(v: float) -> float:
 	return Economy.round2(v)
@@ -36,12 +38,51 @@ static func manage(s0: Dictionary, markup: float = DEFAULT_MARKUP, par: int = DE
 ## reproducible. That reads as the kind/honest line in almost every beat; the one place it does not is
 ## the main climax, where option 0 is "sell and walk away" (which is why the baseline season ends
 ## 'soldout'). A sweep that wants the other branch passes its own choices, not a smarter policy.
+## A GATED choice cannot be taken (docs/06 §2), so the policy is "the first choice that is legal" —
+## with the authoring rule that choice 0 is never gated, that is choice 0 in every written node.
 static func resolve_dialogue(s: Dictionary) -> Dictionary:
+	if Talk.is_open(s):
+		return play_talk(s)
 	if not (s["story"]["pending"] as Dictionary).is_empty():
 		return Rules.apply(s, {"type": "resolve_beat", "choice": 0})
 	if s["story"]["pending_vignette"] != "":
 		return Rules.apply(s, {"type": "resolve_vignette", "choice": 0})
 	return s
+
+## Read every line of the open conversation, then take the first choice that is not locked; repeat
+## until the talk closes. Conversations cost no game time, so this never starves the night clock.
+static func play_talk(s0: Dictionary, guard_limit: int = TALK_GUARD) -> Dictionary:
+	var s := s0
+	var guard := 0
+	while Talk.is_open(s) and guard < guard_limit:
+		guard += 1
+		var stepped := Rules.apply(s, {"type": "talk_advance"})
+		if not is_same(stepped, s):
+			s = stepped
+			continue
+		var chose := s
+		var node := Talk.node_of(s)
+		for i in (node.get("choices", []) as Array).size():
+			chose = Rules.apply(s, {"type": "talk_choose", "choice": i})
+			if not is_same(chose, s):
+				break
+		if is_same(chose, s):
+			break  # every choice locked — test_dialogue forbids the data that would do this
+		s = chose
+	return s
+
+## One guest, one turn: pull them up with `talk_next`, play the conversation out, and let the
+## engine's own `talk_end` ring up what they came in for (docs/06 §4).
+static func talk_turn(s0: Dictionary) -> Dictionary:
+	var s := s0
+	if Talk.is_open(s):
+		return play_talk(s)
+	if (s["active"] as Dictionary).is_empty():
+		return s
+	var opened := Rules.apply(s, {"type": "talk_next"})
+	if is_same(opened, s):
+		return s  # no graph for this guest — the caller falls back to the plain serve
+	return play_talk(opened)
 
 ## Open → tick the whole night, talking to whoever talks and serving the want if stocked → close.
 static func play_night(s0: Dictionary, dt_ms: int = DEFAULT_DT_MS) -> Dictionary:
@@ -50,20 +91,24 @@ static func play_night(s0: Dictionary, dt_ms: int = DEFAULT_DT_MS) -> Dictionary
 	while s["phase"] == "night" and guard < TICK_GUARD:
 		guard += 1
 		s = Rules.apply(s, {"type": "tick", "dt_ms": dt_ms})
-		s = resolve_dialogue(s)  # a beat blocks the serve until it is answered
-		var active: Dictionary = s["active"]
-		if not active.is_empty():
-			var want: String = active["want"]
-			var in_stock := int((s["inventory"] as Dictionary).get(want, {}).get("stock", 0)) > 0
-			# A competent, honest shopkeeper serves the want if stocked — but refuses an underage
-			# restricted sale (the Integrity beat). The dark path drives Integrity down elsewhere.
-			var illegal_sale := bool(Content.archetype(active["archetype_id"]).get("underage", false)) \
-				and bool(Content.sku(want).get("restricted", false))
-			if in_stock and not illegal_sale:
-				s = Rules.apply(s, {"type": "serve_active", "give": [want], "pfand_bottles": 0})
-			else:
-				s = Rules.apply(s, {"type": "skip_active"})
+		var before_talk := s
+		s = talk_turn(s)  # talk_next -> advance -> choose; the talk's own end rings up their want
+		if is_same(s, before_talk):
+			# Nobody could be talked to (no graph for them) — fall back to the plain counter policy.
+			var active: Dictionary = s["active"]
+			if not active.is_empty():
+				var want: String = active["want"]
+				var in_stock := int((s["inventory"] as Dictionary).get(want, {}).get("stock", 0)) > 0
+				# A competent, honest shopkeeper serves the want if stocked — but refuses an underage
+				# restricted sale (the Integrity beat). The dark path drives Integrity down elsewhere.
+				var illegal_sale := bool(Content.archetype(active["archetype_id"]).get("underage", false)) \
+					and bool(Content.sku(want).get("restricted", false))
+				if in_stock and not illegal_sale:
+					s = Rules.apply(s, {"type": "serve_active", "give": [want], "pfand_bottles": 0})
+				else:
+					s = Rules.apply(s, {"type": "skip_active"})
 		if int(s["clock_ms"]) >= int(s["config"]["night_len_ms"]) \
+			and not Talk.is_open(s) \
 			and (s["active"] as Dictionary).is_empty() \
 			and (s["queue"] as Array).is_empty() \
 			and int(s["next_arrival"]) >= (s["arrivals"] as Array).size():

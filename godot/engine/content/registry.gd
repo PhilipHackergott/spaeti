@@ -11,6 +11,7 @@ const UpgradeData := preload("res://engine/content/upgrades.gd")
 const StoryData := preload("res://engine/content/story.gd")
 const VignetteData := preload("res://engine/content/vignettes.gd")
 const CharacterData := preload("res://engine/content/characters.gd")
+const DialogueData := preload("res://engine/content/dialogues.gd")
 
 static var SKUS: Array = SkuData.DATA
 static var ARCHETYPES: Array = CustomerData.DATA
@@ -18,6 +19,8 @@ static var UPGRADES: Array = UpgradeData.DATA
 static var STRANDS: Array = StoryData.DATA
 static var VIGNETTES: Array = VignetteData.DATA
 static var CHARACTERS: Array = CharacterData.DATA
+## id -> conversation graph (docs/06 §3). Keyed by CHARACTER id, plus the generic DIALOGUE_FALLBACK.
+static var DIALOGUES: Dictionary = DialogueData.DATA
 
 static var SKU_BY_ID: Dictionary = {}
 static var ARCHETYPE_BY_ID: Dictionary = {}
@@ -28,6 +31,8 @@ static var CHARACTER_BY_ID: Dictionary = {}
 ## beat_id → strand_id. A customer at the counter carries only `beat_id`, so the reducer needs this to
 ## find the strand the beat belongs to (beat ids are unique registry-wide — test_content asserts it).
 static var BEAT_STRAND: Dictionary = {}
+## The graph every guest with no tree of their own falls back to (its lines substitute `{want}`).
+const DIALOGUE_FALLBACK := "oneoff"
 
 static func _static_init() -> void:
 	_index(SKUS, SKU_BY_ID)
@@ -61,6 +66,20 @@ static func vignette(id: String) -> Dictionary:
 
 static func character(id: String) -> Dictionary:
 	return CHARACTER_BY_ID.get(id, {})
+
+## The conversation graph a guest gets: their own if one is written, else the nameless parade's.
+static func dialogue_id_for(character_id: String) -> String:
+	return character_id if DIALOGUES.has(character_id) else DIALOGUE_FALLBACK
+
+static func dialogue(id: String) -> Dictionary:
+	return DIALOGUES.get(id, {})
+
+## One node of one graph, or {} — the reducer never indexes the tables directly.
+static func dialogue_node(dialogue_id: String, node_id: String) -> Dictionary:
+	var graph := dialogue(dialogue_id)
+	if graph.is_empty():
+		return {}
+	return (graph["nodes"] as Dictionary).get(node_id, {})
 
 ## The beat dictionary for a strand's beat id, or {}.
 static func beat(strand_id: String, beat_id: String) -> Dictionary:

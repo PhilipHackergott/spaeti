@@ -19,12 +19,18 @@ const ANCHORS := {
 	"upgrade": Vector2(240, 150),
 	"raid": Vector2(240, 150),
 	"ordnungsamt": Vector2(240, 150),
+	# A stat check (docs/06 section 2): under the d20 pop's own plate, so the burst and the number
+	# that explains it are the same place on the screen.
+	"check": Vector2(407, 88),
 }
 
 const LIFE := 0.55
 const RISE := 12.0
 
 var _rng := RandomNumberGenerator.new()
+## The `data` of the entry currently being played. A check's burst is green or red, and the only place
+## that verdict exists is the log row — `play(kind, at)` on its own can still be called without it.
+var _last_data: Dictionary = {}
 
 func _ready() -> void:
 	Palette.prepare()
@@ -33,7 +39,9 @@ func _ready() -> void:
 
 ## `entry` is one `log` row: {ts, kind, text, data}.
 func on_event(entry: Dictionary) -> void:
+	_last_data = entry.get("data", {})
 	play(String(entry.get("kind", "")), Vector2.ZERO)
+	_last_data = {}
 
 ## `at == Vector2.ZERO` uses the kind's anchor. Unknown kinds are silently ignored — the log grows
 ## faster than this layer does, and a missing pop is never a bug worth a crash.
@@ -59,6 +67,8 @@ func play(kind: String, at: Vector2 = Vector2.ZERO) -> void:
 			_puff(origin)
 		"upgrade":
 			_chime(origin)
+		"check":
+			_dice(origin, bool((_last_data.get("success", false))))
 
 # ── the four pops ─────────────────────────────────────────────────────────────────────────────
 
@@ -77,6 +87,15 @@ func _chime(at: Vector2) -> void:
 	for i in 3:
 		var dx := float(i - 1) * 4.0
 		_dot(at + Vector2(dx, float(i) * 2.0), Vector2(1, 1), Palette.AMBER, -RISE - float(i) * 3.0, LIFE + float(i) * 0.1)
+
+## A d20 landing: four accent ticks thrown outward from the die, tinted by the verdict. The NUMBER is
+## the DiceResult component's job — this is only the "something was rolled" jolt.
+func _dice(at: Vector2, success: bool) -> void:
+	var colour := Palette.GOOD if success else Palette.BAD
+	_dot(at, Vector2(3, 3), Palette.ACCENT, -RISE * 0.8, LIFE)
+	_dot(at + Vector2(-5, 1), Vector2(2, 2), colour, -5.0, LIFE * 0.8, -8.0)
+	_dot(at + Vector2(5, 1), Vector2(2, 2), colour, -5.0, LIFE * 0.8, 8.0)
+	_dot(at + Vector2(0, 3), Vector2(1, 1), Palette.TEXT_WHITE, -RISE, LIFE * 0.7)
 
 ## A grey puff: something went wrong (a balk, a fine, a raid).
 func _puff(at: Vector2) -> void:

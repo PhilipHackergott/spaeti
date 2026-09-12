@@ -244,7 +244,14 @@ static func apply_vignette_choice(s: Dictionary, choice_index: int) -> void:
 		(story["seen_vignettes"] as Array).append(id)
 	story["pending_vignette"] = ""
 
+## A beat/vignette choice carries its effects as flat keys; a dialogues.gd choice nests them under
+## `effects` (docs/06 §3). Both end up here, so there is exactly one place cash/kiez/flags are moved.
 static func _apply_effects(s: Dictionary, choice: Dictionary) -> void:
+	apply_effect_map(s, choice.get("effects", choice))
+
+static func apply_effect_map(s: Dictionary, choice: Dictionary) -> void:
+	if choice.is_empty():
+		return
 	var cash := float(choice.get("cash", 0.0))
 	if cash != 0.0:
 		s["cash"] = Economy.round2(float(s["cash"]) + cash)

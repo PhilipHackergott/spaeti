@@ -10,6 +10,15 @@ const PFAND_PER_BOTTLE := 0.15
 const NIGHT_START_MIN := 20 * 60
 const NIGHT_MINUTES := 10 * 60
 
+## The six stats, in the order the strip prints them (docs/06 §1). Names are what a player reads.
+const STAT_IDS := ["str", "dex", "con", "int", "wis", "cha"]
+const STAT_NAMES := {
+	"str": "Strength", "dex": "Dexterity", "con": "Constitution",
+	"int": "Intelligence", "wis": "Wisdom", "cha": "Charisma",
+}
+## Every check is one d20 against a DC, the 5e way (docs/06 §2).
+const DIE_FACES := 20
+
 ## The UI is German throughout, so the weekday the HUD and the summary print is German too.
 const WEEKDAY_NAMES := ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
 
@@ -31,6 +40,7 @@ static func apply(s: Dictionary, action: Dictionary) -> Dictionary:
 			n["next_arrival"] = 0
 			n["queue"] = []
 			n["active"] = {}
+			n["talk"] = {}
 			n["tally"] = SpatiState.new_tally()
 			_log(n, "open", "Night %d opens — %d customers expected." % [int(n["day"]), (n["arrivals"] as Array).size()])
 			return n
@@ -63,13 +73,37 @@ static func apply(s: Dictionary, action: Dictionary) -> Dictionary:
 		"set_sunday_open":
 			n["open_sunday"] = bool(action.get("open", false))
 			return n
+		"talk_next":
+			# Take the head of the queue (FIFO) and open the conversation (docs/06 §4).
+			if s["phase"] != "night" or Talk.is_open(s):
+				return s
+			if (n["active"] as Dictionary).is_empty():
+				if (n["queue"] as Array).is_empty():
+					return s
+				_take_next(n)  # may itself open a beat talk — then that IS tonight's conversation
+				if Talk.is_open(n):
+					return n
+			return n if _open_talk(n) else s
+		"talk_advance":
+			if not Talk.is_open(s):
+				return s
+			return n if _talk_advance(n) else s
+		"talk_choose":
+			if not Talk.is_open(s):
+				return s
+			return n if _talk_choose(n, int(action.get("choice", 0))) else s
 		"resolve_beat":
+			# The legacy name for `talk_choose` on a beat — the shipped DialogueBox still speaks it.
+			if Talk.is_open(s):
+				return n if _talk_choose(n, int(action.get("choice", 0))) else s
 			if (s["story"]["pending"] as Dictionary).is_empty():
 				return s
 			_log_choice(n, "beat", int(action.get("choice", 0)))
 			StoryFlow.apply_beat_choice(n, int(action.get("choice", 0)))
 			return n
 		"resolve_vignette":
+			if Talk.is_open(s):
+				return n if _talk_choose(n, int(action.get("choice", 0))) else s
 			if s["story"]["pending_vignette"] == "":
 				return s
 			_log_choice(n, "vignette", int(action.get("choice", 0)))
@@ -148,6 +182,7 @@ static func _take_next(n: Dictionary) -> void:
 	var arch := Content.archetype(n["active"]["archetype_id"])
 	_log(n, "arrive", "%s steps up to the counter." % arch.get("name", "Someone"))
 	StoryFlow.on_customer_active(n)
+	_open_story_talk(n)  # a beat/vignette IS a conversation now (docs/06 §4) — one box, one source
 
 ## Clear the counter and pull the next person up (nobody is left standing there).
 static func _next_customer(n: Dictionary) -> void:
@@ -289,6 +324,7 @@ static func _close_night(n: Dictionary) -> void:
 	n["story"]["pending"] = {}
 	n["story"]["pending_vignette"] = ""
 	n["active"] = {}
+	n["talk"] = {}
 	n["phase"] = "summary"
 	_log(n, "close", "Night %d closed — profit €%.2f, cash €%.2f." % [int(n["day"]), profit, float(n["cash"])])
 
@@ -299,11 +335,162 @@ static func _advance_day(n: Dictionary) -> void:
 	n["day"] = int(n["day"]) + 1
 	n["weekday"] = (int(n["weekday"]) + 1) % 7
 	n["clock_ms"] = 0
+	n["talk"] = {}
 	n["story"]["pending_vignette"] = ""
 	if int(n["day"]) > int(n["config"]["season_days"]) or float(n["cash"]) < -200.0:
 		n["phase"] = "end"
 	else:
 		n["phase"] = "manage"
+
+# ──────────────────────── the six stats & checks (docs/06 §1-§2) ────────────────────────
+
+## D&D 5e: floor((score - 10) / 2). floorf, not integer division — GDScript truncates toward zero,
+## which would turn a 9 (mod -1) into a 0.
+static func modifier(score: int) -> int:
+	return int(floorf(float(score - 10) / 2.0))
+
+static func stat_score(s: Dictionary, stat: String) -> int:
+	return int(((s.get("player", {}) as Dictionary).get("stats", {}) as Dictionary).get(stat, 10))
+
+static func stat_mod(s: Dictionary, stat: String) -> int:
+	return modifier(stat_score(s, stat))
+
+## What a player reads for a stat id ("cha" -> "Charisma"); unknown ids print themselves.
+static func stat_name(stat: String) -> String:
+	return String(STAT_NAMES.get(stat, stat))
+
+## One d20 + modifier against a DC, rolled on the state's OWN Rng so a night replays exactly
+## (docs/06 §2). Mutates `n` (the roll consumes rng state) and logs a `check` entry the box reads.
+static func roll_check(n: Dictionary, check: Dictionary) -> Dictionary:
+	var stat := String(check.get("stat", "cha"))
+	var dc := int(check.get("dc", 10))
+	var rng := Rng.from_state(int(n["rng_state"]))
+	var roll := rng.randi_below(DIE_FACES) + 1
+	n["rng_state"] = rng.state()
+	var mod := stat_mod(n, stat)
+	var success := roll + mod >= dc
+	var result := {"stat": stat, "roll": roll, "mod": mod, "dc": dc, "success": success}
+	var signed := ("+" + str(mod)) if mod >= 0 else str(mod)
+	_log(n, "check", "%s check: %d%s = %d vs DC %d — %s" % [
+		stat_name(stat), roll, signed, roll + mod, dc, ("success" if success else "fail")], result.duplicate())
+	return result
+
+# ────────────────────────── the conversation (docs/06 §3-§4) ──────────────────────────
+
+## Open the guest's own graph (or the nameless parade's). False = there is nothing to say.
+static func _open_talk(n: Dictionary) -> bool:
+	var active: Dictionary = n["active"]
+	if active.is_empty():
+		return false
+	var graph_id := Content.dialogue_id_for(String(active.get("character_id", "")))
+	var graph := Content.dialogue(graph_id)
+	if graph.is_empty():
+		return false
+	var start := String(graph.get("start", ""))
+	if Content.dialogue_node(graph_id, start).is_empty():
+		return false
+	n["talk"] = Talk.open(int(active["id"]), Talk.DIALOGUE_PREFIX + graph_id, start, Talk.KIND_TALK)
+	return true
+
+## A pending beat/vignette IS a conversation: it opens as a ONE-NODE talk so `view.dialogue` and
+## `view.talk` are the same node (docs/06 §4). Ending it does NOT dismiss the guest — the ordinary
+## serve still follows (docs/05 §4), which is the one behavioural difference from a graph talk.
+static func _open_story_talk(n: Dictionary) -> void:
+	if Talk.is_open(n):
+		return
+	var active: Dictionary = n["active"]
+	if active.is_empty():
+		return
+	var story: Dictionary = n["story"]
+	var pending: Dictionary = story["pending"]
+	if not pending.is_empty():
+		n["talk"] = Talk.open(int(active["id"]), Talk.BEAT_PREFIX + String(pending["strand"]),
+			String(pending["beat"]), Talk.KIND_BEAT)
+		return
+	var vignette_id := String(story["pending_vignette"])
+	if vignette_id != "":
+		n["talk"] = Talk.open(int(active["id"]), Talk.VIGNETTE_PREFIX + vignette_id, vignette_id, Talk.KIND_VIGNETTE)
+
+## Next line of the node. On the last line there is nothing left to advance to — the choices are up.
+static func _talk_advance(n: Dictionary) -> bool:
+	var node := Talk.node_of(n)
+	if node.is_empty():
+		return false
+	var last := maxi(0, (node["lines"] as Array).size() - 1)
+	var talk: Dictionary = n["talk"]
+	if int(talk["line"]) >= last:
+		return false
+	talk["line"] = int(talk["line"]) + 1
+	return true
+
+## Resolve a choice: gate → roll → effects → next node, or the end of the conversation.
+static func _talk_choose(n: Dictionary, index: int) -> bool:
+	var node := Talk.node_of(n)
+	if node.is_empty():
+		return false
+	var choices: Array = node["choices"]
+	if choices.is_empty():
+		return false
+	var i := clampi(index, 0, choices.size() - 1)
+	var choice: Dictionary = choices[i]
+	var requires: Dictionary = choice.get("requires", {})
+	if not requires.is_empty() and stat_score(n, String(requires.get("stat", "str"))) < int(requires.get("min", 0)):
+		return false  # a locked gate is an illegal action, not a failed roll
+	_log(n, "beat", "%s — %s" % [String(node["speaker"]), String(choice.get("label", ""))],
+		{"kind": String(node["kind"]), "choice": i})
+	var kind := String(node["kind"])
+	if kind == Talk.KIND_BEAT:
+		StoryFlow.apply_beat_choice(n, i)
+		_end_talk(n, false, true)
+		return true
+	if kind == Talk.KIND_VIGNETTE:
+		StoryFlow.apply_vignette_choice(n, i)
+		_end_talk(n, false, true)
+		return true
+	var next_id := String(choice.get("next", ""))
+	var result: Dictionary = {}
+	if not (choice.get("check", {}) as Dictionary).is_empty():
+		result = roll_check(n, choice["check"])
+		if bool(result["success"]):
+			StoryFlow.apply_effect_map(n, choice.get("effects_success", {}))
+		else:
+			next_id = String(choice.get("next_fail", next_id))
+			StoryFlow.apply_effect_map(n, choice.get("effects_fail", {}))
+	StoryFlow.apply_effect_map(n, choice.get("effects", {}))
+	var talk: Dictionary = n["talk"]
+	talk["last_check"] = result
+	var graph_id := String(talk["dialogue_id"]).trim_prefix(Talk.DIALOGUE_PREFIX)
+	var next_node := Content.dialogue_node(graph_id, next_id) if next_id != "" else {}
+	if next_node.is_empty():
+		_end_talk(n, true, bool(choice.get("serve", true)))
+		return true
+	talk["node"] = next_id
+	talk["line"] = 0
+	(talk["history"] as Array).append(next_id)
+	# The face follows the node you just walked into (docs/06 §3) — the Portrait reads it from `active`.
+	var active: Dictionary = n["active"]
+	active["expression"] = String(next_node.get("expression", active.get("expression", "neutral")))
+	return true
+
+## `talk_end` (docs/06 §4, engine-internal). `dismiss` = the guest leaves; `serve_them` = their want
+## is rung up on the way out if it is in stock, so a night of pure conversation still moves cash.
+## An underage restricted sale is the one thing the counter refuses on its own (the Integrity rule).
+static func _end_talk(n: Dictionary, dismiss: bool, serve_them: bool) -> void:
+	n["talk"] = {}
+	if not dismiss:
+		return
+	var active: Dictionary = n["active"]
+	if active.is_empty():
+		return
+	var want := String(active["want"])
+	var stock := int(((n["inventory"] as Dictionary).get(want, {}) as Dictionary).get("stock", 0))
+	var underage := bool(Content.archetype(String(active["archetype_id"])).get("underage", false))
+	var illegal := underage and bool(Content.sku(want).get("restricted", false))
+	if serve_them and stock > 0 and not illegal:
+		_serve(n, [want], 0)
+		return
+	n["reputation"]["kiez"] = Economy.clamp_meter(float(n["reputation"]["kiez"]) - 0.1)
+	_next_customer(n)
 
 static func _has_effect(n: Dictionary, key: String) -> bool:
 	for id in n["upgrades"]:
@@ -311,8 +498,11 @@ static func _has_effect(n: Dictionary, key: String) -> bool:
 			return true
 	return false
 
+## "Somebody is mid-sentence" — the serve, the wave-off and the patience clock all stand down for it.
 static func _dialogue_pending(s: Dictionary) -> bool:
-	return not (s["story"]["pending"] as Dictionary).is_empty() or s["story"]["pending_vignette"] != ""
+	if Talk.is_open(s) or not (s["story"]["pending"] as Dictionary).is_empty():
+		return true
+	return s["story"]["pending_vignette"] != ""
 
 static func _log(n: Dictionary, kind: String, text: String, data: Dictionary = {}) -> void:
 	# ts orders entries across the season: day-major, clock-minor.
@@ -351,7 +541,23 @@ static func legal_actions(s: Dictionary) -> Array:
 		"night":
 			out.append({"type": "tick", "dt_ms": 100})
 			var story: Dictionary = s["story"]
-			if not (story["pending"] as Dictionary).is_empty():
+			if Talk.is_open(s):
+				# Mid-sentence, the only intents are "next line" and "say this" (docs/06 §4).
+				var node := Talk.node_of(s)
+				var lines: Array = node.get("lines", [])
+				if int((s["talk"] as Dictionary).get("line", 0)) < maxi(0, lines.size() - 1):
+					out.append({"type": "talk_advance"})
+				var views := Talk.choice_views(s, node)
+				for i in views.size():
+					if not bool(views[i]["locked"]):  # a gate is shown by the box, never offered here
+						out.append({"type": "talk_choose", "choice": i})
+				# Legacy aliases: the shipped DialogueBox dispatches these for a beat/vignette.
+				var kind := Talk.kind_of(s)
+				if kind == Talk.KIND_BEAT or kind == Talk.KIND_VIGNETTE:
+					var legacy := "resolve_vignette" if kind == Talk.KIND_VIGNETTE else "resolve_beat"
+					for i in views.size():
+						out.append({"type": legacy, "choice": i})
+			elif not (story["pending"] as Dictionary).is_empty():
 				var beat := Content.beat(story["pending"]["strand"], story["pending"]["beat"])
 				for i in (beat.get("choices", []) as Array).size():
 					out.append({"type": "resolve_beat", "choice": i})
@@ -359,9 +565,13 @@ static func legal_actions(s: Dictionary) -> Array:
 				var v := Content.vignette(story["pending_vignette"])
 				for i in (v.get("choices", []) as Array).size():
 					out.append({"type": "resolve_vignette", "choice": i})
-			elif not (s["active"] as Dictionary).is_empty():
-				out.append({"type": "serve_active", "give": [s["active"]["want"]], "pfand_bottles": 0})
-				out.append({"type": "skip_active"})
+			else:
+				# Take the next guest: the head of the queue, or whoever the tick already pulled up.
+				if not (s["active"] as Dictionary).is_empty() or not (s["queue"] as Array).is_empty():
+					out.append({"type": "talk_next"})
+				if not (s["active"] as Dictionary).is_empty():
+					out.append({"type": "serve_active", "give": [s["active"]["want"]], "pfand_bottles": 0})
+					out.append({"type": "skip_active"})
 			out.append({"type": "close_night"})
 		"summary":
 			out.append({"type": "advance_day"})
@@ -391,7 +601,12 @@ static func view(s: Dictionary) -> Dictionary:
 		},
 		"active": _active_view(s),
 		"queue_len": (s["queue"] as Array).size(),
-		"dialogue": StoryFlow.current_dialogue(s),
+		"queue": _queue_view(s),
+		"talk": Talk.view(s),
+		"player": _player_view(s),
+		# ONE source for the box: while anyone is talking this is a projection of `talk` (docs/06 §4);
+		# the StoryFlow path survives only as the fallback for a pending beat that never opened.
+		"dialogue": _dialogue_view(s),
 		"shelf": _shelf_view(s),
 		"summary": ((s["summaries"] as Array).back() if not (s["summaries"] as Array).is_empty() else {}),
 		"manage": {"restock_options": _restock_options(s), "modules": Economy.module_options(s)},
@@ -429,6 +644,36 @@ static func _active_view(s: Dictionary) -> Dictionary:
 		"is_story": active.get("beat_id", "") != "" or active.get("vignette_id", "") != "",
 		"underage": bool(arch.get("underage", false)),
 	}
+
+## Everyone waiting, FIFO, each with the portrait the art lane drew for them: their own if they are
+## cast, otherwise their archetype's one-off bust (docs/05 §6).
+static func _queue_view(s: Dictionary) -> Array:
+	var out: Array = []
+	for customer in (s["queue"] as Array):
+		var c: Dictionary = customer
+		out.append({
+			"customer_id": int(c["id"]),
+			"character_id": String(c.get("character_id", "")),
+			"name": Talk.guest_name(c),
+			"portrait": Content.portrait_for(String(c.get("character_id", "")), String(c.get("archetype_id", ""))),
+			"expression": String(c.get("expression", "neutral")),
+			"is_story": String(c.get("beat_id", "")) != "" or String(c.get("vignette_id", "")) != "",
+		})
+	return out
+
+## The six-stat strip: the scores and the modifiers the checks actually add (docs/06 §1).
+static func _player_view(s: Dictionary) -> Dictionary:
+	var stats: Dictionary = {}
+	var mods: Dictionary = {}
+	for stat in STAT_IDS:
+		var score := stat_score(s, stat)
+		stats[stat] = score
+		mods[stat] = modifier(score)
+	return {"stats": stats, "mods": mods}
+
+static func _dialogue_view(s: Dictionary) -> Dictionary:
+	var projected := Talk.dialogue_view(s)
+	return projected if not projected.is_empty() else StoryFlow.current_dialogue(s)
 
 static func _shelf_view(s: Dictionary) -> Array:
 	var out: Array = []

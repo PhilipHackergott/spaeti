@@ -8,8 +8,14 @@ extends Node
 ## After every step it saves shots/play-NN-<step>.png (1920x1080, nearest) and appends one row to
 ## shots/play-log.json, so a failure is a picture, not a stack trace.
 ##
+## Since docs/06 the demo path is the REGISTER: wait for guests, take the first one ("Next guest" /
+## `talk_next`), walk their lines, answer a choice - a stat check when the node offers one - and let
+## the conversation end, then the next guest, all night. The old serve steps (Serve -> pick -> Ring
+## up -> Wave off) are still here as an OPTIONAL branch: they run when the engine has no `talk_next`
+## yet, and `--serve=1` forces them even when it has, so the till never rots untested.
+##
 ## Run it through the wrapper (it owns the lock + the watchdog), never the Godot binary directly:
-##   node tools/godot/play.mjs [--out shots] [--timeout 240]
+##   node tools/godot/play.mjs [--out shots] [--timeout 240] [--serve]
 ##
 ## Time: a night is `night_len_ms` = 5 real minutes. `Engine.time_scale` (and NOTHING in the game) is
 ## what makes that fit in a test run — Session still ticks itself, arrivals still arrive on their own
@@ -34,10 +40,21 @@ var _deadline_ms: int = 0
 ## Each of these is captured the first time the night offers it, then never again.
 var _seen_beat: bool = false
 var _seen_wave: bool = false
+## The register set pieces, each captured the first time the night offers it.
+var _seen_talk: bool = false
+var _seen_choice: bool = false
+var _seen_check: bool = false
+## --serve=1 keeps the old till branch running even on an engine that can talk.
+var _force_serve: bool = false
+## How many guests the register loop took before the night ran out.
+var _guests: int = 0
+## Consecutive "Next guest" presses that opened no conversation - the loop steps back after a few.
+var _mute: int = 0
 
 func _ready() -> void:
 	var args := _parse_args()
 	_out_dir = String(args.get("out", "shots")).rstrip("/")
+	_force_serve = String(args.get("serve", "")) not in ["", "0", "false"]
 	# Wall clock, not a SceneTreeTimer: those run on SCALED time, so at time_scale 4 a 225-second
 	# watchdog fires after 56 real seconds (it did, on the first run).
 	_deadline_ms = Time.get_ticks_msec() + int(float(args.get("timeout", "240")) * 1000.0)
@@ -100,41 +117,21 @@ func _play() -> void:
 		return
 	await _shot("night-open")
 
-	# 6 ── wait at the counter until somebody actually walks up.
-	if not await _wait_for(func() -> bool: return not _active().is_empty(), 40.0, "the first customer"):
+	# 6 ── wait at the register until somebody is actually there to talk to. On an engine with the
+	#      queue this is the LINE forming; on the older one it is the first customer at the counter.
+	if not await _wait_for(func() -> bool: return not _active().is_empty() or not _queue().is_empty(), 40.0, "the first guest"):
 		return
 	await _resolve_any_beat("arrival")
-	await _shot("first-customer")
+	await _shot("first-guest")
 
-	# 7 ── open the shelf the way the player does: the Serve toggle.
-	if not _press(_button("ServeToggle"), "Serve"):
-		return
-	await _settle(12)
-	if not _serve_open():
-		_die("the serve panel did not open")
-		return
-	await _shot("shelf-open")
-
-	# 8 ── pick what they asked for, off the real ItemSlot.
-	var want := String((_active().get("want", {}) as Dictionary).get("sku_id", ""))
-	if not _pick(want):
-		_die("no shelf slot for the wanted sku '%s'" % want)
-		return
-	await _settle(2)
-	if not _till_has_lines():
-		_die("picking '%s' did not reach the till" % want)
-		return
-	await _shot("picked")
-
-	# 9 ── ring it up: the till becomes `serve_active` and the tally has to move.
-	var sold_before := _sales()
-	if not _press(_button("RingUp"), "Ring up"):
-		return
-	await _settle(8)
-	if _sales() <= sold_before:
-		_die("Ring up did not sell anything (sales stayed at %d)" % sold_before)
-		return
-	await _shot("rang-up")
+	# 7-9 ── the register: take a guest, talk them through, choose. The till branch runs instead when
+	#        the engine cannot talk yet (and as well, with --serve).
+	if _can_talk():
+		if not await _take_a_guest():
+			return
+	if _force_serve or not _can_talk():
+		if not await _serve_somebody():
+			return
 
 	# 10-12 ── play the rest of the night out: answer the beat the story schedules, wave one customer
 	#          off, and let `night.gd` close the books itself at 06:00. Everything below happens on the
@@ -195,6 +192,8 @@ func _shot(step_name: String) -> void:
 		"cash": snappedf(float(v.get("cash", 0.0)), 0.01),
 		"active": _active_name(),
 		"pending": _pending(),
+		"queue": _queue().size(),
+		"talking": String((_talk() as Dictionary).get("speaker", "")),
 	})
 	print("PLAY step=%02d %s screen=%s phase=%s day=%d clock=%s cash=%.2f active='%s' pending='%s' png_err=%d" % [
 		_step, step_name, String(_main.get("current_screen")), String(v.get("phase", "")),
@@ -238,6 +237,10 @@ func _choose(index: int) -> bool:
 
 ## Resolves a beat that fired the moment a customer stepped up, so the serve steps can run.
 func _resolve_any_beat(tag: String) -> void:
+	# On an engine that talks, every beat opens as a one-node conversation (docs/05 section 8) and the
+	# register loop is what answers it - this older path would press the same buttons twice.
+	if _can_talk():
+		return
 	if _pending() == "":
 		return
 	await _advance_dialogue()
@@ -253,6 +256,33 @@ func _play_out_the_night() -> bool:
 	while not _expired():
 		if String(_view().get("phase", "")) != "night":
 			return true
+		# The register loop: a conversation to carry, or a line to take the next guest from.
+		if _can_talk():
+			if not _talk().is_empty():
+				Engine.time_scale = IDLE_SCALE
+				if not await _carry_the_conversation():
+					return false
+				Engine.time_scale = NIGHT_SCALE
+				continue
+			if not _active().is_empty() or not _queue().is_empty():
+				Engine.time_scale = IDLE_SCALE
+				await _settle(4)
+				if _soft_press(_button("NextGuest")):
+					await _settle(6)
+					if _talk().is_empty():
+						# Nobody the graphs can talk to (or the reducer refused): let the clock run
+						# instead of pressing the same button forever.
+						_mute += 1
+						if _mute > 3:
+							_mute = 0
+							Engine.time_scale = NIGHT_SCALE
+							await _settle(60)
+							continue
+					else:
+						_guests += 1
+						_mute = 0
+				Engine.time_scale = NIGHT_SCALE
+				continue
 		if _pending() != "":
 			Engine.time_scale = IDLE_SCALE
 			await _advance_dialogue()
@@ -287,6 +317,119 @@ func _play_out_the_night() -> bool:
 		_active_name(), int(_view().get("queue_len", 0))])
 	return false
 
+# ───────────────────────────────── the register (docs/06 section 5) ─────────────────────────────
+
+## True once the engine ships the conversation (docs/06 section 4). Until then `view` carries no
+## `talk` key at all and this whole branch is skipped - which is exactly how the two lanes land
+## independently: the screen is built against the contract, the driver waits for the reducer.
+func _can_talk() -> bool:
+	return _view().has("talk")
+
+func _talk() -> Dictionary:
+	return _view().get("talk", {})
+
+func _queue() -> Array:
+	return _view().get("queue", [])
+
+## One whole guest: take them out of the line, walk their lines, answer the first choice they offer,
+## and see the conversation close. Captures the three set pieces once each.
+func _take_a_guest() -> bool:
+	if not await _wait_for(func() -> bool: return not _queue().is_empty() or not _active().is_empty(), 40.0, "a guest to take"):
+		return false
+	await _shot("queue")
+	# The strip's own button, the way a player presses it - not a dispatch behind the screen's back.
+	if not await _wait_for(func() -> bool: return _soft_ready(_button("NextGuest")), 6.0, "the Next guest button"):
+		return false
+	if not _press(_button("NextGuest"), "Next guest"):
+		return false
+	if not await _wait_for(func() -> bool: return not _talk().is_empty(), 8.0, "the conversation to open"):
+		return false
+	if not _serve_is_blocked():
+		_die("the engine offered `serve_active` while a conversation was open")
+		return false
+	await _shot("talk-open")
+	_guests += 1
+	return await _carry_the_conversation()
+
+## Advance until the node offers choices, take one, and let the guest go. Everything is pressed on
+## the real DialogueBox; the engine owns `talk.line`, so this only decides WHEN to click.
+func _carry_the_conversation() -> bool:
+	var guard := 0
+	while not _talk().is_empty() and not _expired() and guard < 40:
+		guard += 1
+		if not _seen_talk and (_talk().get("choices", []) as Array).is_empty():
+			_seen_talk = true
+			await _shot("talk-lines")
+		var choices := _choice_buttons()
+		if choices.is_empty():
+			# No choices yet: one more line. `advance()` is exactly what a click or Space does.
+			var box := _node("DialogueBox")
+			if box == null:
+				return true
+			box.call("advance")
+			await _settle(6)
+			continue
+		if not _seen_choice:
+			_seen_choice = true
+			await _shot("talk-choice")
+		# Prefer a choice that ROLLS, so the d20 pop is exercised; otherwise the first open one.
+		if not _choose(_pick_choice()):
+			return false
+		await _settle(8)
+		if not _seen_check and not (_talk().get("last_check", {}) as Dictionary).is_empty():
+			_seen_check = true
+			await _shot("talk-check")
+	if _talk().is_empty() and _guests > 0 and not _has_shot("talk-ended"):
+		await _shot("talk-ended")
+	return true
+
+## The index of the first choice that carries a check and is not locked; else the first open one.
+## A locked gate is never pressed - `legal_actions` does not offer it and the button is disabled.
+func _pick_choice() -> int:
+	var choices: Array = _talk().get("choices", [])
+	var fallback := -1
+	for i in choices.size():
+		var c: Dictionary = choices[i]
+		if bool(c.get("locked", false)):
+			continue
+		if fallback < 0:
+			fallback = i
+		if not (c.get("check", {}) as Dictionary).is_empty():
+			return i
+	return maxi(0, fallback)
+
+## The old till branch, kept whole: Serve -> pick the wanted SKU -> Ring up. It is the demo path on
+## an engine without conversations, and an optional extra (--serve) on one with them.
+func _serve_somebody() -> bool:
+	if not await _wait_for(func() -> bool: return not _active().is_empty(), 40.0, "somebody at the counter"):
+		return false
+	await _resolve_any_beat("serve")
+	if not _press(_button("ServeToggle"), "Serve"):
+		return false
+	await _settle(12)
+	if not _serve_open():
+		_die("the serve panel did not open")
+		return false
+	await _shot("shelf-open")
+	var want := String((_active().get("want", {}) as Dictionary).get("sku_id", ""))
+	if not _pick(want):
+		_die("no shelf slot for the wanted sku '%s'" % want)
+		return false
+	await _settle(2)
+	if not _till_has_lines():
+		_die("picking '%s' did not reach the till" % want)
+		return false
+	await _shot("picked")
+	var sold_before := _sales()
+	if not _press(_button("RingUp"), "Ring up"):
+		return false
+	await _settle(8)
+	if _sales() <= sold_before:
+		_die("Ring up did not sell anything (sales stayed at %d)" % sold_before)
+		return false
+	await _shot("rang-up")
+	return true
+
 ## Wall-clock budget for the whole run, checked by every wait in here.
 func _expired() -> bool:
 	return Time.get_ticks_msec() >= _deadline_ms
@@ -296,6 +439,18 @@ func _has_shot(step_name: String) -> bool:
 		if String((row as Dictionary).get("name", "")) == step_name:
 			return true
 	return false
+
+## A press that is allowed to fail: the screen renders a frame behind the reducer, so "the button is
+## not there yet" is an ordinary state inside the night loop, not a failed playthrough.
+func _soft_ready(b: Button) -> bool:
+	return b != null and not b.disabled and b.is_visible_in_tree()
+
+func _soft_press(b: Button) -> bool:
+	if not _soft_ready(b):
+		return false
+	b.grab_focus()
+	b.pressed.emit()
+	return true
 
 func _press(b: Button, what: String) -> bool:
 	if b == null:
@@ -395,15 +550,24 @@ func _till_has_lines() -> bool:
 	var till := _node("Till")
 	return till != null and not (till.get("lines") as Array).is_empty()
 
+## The buttons under `%Choices`, in order. It walks INTO each row: since docs/06 a choice is a row
+## (`Choice1`, `Choice2`, …) holding the button plus its stat tag as a sibling label, because a label
+## cannot colour half of itself. A direct-children-only scan finds zero and reads as "the beat offered
+## no choices" while the choice is plainly on screen — which is exactly what it did.
 func _choice_buttons() -> Array:
 	var box := _node("Choices")
 	if box == null:
 		return []
 	var out: Array = []
-	for c in box.get_children():
+	_collect_buttons(box, out)
+	return out
+
+func _collect_buttons(root: Node, out: Array) -> void:
+	for c in root.get_children():
 		if c is Button:
 			out.append(c)
-	return out
+		else:
+			_collect_buttons(c, out)
 
 func _first_restock_button() -> Button:
 	var rows := _node("Rows")
@@ -427,7 +591,7 @@ func _settle(frames: int) -> void:
 
 func _finish() -> void:
 	_write_log()
-	print("PLAY ok steps=%d" % _step)
+	print("PLAY ok steps=%d guests=%d" % [_step, _guests])
 	get_tree().quit(0)
 
 func _die(reason: String) -> void:

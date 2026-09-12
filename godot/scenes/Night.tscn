@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scenes/night.gd" id="1_script"]
 [ext_resource type="Theme" path="res://components/Theme.tres" id="2_theme"]
@@ -9,6 +9,9 @@
 [ext_resource type="PackedScene" path="res://components/DialogueBox.tscn" id="7_dialogue"]
 [ext_resource type="PackedScene" path="res://components/ServePanel.tscn" id="8_serve"]
 [ext_resource type="PackedScene" path="res://components/Fx.tscn" id="9_fx"]
+[ext_resource type="PackedScene" path="res://components/StatsStrip.tscn" id="10_stats"]
+[ext_resource type="PackedScene" path="res://components/DiceResult.tscn" id="11_dice"]
+[ext_resource type="PackedScene" path="res://components/QueueStrip.tscn" id="12_queue"]
 
 [node name="Night" type="Control"]
 anchor_right = 1.0
@@ -32,12 +35,21 @@ offset_bottom = 254.0
 [node name="Hud" parent="." instance=ExtResource("5_hud")]
 unique_name_in_owner = true
 
+[node name="StatsStrip" parent="." instance=ExtResource("10_stats")]
+unique_name_in_owner = true
+
 [node name="WantBubble" parent="." instance=ExtResource("6_bubble")]
 unique_name_in_owner = true
 offset_left = 340.0
 offset_top = 74.0
 offset_right = 426.0
 offset_bottom = 120.0
+
+[node name="DiceResult" parent="." instance=ExtResource("11_dice")]
+unique_name_in_owner = true
+
+[node name="QueueStrip" parent="." instance=ExtResource("12_queue")]
+unique_name_in_owner = true
 
 [node name="DialogueBox" parent="." instance=ExtResource("7_dialogue")]
 unique_name_in_owner = true
@@ -47,11 +59,12 @@ unique_name_in_owner = true
 
 [node name="ServeToggle" type="Button" parent="."]
 unique_name_in_owner = true
-offset_left = 396.0
-offset_top = 44.0
-offset_right = 476.0
-offset_bottom = 62.0
+offset_left = 2.0
+offset_top = 21.0
+offset_right = 64.0
+offset_bottom = 39.0
 theme = ExtResource("2_theme")
+theme_type_variation = &"StepButton"
 text = "Serve"
 
 [node name="ServePanel" parent="." instance=ExtResource("8_serve")]

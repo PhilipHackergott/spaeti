@@ -23,20 +23,27 @@ const COMPONENTS := [
 	"res://components/Modal.tscn",
 	"res://components/Transition.tscn",
 	"res://components/Fx.tscn",
+	"res://components/QueueStrip.tscn",
+	"res://components/StatsStrip.tscn",
+	"res://components/DiceResult.tscn",
 ]
 
 const SCENE_PRESETS := {
 	"res://scenes/Title.tscn": ["title"],
-	"res://scenes/Night.tscn": ["empty_counter", "customer_at_counter", "dialogue_choice", "serving", "pfand", "late_night"],
+	"res://scenes/Night.tscn": ["empty_counter", "customer_at_counter", "dialogue_choice", "serving", "pfand", "late_night",
+		"queue_waiting", "talk_lines", "talk_choice", "talk_result"],
 	"res://scenes/Manage.tscn": ["manage"],
 	"res://scenes/Summary.tscn": ["summary"],
-	"res://scenes/Main.tscn": ["title", "customer_at_counter", "dialogue_choice", "serving", "pfand", "empty_counter", "late_night", "manage", "summary"],
+	"res://scenes/Main.tscn": ["title", "customer_at_counter", "dialogue_choice", "serving", "pfand", "empty_counter", "late_night", "manage", "summary",
+		"queue_waiting", "talk_lines", "talk_choice", "talk_result"],
 }
 
 ## The keys `Rules.view(state)` must hand a scene (docs/05 section 5).
 const VIEW_KEYS := [
 	"phase", "day", "weekday_name", "clock_ms", "night_progress", "time_label", "cash", "pfand_held",
 	"pfand_rate", "reputation", "hud", "active", "queue_len", "dialogue", "shelf", "summary", "manage", "ending",
+	# docs/06-dialogue-and-stats.md section 4: the line, the conversation and the character sheet.
+	"queue", "talk", "player",
 ]
 
 func test_components_instantiate() -> void:
@@ -240,6 +247,235 @@ func test_dialogue_survives_being_re_rendered() -> void:
 	box.call("show_dialogue", other, false)
 	assert_eq(int(box.get("_line_index")), 0, "a different dialogue does start over")
 	_dispose(box)
+
+## docs/06 section 4: the read-model the register screen renders. The four new presets have to carry
+## a line, a conversation and a sheet that are actually shaped like the contract, or the captures are
+## a drawing of an engine nobody is building.
+func test_mock_view_carries_the_register_contract() -> void:
+	var waiting: Dictionary = MockView.view("queue_waiting")
+	assert_eq((waiting["queue"] as Array).size(), 3, "three guests are in the line")
+	assert_true((waiting["active"] as Dictionary).is_empty(), "and nobody is at the counter")
+	assert_eq(int(waiting["queue_len"]), (waiting["queue"] as Array).size(), "queue_len agrees with the line")
+	for guest in waiting["queue"]:
+		for key in ["customer_id", "character_id", "name", "portrait", "expression", "is_story"]:
+			assert_true((guest as Dictionary).has(key), "a queue row carries " + str(key))
+	for preset in ["talk_lines", "talk_choice", "talk_result"]:
+		var talk: Dictionary = MockView.view(preset)["talk"]
+		assert_false(talk.is_empty(), preset + " has a conversation open")
+		for key in ["speaker", "portrait", "expression", "lines", "line", "choices", "last_check"]:
+			assert_true(talk.has(key), "%s talk carries %s" % [preset, key])
+		assert_true(int(talk["line"]) < (talk["lines"] as Array).size(), preset + " points at a line that exists")
+	assert_true((MockView.view("talk_lines")["talk"]["choices"] as Array).is_empty(), "lines come before choices")
+	var choices: Array = MockView.view("talk_choice")["talk"]["choices"]
+	assert_eq(choices.size(), 3, "the decision offers three")
+	assert_false(((choices[1] as Dictionary)["check"] as Dictionary).is_empty(), "one of them rolls")
+	assert_true(bool((choices[2] as Dictionary)["locked"]), "and one of them is a gate")
+	var check: Dictionary = MockView.view("talk_result")["talk"]["last_check"]
+	assert_eq(int(check["roll"]) + int(check["mod"]), 16, "14 + 2 = 16")
+	assert_true(bool(check["success"]), "16 beats DC 12")
+
+## The sheet is a READING: the modifier is the engine's, and the strip prints it rather than deriving
+## it (docs/06 section 1). This checks the mock's own arithmetic so the capture cannot teach a lie.
+func test_mock_player_modifiers_are_the_5e_rule() -> void:
+	var player: Dictionary = MockView.view("queue_waiting")["player"]
+	assert_eq((player["stats"] as Dictionary).size(), 6, "six stats")
+	for stat_id in Strings.STAT_ORDER:
+		var id := String(stat_id)
+		assert_true((player["stats"] as Dictionary).has(id), "the sheet has " + id)
+		assert_eq(int(player["mods"][id]), int(floorf((float(player["stats"][id]) - 10.0) / 2.0)), id + " modifier is floor((v-10)/2)")
+		assert_ne(Strings.stat_name(id), id, id + " has a name the player reads")
+
+## A rolled choice wears its stat tag in the accent colour; a gate is SHOWN, disabled and told why
+## (docs/06 section 2). Before this the gate was just another button the player could press.
+func test_dialogue_box_tags_checks_and_greys_gates() -> void:
+	var packed := load("res://components/DialogueBox.tscn") as PackedScene
+	assert_true(packed != null, "DialogueBox.tscn loads")
+	if packed == null:
+		return
+	var box := packed.instantiate()
+	var talk: Dictionary = MockView.view("talk_choice")["talk"]
+	box.call("show_dialogue", {
+		"speaker": String(talk["speaker"]), "portrait": String(talk["portrait"]),
+		"expression": "neutral", "lines": [String((talk["lines"] as Array)[0])],
+		"choices": talk["choices"], "kind": "talk",
+	}, true)
+	var rows := box.get_node_or_null("%Choices")
+	assert_true(rows != null and rows.get_child_count() == 3, "three choice rows")
+	if rows == null or rows.get_child_count() != 3:
+		_dispose(box)
+		return
+	var plain := rows.get_child(0)
+	assert_true(plain.get_node_or_null("Tag") == null, "a plain choice wears no tag")
+	var rolled := rows.get_child(1)
+	var tag := rolled.get_node_or_null("Tag") as Label
+	assert_true(tag != null, "the rolled choice wears a tag")
+	if tag != null:
+		assert_eq(tag.text, Strings.check_tag("cha", 12), "and the tag names the stat and the DC")
+		assert_eq(tag.get_theme_color("font_color"), Palette.ACCENT, "in the accent colour")
+	var gate := rows.get_child(2)
+	var gate_button := gate.get_node_or_null("Line") as Button
+	var gate_tag := gate.get_node_or_null("Tag") as Label
+	assert_true(gate_button != null and gate_button.disabled, "the gate is shown but not pressable")
+	assert_true(gate_tag != null, "the gate says why")
+	if gate_tag != null:
+		assert_eq(gate_tag.text, Strings.locked("%s %d needed" % [Rules.stat_name("str"), 12]), "the gate says locked: Strength 12 needed")
+		assert_eq(gate_tag.get_theme_color("font_color"), Palette.TEXT_DIM, "greyed, not accented")
+	# The authored label carries the tag inline ("[Charisma 12] Pay me..."); printing it twice is how
+	# a 300-px choice row ends up clipped, so the button keeps only the words.
+	if gate_button != null:
+		assert_false(gate_button.text.contains("["), "the bracket tag is not repeated inside the button")
+	_dispose(box)
+
+## The line is FIFO, the first guest is the one the button takes, and a line longer than the strip
+## ends in a "+N" chip instead of running off the frame.
+func test_queue_strip_shows_the_line_fifo() -> void:
+	var packed := load("res://components/QueueStrip.tscn") as PackedScene
+	assert_true(packed != null, "QueueStrip.tscn loads")
+	if packed == null:
+		return
+	var strip := packed.instantiate()
+	var queue: Array = MockView.view("queue_waiting")["queue"]
+	strip.call("set_queue", queue, true)
+	var chips := strip.get_node_or_null("%Chips")
+	assert_true(chips != null and chips.get_child_count() == 3, "one chip per waiting guest")
+	var first_name := strip.get_node_or_null("%Name") as Label
+	assert_true(first_name != null, "the strip names who is next")
+	if first_name != null:
+		assert_eq(first_name.text, String((queue[0] as Dictionary)["name"]), "and it is the FIRST in line")
+	var long_queue: Array = queue.duplicate()
+	for i in 9:
+		long_queue.append((queue[2] as Dictionary).duplicate())
+	strip.call("set_queue", long_queue, true)
+	assert_eq(chips.get_child_count(), Palette.QUEUE_SLOTS, "a long line fills the strip and no more")
+	assert_eq(chips.get_child(Palette.QUEUE_SLOTS - 1).name, StringName("More"), "the last chip is the overflow")
+	var took: Array = []
+	strip.connect("talk_next", func() -> void: took.append(1))
+	strip.call("_on_next")
+	assert_eq(took.size(), 1, "the strip asks for the next guest")
+	# With somebody already at the counter `talk_next` is illegal (docs/06 section 4).
+	strip.call("set_queue", long_queue, false)
+	strip.call("_on_next")
+	assert_eq(took.size(), 1, "and stays quiet while a conversation is open")
+	var button := strip.get_node_or_null("%NextGuest") as Button
+	assert_true(button != null and not button.visible, "the Next guest button hides while they talk")
+	# The reducer pulls the head of the queue to the counter by itself, so "take the next guest" is
+	# offered with an EMPTY line too - the strip is then the button alone.
+	strip.call("set_queue", [], true)
+	assert_true(strip.visible and button.visible, "an empty line still offers the guest at the counter")
+	assert_false((strip.get_node_or_null("Plate") as Control).visible, "but there is no line to draw")
+	strip.call("set_queue", [], false)
+	assert_false(strip.visible, "nobody to take and nobody waiting is no strip at all")
+	_dispose(strip)
+
+## The d20 pop prints the engine's arithmetic and nothing else (docs/06 section 2).
+func test_dice_result_prints_the_roll() -> void:
+	var packed := load("res://components/DiceResult.tscn") as PackedScene
+	assert_true(packed != null, "DiceResult.tscn loads")
+	if packed == null:
+		return
+	var dice := packed.instantiate()
+	dice.call("show_check", MockView.view("talk_result")["talk"]["last_check"])
+	assert_true(dice.visible, "a check that happened is shown")
+	assert_eq((dice.get_node_or_null("%Roll") as Label).text, "14", "the die carries the raw roll")
+	assert_eq((dice.get_node_or_null("%Line") as Label).text, Strings.dice_line(14, 2, 16), "d20 14 + 2 = 16")
+	assert_eq((dice.get_node_or_null("%Verdict") as Label).text, Strings.dice_verdict(12, true), "vs 12, success")
+	assert_eq((dice.get_node_or_null("%Verdict") as Label).get_theme_color("font_color"), Palette.GOOD, "in the good colour")
+	dice.call("show_check", {"stat": "wis", "roll": 3, "mod": -1, "dc": 14, "success": false})
+	assert_eq((dice.get_node_or_null("%Line") as Label).text, Strings.dice_line(3, -1, 2), "a negative modifier subtracts in words")
+	assert_eq((dice.get_node_or_null("%Verdict") as Label).get_theme_color("font_color"), Palette.BAD, "a miss is BAD")
+	dice.call("show_check", {})
+	assert_false(dice.visible, "no check, no pop")
+	_dispose(dice)
+
+## The engine composes the second half of a gate's reason (Talk.choice_views) and names the stats for
+## it; the string table names them for the UI. Two tables, one set of words - this is what stops them
+## drifting, and what makes Strings.locked(reason) frame a sentence the engine can actually produce.
+func test_the_two_stat_tables_agree() -> void:
+	for stat_id in Strings.STAT_ORDER:
+		var id := String(stat_id)
+		assert_true(Rules.STAT_IDS.has(id), "the engine knows the stat " + id)
+		assert_eq(Strings.stat_name(id), Rules.stat_name(id), id + " is named the same on both sides")
+	assert_eq(Strings.STAT_ORDER.size(), Rules.STAT_IDS.size(), "six on both sides")
+	# And the mock's locked gate is worded exactly like a real one.
+	var s := SpatiState.new_game({})
+	var node := {"speaker": "juergen", "expression": "neutral", "lines": ["Lift it?"],
+			"choices": [{"label": "Lift the crate.", "requires": {"stat": "str", "min": 12}}]}
+	var gate: Dictionary = (Talk.choice_views(s, node) as Array)[0]
+	assert_true(bool(gate["locked"]), "STR 10 cannot pass a STR 12 gate")
+	var mock_gate: Dictionary = (MockView.view("talk_choice")["talk"]["choices"] as Array)[2]
+	assert_eq(String(mock_gate["reason"]), String(gate["reason"]), "the mock's gate says what a real one says")
+	assert_true((mock_gate["check"] as Dictionary).is_empty(), "and a gate is not a roll")
+
+## The register columns may not collide: the queue over neither the SPÄTI neon (SceneLayers' glow at
+## x 124-224, y 20-62) nor the active bust (bottom-centred on x 250, up to 190 wide), and the sheet
+## clear of both HUD plates. This is the rule the brief set, kept as arithmetic instead of an eyeball.
+func test_the_register_columns_do_not_overlap() -> void:
+	var neon := Rect2i(124, 20, 100, 42)
+	var bust := Rect2i(Palette.PORTRAIT_CENTRE_X - 95, 0, 190, Palette.COUNTER_TOP)
+	for rect in [Palette.QUEUE_RECT, Palette.DICE_RECT]:
+		assert_false(rect.intersects(neon), "the right column clears the SPÄTI sign")
+		assert_false(rect.intersects(bust), "the right column clears the active bust")
+	assert_false(Palette.STATS_RECT.intersects(bust), "the sheet clears the bust")
+	assert_false(Palette.STATS_RECT.intersects(neon), "the sheet clears the sign")
+	# Both HUD plates live in the top 20 px (docs/04: one compact line per corner).
+	var hud := Rect2i(0, 0, Palette.BASE.x, 20)
+	assert_false(Palette.STATS_RECT.intersects(hud), "the sheet clears the HUD")
+	assert_false(Palette.SERVE_TOGGLE_RECT.intersects(hud), "so does the demoted serve toggle")
+	assert_false(Palette.SERVE_TOGGLE_RECT.intersects(Palette.STATS_RECT), "and the two of them do not stack")
+	# The dialogue box gives the right column back when the line is up, or the choices run under it.
+	assert_true(Palette.DIALOGUE_RECT.position.x + Palette.DIALOGUE_W_QUEUE <= Palette.QUEUE_RECT.position.x,
+			"the narrowed dialogue box stops short of the queue")
+	assert_eq(Palette.QUEUE_RECT.position.y + Palette.QUEUE_RECT.size.y, Palette.COUNTER_TOP,
+			"the line stands at the counter, not over it")
+
+## The whole conversation, driven the way a player drives it: the box shows the line the ENGINE is on,
+## a click asks for the next one, and a choice becomes `talk_choose` (docs/06 section 4).
+func test_night_drives_a_conversation() -> void:
+	var packed := load("res://scenes/Night.tscn") as PackedScene
+	assert_true(packed != null, "Night.tscn loads")
+	if packed == null:
+		return
+	var night := packed.instantiate()
+	# A capture preset renders instantly, which is also the only way a typewriter-free assertion can
+	# see the choices: outside the tree there is no _process to finish typing the line.
+	night.call("apply_capture_preset", "talk_lines")
+	var v: Dictionary = MockView.view("talk_lines")
+	var box := night.get_node_or_null("%DialogueBox")
+	var body := box.get_node_or_null("%Body") as Label
+	assert_eq(body.text, String((v["talk"]["lines"] as Array)[int(v["talk"]["line"])]), "the box shows the engine's line")
+	var speaker := box.get_node_or_null("%Speaker") as Label
+	assert_eq(speaker.text, String(v["talk"]["speaker"]), "and who is saying it")
+	assert_eq(box.get_node_or_null("%Choices").get_child_count(), 0, "lines come before choices")
+	# The portrait follows the NODE's expression, not the customer's.
+	night.call("apply_capture_preset", "talk_result")
+	assert_eq(String(night.get_node_or_null("%Portrait").get("expression")), String(MockView.view("talk_result")["talk"]["expression"]), "the bust reacts with the node")
+	assert_true(night.get_node_or_null("%DiceResult").visible, "the roll is on screen beside the box")
+	night.call("apply_capture_preset", "talk_choice")
+	assert_eq(box.get_node_or_null("%Choices").get_child_count(), 3, "the decision is on the counter")
+	assert_false(night.get_node_or_null("%DiceResult").visible, "and the previous roll is gone")
+	_dispose(night)
+
+## The queue owns the right column, so the box gives it up — and the want bubble stands down, because
+## a guest who is TALKING does not also mime their order in a speech balloon.
+func test_night_hands_the_right_column_to_the_queue() -> void:
+	var packed := load("res://scenes/Night.tscn") as PackedScene
+	if packed == null:
+		return
+	var night := packed.instantiate()
+	night.call("render", MockView.view("customer_at_counter"))
+	var box := night.get_node_or_null("%DialogueBox") as Control
+	assert_eq(int(box.size.x), Palette.DIALOGUE_RECT.size.x, "no line, full-width box")
+	assert_true(night.get_node_or_null("%WantBubble").visible, "and the order is in the bubble")
+	night.call("render", MockView.view("talk_choice"))
+	assert_eq(int(box.size.x), Palette.DIALOGUE_W_QUEUE, "with a line waiting the box steps back")
+	assert_false(night.get_node_or_null("%WantBubble").visible, "the bubble stands down while they talk")
+	assert_true(night.get_node_or_null("%QueueStrip").visible, "and the line is visible")
+	# The sheet is default-hidden behind Tab; `queue_waiting` is the capture that opens it for the
+	# reader, which is the preset's job, not the read-model's — so it is the PRESET that is checked.
+	night.call("apply_capture_preset", "queue_waiting")
+	assert_true(night.get_node_or_null("%StatsStrip").visible, "queue_waiting shows the sheet without Tab")
+	assert_false(night.get_node_or_null("%DialogueBox").visible, "and nobody is talking")
+	_dispose(night)
 
 func _dispose(n: Node) -> void:
 	if n == null:

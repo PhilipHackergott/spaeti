@@ -5,6 +5,12 @@ extends Screen
 ## sliding in over the right half. Every one of those is a component; this file only arranges them
 ## and turns clicks into engine actions.
 ##
+## Since docs/06 it is also the REGISTER screen: the guests queue at the right end of the counter
+## (QueueStrip), you take them one at a time (`talk_next`), the conversation runs on the DialogueBox
+## (`talk_advance` / `talk_choose`), a roll pops as a d20 beside it (DiceResult) and the six stats sit
+## on the left behind Tab (StatsStrip). The serve panel is still there and still works — it is just a
+## small toggle under the HUD now instead of the point of the screen.
+##
 ## It renders `Session.view()` in the real game and `MockView.view(preset)` for a capture — the SAME
 ## `render()`, never a second path (docs/04). The only capture-only branch is `_advance_phase`, which
 ## would otherwise dispatch a `close_night` into a screenshot.
@@ -40,18 +46,37 @@ func _ready() -> void:
 	var toggle := get_node_or_null("%ServeToggle") as Button
 	if toggle != null:
 		toggle.text = Strings.SERVE
+		# Demoted (docs/06 §5): a small plate under the HUD, out of the conversation's way — and it
+		# stays put when the panel slides in, so it doubles as the close affordance.
+		toggle.position = Vector2(Palette.SERVE_TOGGLE_RECT.position)
+		toggle.size = Vector2(Palette.SERVE_TOGGLE_RECT.size)
 		if not toggle.pressed.is_connected(toggle_serve):
 			toggle.pressed.connect(toggle_serve)
+	var queue := _queue()
+	if queue != null and not queue.talk_next.is_connected(_on_talk_next):
+		queue.talk_next.connect(_on_talk_next)
+	if box != null and not box.finished.is_connected(_on_dialogue_finished):
+		box.finished.connect(_on_dialogue_finished)
 	_connect_events()
 
-## The FX/SFX stream: every new log entry, in order (docs/05 §7). Visual only for now.
+## The FX/SFX stream: every new log entry, in order (docs/05 §7). Visual only for now. It is routed
+## through here rather than straight into `Fx` because one kind has a second listener: a `check`
+## (docs/06 §2) both bursts and re-pops the d20 plate, and neither may depend on the other existing.
 func _connect_events() -> void:
 	var s := session()
-	var fx := _fx()
-	if s == null or fx == null:
+	if s == null:
 		return
-	if s.has_signal("event") and not s.is_connected("event", fx.on_event):
-		s.connect("event", fx.on_event)
+	if s.has_signal("event") and not s.is_connected("event", _on_log_event):
+		s.connect("event", _on_log_event)
+
+func _on_log_event(entry: Dictionary) -> void:
+	var fx := _fx()
+	if fx != null:
+		fx.on_event(entry)
+	if String(entry.get("kind", "")) == "check":
+		var dice := _dice()
+		if dice != null and dice.visible:
+			dice.pop()
 
 func render(v: Dictionary) -> void:
 	if v.is_empty():
@@ -67,32 +92,47 @@ func render(v: Dictionary) -> void:
 	if hud != null:
 		hud.render(v)
 	var active: Dictionary = v.get("active", {})
+	var talk: Dictionary = v.get("talk", {})
 	_notice_customer(active)
 	var portrait := _portrait()
 	if portrait != null:
 		portrait.set_from_active(active)
+		# While a conversation is open the NODE's expression is the truth (docs/06 §3): the guest
+		# reacts line by line, and `active.expression` only moves when a choice is finally applied.
+		if not talk.is_empty() and not active.is_empty():
+			portrait.expression = String(talk.get("expression", String(active.get("expression", "neutral"))))
 		_seat_portrait()
 	var dialogue: Dictionary = v.get("dialogue", {})
 	var box := _dialogue()
 	if box != null:
-		if not dialogue.is_empty():
+		if not talk.is_empty():
+			box.show_dialogue(_talk_dialogue(talk), _capture_mode)
+		elif not dialogue.is_empty():
 			box.show_dialogue(dialogue, _capture_mode)
 		elif not active.is_empty():
 			box.show_dialogue(_order_line(active), true)
 		else:
 			box.clear()
 	var panel := _serve()
-	var serving := panel != null and panel.is_open
-	var bubble := get_node_or_null("%WantBubble") as WantBubble
-	if bubble != null:
-		bubble.set_want(active.get("want", {}) if not active.is_empty() else {})
-		bubble.visible = not active.is_empty() and not serving
 	if panel != null:
 		panel.render(v)
-		_place_bubble(panel.is_open)
+	var dice := _dice()
+	if dice != null:
+		dice.show_check(talk.get("last_check", {}) as Dictionary if not talk.is_empty() else {})
+	var stats := _stats()
+	if stats != null:
+		var player: Dictionary = v.get("player", {})
+		stats.render(player)
+		# An engine that has not shipped docs/06 §1 yet hands no stats at all; an empty sheet is not
+		# a sheet, so Tab has nothing to open rather than six zeroes to show.
+		if player.is_empty():
+			stats.set_shown(false)
+	_place_chrome(v)
 	var toggle := get_node_or_null("%ServeToggle") as Button
 	if toggle != null:
-		toggle.disabled = active.is_empty() or not dialogue.is_empty()
+		# `legal_actions` offers no serve at all while the story (or a conversation) holds the counter,
+		# docs/05 §4 + docs/06 §4 — the button says so instead of dispatching something illegal.
+		toggle.disabled = active.is_empty() or not dialogue.is_empty() or not talk.is_empty()
 
 ## Closes the night when the clock has run out and nobody is left waiting, and hands over to the
 ## summary screen once the reducer has moved on. Returns true when the screen is in transition and
@@ -157,18 +197,37 @@ func apply_capture_preset(preset_name: String) -> void:
 			if panel != null:
 				panel.open(true)
 				panel.preload_picks(["beer", "mate"])
-			_place_bubble(true)
 		"pfand":
 			if panel != null:
 				panel.open(true)
 				panel.preload_picks(["beer"], 6)
-			_place_bubble(true)
+		"queue_waiting":
+			# The one capture where the sheet is on screen without Tab being pressed (docs/06 section 5).
+			if panel != null:
+				panel.close(true)
+			var stats := _stats()
+			if stats != null:
+				stats.set_shown(true)
 		_:
 			if panel != null:
 				panel.close(true)
 	var layers := _layers()
 	if layers != null and preset_name == "late_night":
 		layers.rain_drops = 26
+	# The chrome is laid out LAST: opening or closing the panel moves the box, the bust and the line.
+	_place_chrome(view())
+
+## Tab toggles the six stats. It is taken in `_input`, BEFORE the GUI sees it, so Tab does not also
+## walk the focus ring: a sheet that opens while the focus jumps to the next choice is worse than no
+## sheet at all. Nothing else on this screen wants Tab.
+func _input(event: InputEvent) -> void:
+	var key := event as InputEventKey
+	if key == null or not key.pressed or key.echo or key.keycode != KEY_TAB:
+		return
+	var stats := _stats()
+	if stats != null and stats.has_stats(view().get("player", {})):
+		stats.toggle()
+	get_viewport().set_input_as_handled()
 
 ## Space / click advances the conversation; with nothing being said it opens the shelf.
 func _unhandled_input(event: InputEvent) -> void:
@@ -189,20 +248,47 @@ func toggle_serve() -> void:
 	else:
 		panel.render(view())
 		panel.open()
-	_place_bubble(panel.is_open)
+	_place_chrome(view())
 
-## With the serve panel open the counter chrome moves left so nothing is hidden behind it.
-func _place_bubble(serve_open: bool) -> void:
-	# The panel's own header already says "Clubber: Sterni", and the bust steps left into the space the
-	# bubble used to occupy — so the bubble simply stands down while the shelf is open.
+## Where the counter chrome sits, given who owns the right half of the frame. The three states are
+## mutually exclusive on purpose - two things may never share the column:
+##   * serve panel open: the box shrinks to `DIALOGUE_W_SERVING`, the bust steps left, and the queue
+##     and the want bubble stand down (the panel covers x 228..476 anyway);
+##   * the queue on screen: the box gives the right column back (`DIALOGUE_W_QUEUE`) so the choices
+##     stop short of the line, and the bubble stands down (the guest is talking, not miming);
+##   * neither: the full-width box the serve screen always had.
+func _place_chrome(v: Dictionary) -> void:
+	var panel := _serve()
+	var serve_open := panel != null and panel.is_open
+	var active: Dictionary = v.get("active", {})
+	var talk: Dictionary = v.get("talk", {})
+	var queue: Array = v.get("queue", [])
+	var queue_shown := not serve_open and not queue.is_empty()
+	var strip := _queue()
+	if strip != null:
+		# Mirrors `legal_actions` (docs/06 section 4): `talk_next` is on offer whenever no conversation
+		# is open and there is somebody to talk to - at the counter or in the line, since the reducer
+		# pulls the head of the queue up on its own tick. The strip hides entirely under the serve panel.
+		# A pending beat that never opened as a talk blocks it too (docs/05 section 4: while it is
+		# pending, legal_actions offers only resolve_beat/resolve_vignette) - and its choices are drawn
+		# full-width, so a live button under them would sit inside the choice stack.
+		var beat: Dictionary = v.get("dialogue", {})
+		var can_start: bool = talk.is_empty() and beat.is_empty() and (not active.is_empty() or not queue.is_empty())
+		strip.set_queue(([] if serve_open else queue), can_start and not serve_open)
 	var bubble := get_node_or_null("%WantBubble") as WantBubble
 	if bubble != null:
+		bubble.set_want(active.get("want", {}) if not active.is_empty() else {})
 		bubble.position = BUBBLE_RIGHT
-		bubble.visible = not serve_open and not view().get("active", {}).is_empty()
+		bubble.visible = not active.is_empty() and not serve_open and talk.is_empty() and not queue_shown
 	var box := _dialogue()
 	if box != null:
 		var r := Palette.DIALOGUE_RECT
-		box.size = Vector2(float(Palette.DIALOGUE_W_SERVING if serve_open else r.size.x), float(r.size.y))
+		var w := r.size.x
+		if serve_open:
+			w = Palette.DIALOGUE_W_SERVING
+		elif queue_shown:
+			w = Palette.DIALOGUE_W_QUEUE
+		box.size = Vector2(float(w), float(r.size.y))
 	var hud := get_node_or_null("%Hud") as Hud
 	if hud != null:
 		hud.set_compact(serve_open)
@@ -232,9 +318,42 @@ func _speaker_name(active: Dictionary) -> String:
 	var arch_name := String((active.get("archetype", {}) as Dictionary).get("name", ""))
 	return arch_name if arch_name != "" else Strings.SOMEONE
 
+## The ONE place a choice becomes an action. A conversation (docs/06 section 4) is `talk_choose`; the
+## older beat/vignette paths stay exactly as they were, because the engine still routes them by name.
 func _on_choice(index: int) -> void:
+	if not view().get("talk", {}).is_empty():
+		dispatch({"type": "talk_choose", "choice": index})
+		return
 	var kind := String(view().get("dialogue", {}).get("kind", "beat"))
 	dispatch({"type": "resolve_vignette" if kind == "vignette" else "resolve_beat", "choice": index})
+
+## Clicking the line (or "Next guest") takes the first guest waiting, FIFO.
+func _on_talk_next() -> void:
+	dispatch({"type": "talk_next"})
+
+## The DialogueBox ran out of words with nothing to choose. In a conversation that is the cue to ask
+## the engine for the next line (`talk_advance`): the engine owns `talk.line`, the box only shows it.
+func _on_dialogue_finished() -> void:
+	if _capture_mode:
+		return
+	if view().get("talk", {}).is_empty():
+		return
+	dispatch({"type": "talk_advance"})
+
+## `view.talk` as the DialogueBox wants it: ONE line, the one the engine says we are on, plus the
+## choices if the node has reached them. The box's own line walk is deliberately not used here; two
+## cursors over one conversation is how a click ends up a line ahead of the reducer.
+func _talk_dialogue(talk: Dictionary) -> Dictionary:
+	var lines: Array = talk.get("lines", [])
+	var index := clampi(int(talk.get("line", 0)), 0, maxi(0, lines.size() - 1))
+	return {
+		"speaker": String(talk.get("speaker", "")),
+		"portrait": String(talk.get("portrait", "")),
+		"expression": String(talk.get("expression", "neutral")),
+		"lines": ([String(lines[index])] if not lines.is_empty() else []),
+		"choices": talk.get("choices", []),
+		"kind": "talk",
+	}
 
 func _on_serve(action: Dictionary) -> void:
 	dispatch(action)
@@ -244,7 +363,7 @@ func _on_serve(action: Dictionary) -> void:
 		if t != null:
 			t.clear()
 		panel.close()
-		_place_bubble(false)
+	_place_chrome(view())
 
 func _on_wave_off() -> void:
 	dispatch({"type": "skip_active"})
@@ -254,7 +373,7 @@ func _on_wave_off() -> void:
 		if t != null:
 			t.clear()
 		panel.close()
-		_place_bubble(false)
+	_place_chrome(view())
 
 func _layers() -> SceneLayers:
 	return get_node_or_null("%SceneLayers") as SceneLayers
@@ -270,3 +389,12 @@ func _serve() -> ServePanel:
 
 func _fx() -> Fx:
 	return get_node_or_null("%Fx") as Fx
+
+func _queue() -> QueueStrip:
+	return get_node_or_null("%QueueStrip") as QueueStrip
+
+func _stats() -> StatsStrip:
+	return get_node_or_null("%StatsStrip") as StatsStrip
+
+func _dice() -> DiceResult:
+	return get_node_or_null("%DiceResult") as DiceResult

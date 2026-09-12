@@ -1,10 +1,14 @@
 #!/usr/bin/env node
 // Play the real game end to end, WINDOWED (headless cannot render), with the same lock + watchdog
 // shot.mjs uses.  It drives res://scenes/Main.tscn through the screens' own handlers — New game →
-// Manage → Open up → serve → a story beat → wave off → 06:00 → Summary → night 2 — and writes
+// Manage → Open up → THE REGISTER (take a guest, walk their lines, answer a choice, let the
+// conversation end, next guest… all night, docs/06) → 06:00 → Summary → night 2 — and writes
 // shots/play-NN-<step>.png plus shots/play-log.json.
 //
-//   node tools/godot/play.mjs [--out shots] [--timeout 240] [--keep]
+// The old till loop (Serve → pick → Ring up → Wave off) is still driven: automatically on an engine
+// that has no talk_next yet, and on demand with --serve, so the serve panel never rots untested.
+//
+//   node tools/godot/play.mjs [--out shots] [--timeout 240] [--serve] [--keep]
 //
 // Exit 0 and a "PLAY ok steps=N" line means the loop is playable. Any ERROR / SCRIPT ERROR from the
 // engine fails the run even if the playthrough itself reported ok — a night that only works while
@@ -31,6 +35,9 @@ if (!fs.existsSync(path.join(GODOT_DIR, '.godot'))) {
 // Small window: the game renders into its own 480x270 SubViewport, so the window is only a host.
 const gargs = ['--path', '.', '--resolution', '320x180', '--position', '0,0', 'res://tools/Playthrough.tscn', '--',
   `--out=${fwd(outDir)}`, `--timeout=${Math.max(20, timeoutS - 15)}`];
+// --serve keeps the till branch in the run even when the engine can talk (the guest loop is the
+// demo path; the serve panel is the part of the night that would otherwise never be pressed).
+if (args.serve) gargs.push(`--serve=${args.serve === true ? 1 : args.serve}`);
 
 const child = spawn(godot, gargs, { cwd: GODOT_DIR, stdio: ['ignore', 'pipe', 'pipe'] });
 let log = '';

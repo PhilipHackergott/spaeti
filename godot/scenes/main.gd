@@ -18,6 +18,11 @@ const PRESET_SCREEN := {
 	"serving": "night",
 	"pfand": "night",
 	"late_night": "night",
+	# The register screen (docs/06-dialogue-and-stats.md section 5).
+	"queue_waiting": "night",
+	"talk_lines": "night",
+	"talk_choice": "night",
+	"talk_result": "night",
 	"manage": "manage",
 	"summary": "summary",
 }

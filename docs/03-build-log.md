@@ -867,3 +867,251 @@ the first thing it caught.
 ## 2026-09-12 late — session restart + the real-Späti brief (orchestrator)
 - The Claude session restarted; art round 2 (6 lanes) and the review/polish fleet died mid-flight (no completion records). Surviving work: 10 neutral portraits (astra 62–76), SKUs (mate 84, water 83, chips 84, gummi 79, chocolate 74), scene r3 rounds (backdrop 64, counter 59, title 67 under astra). Variant files purged from godot/assets (raws kept).
 - **User feedback with six real Späti photos:** the set still read as a wooden tavern. Rewrote `docs/art-style-brief.md` (set section: fluorescent light, white/metal shelving, the cigarette wall, glass fridges, cluttered laminate counter with a white register, graffiti facade, bench — explicit NOT-list: wood panelling, beams, pendant lamps, café props) and the concept/backdrop/counter/title prompts. `concept-art/spaeti-references/` is a drop folder auto-attached to scene/concept generations. Next: concept r3 → scene layers with astra against the new brief.
+
+## 2026-09-12 — ENGINE lane: guests, the queue, branching dialogue and the six stats (docs/06)
+
+`node tools/godot/test.mjs` -> **98 run, 0 failed** (was 66 before this lane and the UI lane landed
+together), including the 25 new ones in `test_dialogue.gd`.
+
+### What the engine now does
+
+- **`state.player.stats`** — `{str:10, dex:11, con:12, int:13, wis:12, cha:14}` from
+  `SpatiState.DEFAULT_STATS`, plus `Rules.modifier(score)` (5e, `floorf` — integer division would turn
+  a 9's -1 into 0), `Rules.stat_score/stat_mod/stat_name`, `Rules.STAT_IDS/STAT_NAMES`.
+- **Checks** — `Rules.roll_check(n, {stat, dc})` draws one d20 off the state's own `rng_state` and
+  threads it back, so **a night still replays exactly from `{config, seed, actions}`, every die
+  included**. It logs `kind:"check"` with `data:{stat, roll, mod, dc, success}` — that is the entry the
+  d20 pop reads off `Session.event`. A **gate** (`requires:{stat,min}`) rolls nothing: below `min` the
+  choice is *shown but locked*, and `talk_choose` on it is an illegal action.
+- **`engine/content/dialogues.gd`** — graphs for `lena` (7 nodes, CHA 12 + WIS 12), `juergen` (6 nodes,
+  a STR 12 gate on the Pfand crate + WIS 13 to notice he is sleeping in the Hof), `mehmet` (7 nodes,
+  INT 13 on the rent letter + CHA 13 to get him knocking on doors), and the generic `oneoff` whose one
+  node substitutes `{want}` with the SKU name. Choices wear their own stat tag (`[Charisma 12] …`).
+- **`state.talk`** + `talk_next` / `talk_advance` / `talk_choose{choice}`, with `talk_end` internal:
+  `next:""` ends the conversation, the guest leaves and **their want is auto-served if it is in stock**,
+  so a night of pure talking still moves cash. `serve:false` on a choice is "you turned them away".
+- **`view.queue` / `view.talk` / `view.player`** — every guest waiting carries a `portrait` from the
+  characters registry (one-offs wear their archetype's bust), FIFO.
+
+### The one structural decision: ONE box, ONE source
+
+Rather than letting `view.dialogue` and `view.talk` describe the counter separately, **a pending beat
+or vignette now opens as a one-node talk** (`Talk.KIND_BEAT` / `KIND_VIGNETTE`), and `view.dialogue` is
+a literal projection of `view.talk` (same speaker/portrait/expression/lines, choices reduced to
+labels). They cannot disagree because there is only one lookup. `resolve_beat` / `resolve_vignette`
+survive as **aliases of `talk_choose`** on that talk — which is why the shipped DialogueBox and
+`playthrough.gd` kept working while docs/06 landed. The behavioural split of docs/05 §4 is preserved:
+ending a **beat** leaves the customer at the counter for the ordinary serve; ending a **graph talk**
+dismisses them. New `godot/engine/talk.gd` (`class_name Talk`) owns node resolution and both views.
+
+### Things that only showed up once it ran
+
+- **The AutoPlayer cannot blindly "choose 0" any more** — a gated choice is illegal, and a policy that
+  stops on one would hang the night loop (TICK_GUARD 100000 with a never-clearing counter). Two
+  belts: `AutoPlayer.play_talk` takes *the first choice that is not locked*, and
+  `test_dialogue.gd::test_every_graph_is_playable` fails any node whose **choice 0 is gated**.
+- **Conversations must cost no game time.** `play_talk` runs a whole tree inside one tick; if it had
+  spent a tick per line, 40+ guests x 4 steps would have dragged the night clock hours past 06:00.
+- **`_dialogue_pending` now includes an open talk**, so patience freezes and `serve_active` /
+  `skip_active` are refused mid-sentence — the same rule a pending beat always had.
+- **The underage/restricted refusal moved into the engine.** `talk_end`'s auto-serve will not sell a
+  restricted SKU to a `kid`; without that, every season quietly bled Integrity the moment the
+  AutoPlayer started talking to everyone instead of hand-picking the serve.
+
+### The end-to-end run, and the one seam it caught
+
+`node tools/godot/play.mjs` -> **PLAY ok steps=15** (after the fix below). Read at 1080p:
+`shots/play-11-beat-choice.png` (the intro beat, its first line, the choice "1 Open up.", the QueueStrip
+along the right edge — every word of it out of `view.talk` / `view.queue`), `play-12-beat-resolved.png`
+(pending cleared and **the same customer still at the counter**, which is the docs/05 §4 rule the
+one-node-talk had to preserve) and `play-13-summary.png` (1,30 + 0,06 − 0,50 − 48,00 = **−47,14**, cash
+420,91 − 48,00 = **372,91** — identical to the pre-docs/06 baseline, so nothing moved in the money path).
+
+- **Fixed in `godot/tools/playthrough.gd` (outside this lane, flagged):** the run died at step 11 with
+  "the beat offered 0 choices, not 1" *while the choice was plainly on screen*. `dialogue_box.gd` now
+  wraps each choice in a row (`Choice1`, `Choice2`, …) so the stat tag can sit beside the button as a
+  sibling, but `_choice_buttons()` collected only **direct** `Button` children of `%Choices` and found
+  none. It walks the rows now. A harness that reports "no choices" for a rendered choice is worse than
+  a red test, so it did not seem right to leave it for the next lane.
+
+### Still open for the UI lane
+
+**`night.gd` gates "Next guest" on `active.is_empty() and talk.is_empty()`** (line ~271), on the premise
+that "`talk_next` is legal only with a clear counter". It is not: the reducer pulls the head of the
+queue up on `tick` by itself, so `active` is almost never empty on a busy night and the affordance stays
+disabled — which is why `play-12` reads "21 waiting". The engine offers `talk_next` whenever there is
+*anybody* to take (queued **or** already standing at the counter) and no talk is open, so the gate
+should be `talk.is_empty()` alone.
+
+`docs/05-engine-api.md` gained **§8** (the docs/06 delta: state, actions, read-model, checks, the
+one-box rule) — the old §8 test list is now §9 — plus `talk.gd`/`dialogues.gd` in §1, the three actions
+in §3 and `queue`/`talk`/`player` in the §5 read-model.
+
+## 2026-09-12 — art round 3: char/lena_neutral, char/juergen_neutral, char/mehmet_neutral, char/oneoff_clubber_neutral, char/oneoff_tourist_neutral (art operator)
+
+Five neutral NPC busts, judged by astra as NPCs against their own briefs (the protagonist image is the
+rendering bar only), at ×5 nearest upscale, threshold 80. **One pass, four at 77–79** — every one of them
+is up 4–21 points, and the blocking axis is the same on all four: `pixel_rendering`.
+
+- **char/juergen_neutral — 3 rounds, 84 PASS** (composition 91, palette 86, **pixel 87**, fidelity 81; was 63).
+  His prompt was the only one of the five with no TRUE-PIXEL-ART clause and no background clause — that alone
+  explained the 39 pixel score and the green fringe. Remaining: the neutral still leans weary rather than guarded;
+  the bottle bag reads as silver-blue cords more than sheet plastic.
+- **char/mehmet_neutral — 3 rounds, 79** (composition 93, fidelity 89, pixel 78, palette 73; was 64). Best of the
+  near-misses on identity. Remaining: skin still reads a touch salmon; facial transitions still fragment.
+- **char/lena_neutral — 3 rounds, 79** (composition 92, palette 85, fidelity 88, pixel 73; was 74). The Mate bottle
+  finally reads as translucent amber glass. Remaining: intermediate shades soften contours; the denim seam
+  highlights are too long and bright and compete with the face.
+- **char/oneoff_clubber_neutral — 3 rounds, 78** (composition 92, palette 85, fidelity 83, pixel 74; was 72).
+  Remaining: the face keeps drifting back to manga (elongated glossy eyes, modelled lips) and a cream/magenta
+  halo survives around the silhouette.
+- **char/oneoff_tourist_neutral — 3 rounds, 78** (r3 kept; r4 was 77 — it fixed the age and the wet hair but lost
+  palette 80→74 and pixel 76→69). Remaining: mottled shading, a diffuse grey/yellow halo.
+
+**The finding that moved everything: `--filter nearest` is right for busts too, not just small props.**
+Re-snapping the *existing* raws with nearest instead of lanczos, with zero Codex calls, moved
+lena 74→77, juergen **63→75** (pixel 39→72), mehmet 64→79, clubber 72→74, tourist 74→78. Lanczos at a 5–6×
+downscale invents the exact intermediate tones every verdict complains about. All five spec entries now carry
+`"filter": "nearest"`; the art-pipeline doc's "keep lanczos for busts and scene layers" line is wrong and should
+be flipped to "nearest by default, lanczos only if a raw is genuinely painterly and the nearest snap aliases".
+
+**Palette quantisation is a wash, confirmed on a bust.** clubber r3 snapped to 31 colours (`--quantize 32
+--despeckle 1`) scored **76 — exactly the same as the un-quantised 76**: pixel_rendering 68→74, palette_lighting
+85→75. Fewer colours do not reorganise painted texture into authored clusters, they just posterise. Standard chain
+stays snap-only (this is now the second independent measurement, after the concept ladder).
+
+**Two transparency traps, both costing a round:**
+- `char/mehmet_neutral` r4 came back with a painted grey-and-white **checkerboard** background. The wrapper's 2%
+  transparency check *passed* (the border flood-fill removed 1.0M pixels) but the white checker squares connected
+  through his white paper hat and pale skin and **erased half his face** — a plausible-looking 170×230 sprite that
+  is silently ruined. Check `opaque` pixel count against the previous round, not just `transparentFrac`. Fixed by
+  hoisting the background demand to the FIRST paragraph of the prompt (r5 came back with a flat key colour).
+- After keying, `juergen` r1 and `mehmet` r5 kept 35–43 **bright green fringe pixels** the judge saw and named.
+  `--key-tol 0.45` removed all of them on mehmet at a cost of 61 opaque pixels; the entry now carries
+  `"keyTol": 0.45`. Worth a fringe count on every keyed portrait before promoting it.
+
+**Judge-context note:** the pipeline trims sprites tight, so every bust touches its canvas edges by construction.
+Without a context line saying so, the judge deducts for "no headroom / sleeves cut by the sides" on every portrait
+(it cost mehmet 10 composition points). The NPC portrait context now states the trim, the bottom crop, and that the
+protagonist reference is the *rendering* bar only and not an identity to match.
+
+**Spec changes (my five entries only, ids/sizes/kind untouched):** all five prompts rebuilt around one shared,
+proven RENDERING / LIGHT / FRAMING / BACKGROUND block (the clause set that produced juergen's 87) plus a per-character
+identity paragraph, an explicit five-tone anti-orange skin ramp, and a hard **palette budget** ("at most 28 colours,
+each covering a large connected area"); `"filter": "nearest"` on all five; `"keyTol": 0.45` and `"bgTol": 0.10` on
+mehmet. `char/you_neutral` and the rest of the cast were not touched.
+
+**Honest gap:** four of five are 1–3 points short and it is all cluster discipline. Two more generation rounds did
++1 to +4 each, so a third is unlikely to clear it by prompt alone — the remaining lever is either a targeted
+cluster redraw of the face region or accepting 77–79 for one-off NPCs and spending the rounds on the hero screens.
+
+## 2026-09-12 — REGISTER lane: the queue, the six stats, the checks on screen (docs/06 §5)
+
+`node tools/godot/test.mjs` → **99 run, 0 failed** (66 → 99: the engine lane's `test_dialogue.gd` and eight new
+screen tests). `node tools/godot/play.mjs` → **PLAY ok steps=13 guests=66** — a whole night played as a
+conversation loop. `node tools/godot/play.mjs --serve 1` → **PLAY ok steps=16 guests=65**: the old till branch
+still rings people up.
+
+### What the night screen is now
+
+The Night scene is the **register**. Three columns that may never trade places, and the rectangles are arithmetic,
+not taste — `test_scenes.gd::test_the_register_columns_do_not_overlap` checks every one of them against the two
+things that were already nailed down (the SPÄTI neon at x 124–224 / y 20–62, and the bust bottom-centred on
+x 250 at up to 190 wide, so x 155–345):
+
+| | where | what |
+|---|---|---|
+| right | `DICE_RECT` 346,42 132×42 · `QUEUE_RECT` 346,86 132×84 | the d20 pop, then the line: the next guest's name over their busts, "Next guest" underneath. Its bottom **is** `COUNTER_TOP`, so the guests stand at the counter's right end rather than float over it. |
+| left | `STATS_RECT` 2,64 136×98 · `SERVE_TOGGLE_RECT` 2,21 62×18 | the six stats (Tab), below the neon and left of the bust; the demoted Serve toggle above them, clear of both HUD plates. |
+| centre | `DIALOGUE_RECT`, width 400 / **300** / 188 | the conversation. It gives the right column back (`DIALOGUE_W_QUEUE` 300) whenever a line is on screen, so the choices stop short of the queue; 188 while the serve panel owns the half. |
+
+**Three new components** (docs/04 has the contracts):
+
+- **QueueStrip** — the line, FIFO, head of the line edged and underlined in amber, the rest stepped back,
+  `QUEUE_SLOTS` chips then a "+N". Click anywhere on it, or the "Next guest" `PixelButton`, → `talk_next`.
+  The chips are **code-drawn silhouettes in the speaker's own colour**, not shrunken portraits: a 190×230 bust
+  cannot go in a 28-px slot without scaling it (which kills the pixel grid, docs/01) or cropping it to a nostril.
+  The first capture's head-over-a-rectangle read as an abstract logo; one stepped collar row fixed it.
+- **StatsStrip** — six rows of name / value / modifier, default hidden behind **Tab** (taken in `_input`, before
+  the GUI, so Tab does not also walk the focus ring), forced open in the `queue_waiting` capture. It PRINTS
+  `view.player.mods`; re-deriving `floor((v-10)/2)` in the UI would be a second source of truth the first time a
+  module grants a bonus.
+- **DiceResult** — the pop beside the box: a code-drawn d20 with the raw roll in it, `d20 14 + 2 = 16` over
+  `vs 12 — success` in GOOD/BAD. Fed from `view.talk.last_check`, and re-popped by the `check` log event, which
+  `Fx` answers at the same anchor with accent ticks tinted by the verdict.
+
+**CheckChoice** lives inside `DialogueBox`: a choice is a **row** now, not a button — the line in a `ChoiceButton`
+plus, when it rolls, its tag beside it in `Palette.ACCENT` ("[Charisma 12]"). A label cannot colour half of itself,
+and an overlay ran under long choices. A **gate** is shown, greyed and told why on its own line underneath
+("locked: needs Strength 12"): "locked: …" + "Strength 12 needed" does not fit across a 300-px counter on one row,
+and a clipped explanation is worse than none. A gate is information, so it keeps a readable `disabled` box of its
+own — the Theme has no `disabled` style for `ChoiceButton`, so it fell back to the generic one and all but
+vanished over Lena's face (capture 2).
+
+### The talk flow
+
+`night.gd` renders `view.talk` through the SAME DialogueBox: one line, the one **the engine** says we are on
+(`talk.line`), plus the choices when the node has reached them. Two cursors over one conversation is how a click
+ends up a line ahead of the reducer, so the box's own line walk is not used here — a click or Space that runs out
+of words dispatches `talk_advance`, a choice dispatches `talk_choose`, and the Portrait follows
+`view.talk.expression` rather than the customer's (the guest reacts line by line; `active.expression` only moves
+when a choice is finally applied).
+
+Four new capture presets — `queue_waiting` · `talk_lines` · `talk_choice` · `talk_result` — and all nine old ones
+still render (re-captured and read at 1080p: `shots/r5-*.png`). The four pre-register night presets keep an
+**empty** `queue` on purpose: they are the serve screen's reference shots, and drawing a line into them would
+quietly change nine captures.
+
+### What the captures taught us (four rounds, every PNG read at 1080p)
+
+1. `HudPlate` is half-transparent because it sits on the dark top band. Over the fridge and the door it leaves
+   16-px text unreadable — the stats sheet, the queue's name and the d20 plate all carry an `INK_DEEP` ground now.
+2. The Choices container was 57 px tall and three choices are 68; row 3 sat inside the dialogue box. It is 101 now.
+3. The continue ▾ was authored at the 400-px box's corner and floated in the wood at 300. It follows `size.x`, via
+   the `resized` signal — the screen resizes the box *after* handing it a line.
+4. "Next guest" at the top of the right column covered the want bubble (x 340–426, y 74–120) in
+   `customer_at_counter`. It moved to the bottom of the strip; nothing on the right column collides now.
+5. The same button was live inside the `dialogue_choice` choice stack: a pending beat that never opened as a
+   talk blocks `talk_next` too (docs/05 §4), and its choices are drawn full-width. `can_start` now requires an
+   empty `view.dialogue` as well.
+6. `Assets.portrait` returned a stamped placeholder for `char/lena_warm` next to the finished `lena_neutral`,
+   which reads as a broken character rather than an unfinished expression. docs/05 §6 always said a missing
+   expression falls back to `_neutral`; it does now whenever the neutral PNG is real.
+
+### The driver
+
+`tools/godot/playthrough.gd` + `play.mjs` play the register: wait for a guest → "Next guest" (the strip's own
+button) → advance the lines → choose (preferring a choice that **rolls**, so the d20 is exercised) → the
+conversation ends → the next guest, all night, then 06:00 → Summary → night 2. `_can_talk()` is
+`view.has("talk")`, so this lane and the engine lane could land independently: on an engine without the
+conversation the driver falls through to the **old till branch** (Serve → pick → Ring up), which `--serve` also
+forces on an engine that has it. It asserts what docs/06 §4 promises — no `serve_active` is offered while a
+conversation is open — and the log rows now carry `queue` and `talking`.
+
+### Two things the two lanes now both own, and one guard each
+
+- **Stat names.** `Rules.STAT_NAMES` exists because the engine composes a locked choice's `reason`;
+  `Strings.STAT_NAMES` exists because the table owns every word the UI writes.
+  `test_scenes.gd::test_the_two_stat_tables_agree` fails the moment they disagree.
+- **The lock sentence.** The engine writes "Strength 12 needed" into `choice.reason`; the box frames it with
+  `Strings.locked()` → "locked: Strength 12 needed", so the word *locked* is still written in exactly one place.
+  `MockView`'s gate is shaped like a real one (empty `check`, the engine's wording) and the same test pins it to
+  `Talk.choice_views`. **The cleaner fix is the engine's:** if `view.talk.choices[].requires = {stat, min}` rode
+  along, `Strings.locked_reason()` would own the whole sentence ("locked: needs Strength 12") and it would be
+  translatable. The box already prefers `requires` when it is there.
+
+### Not done / for other lanes
+
+- **The live night never shows a line.** `queue` was 0 at every step of a 66-guest night: the reducer pulls the
+  head of the queue to the counter on its own tick (`Rules._take_next`), and arrivals are spread far enough apart
+  that nobody ever waits. So the queue strip is, in a real run, the "Next guest" button — the *line* only appears
+  in the `queue_waiting` capture. Either arrivals need to bunch up (balance) or `_take_next` should stop
+  auto-promoting while the register is idle (engine). Worth a decision before the slice is shown.
+- For the same reason the playthrough's `talk-lines` and `talk-check` frames did not fire on night 1 with the
+  default seed: the nameless parade's graph is one line with its choices already open, and no regular's graph
+  (the ones with checks) came up. The four capture presets are the reference shots for those two moments.
+- `char/lena_warm` / `_upset` and the other expressions are still unpainted; the fallback hides it now, which also
+  means the art lane's expression work will show up with no code change (and no capture will flag it missing).
+- The stats strip is 136 px wide because "Constitution" is 12 characters at the pool's one text size. It fits, but
+  it is the widest thing on the left edge; a three-letter ladder (STR/DEX/…) would free 60 px if the left column
+  ever needs them.

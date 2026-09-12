@@ -22,6 +22,10 @@ const DEFAULT_CONFIG := {
 	"rent_per_day": 48.0,
 }
 
+## The six stats (docs/06 §1). 8..18; a later character-creation screen may replace them, and the
+## engine reads them only through Rules.stat_score / Rules.modifier, never from a literal.
+const DEFAULT_STATS := {"str": 10, "dex": 11, "con": 12, "int": 13, "wis": 12, "cha": 14}
+
 const START_STOCK := 8
 const START_KIEZ := 50.0
 const START_PROFIT := 50.0
@@ -72,9 +76,15 @@ static func new_game(config: Dictionary = {}) -> Dictionary:
 		"tally": new_tally(),
 		"summaries": [],
 		"story": new_story(),
+		"player": new_player(),
+		"talk": {},
 		"rng_state": int(cfg["seed"]) & 0xFFFFFFFF,
 		"log": [],
 	}
+
+## The shopkeeper themself: the only thing in state that a conversation rolls against (docs/06 §1).
+static func new_player() -> Dictionary:
+	return {"stats": DEFAULT_STATS.duplicate(true)}
 
 static func new_tally() -> Dictionary:
 	return {"revenue": 0.0, "cogs": 0.0, "tips": 0.0, "pfand_paid": 0.0, "sales": 0, "lost": 0}
@@ -156,6 +166,16 @@ static func _normalise(s: Dictionary) -> Dictionary:
 	for strand_id in s["story"]["strands"]:
 		var progress: Dictionary = s["story"]["strands"][strand_id]
 		progress["last_day"] = int(progress["last_day"])
+	var player: Dictionary = s.get("player", new_player())
+	for stat in (player["stats"] as Dictionary):
+		player["stats"][stat] = int(player["stats"][stat])
+	s["player"] = player
+	var talk: Dictionary = s.get("talk", {})
+	if not talk.is_empty():
+		talk["customer_id"] = int(talk["customer_id"])
+		talk["line"] = int(talk["line"])
+		_normalise_data(talk["last_check"])
+	s["talk"] = talk
 	for entry in s["log"]:
 		entry["ts"] = int(entry["ts"])
 		_normalise_data(entry["data"])
