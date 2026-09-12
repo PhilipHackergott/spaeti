@@ -190,7 +190,7 @@
       "transparent": true,
       "gen": "1024x1536",
       "aspect": "portrait",
-      "prompt": "A one-off Späti customer: a Berlin techno clubber stumbling in at 6am, late 20s, androgynous, still glowing from the night. Short bleached-platinum hair in chunky tufts with dark roots, small round sunglasses pushed up on top of the head, a scatter of glitter on the cheekbones rendered as a handful of single bright pixels (not sparkle noise), smudged dark eyeliner as a simple thick line under each eye. A black mesh top under an open bomber jacket in a saturated magenta-pink — the one saturated accent colour — and a tiny bag on a thin silver chain across the chest. Expression: blissed-out, heavy-lidded, tired, a soft happy half-smile. Head-and-shoulders dialogue bust. RENDERING — this is exactly where the first calibration portrait lost its points (66/100), so obey it literally: draw a TRUE PIXEL-ART SPRITE, not a painted illustration. Imagine a 190x230-pixel sprite blown up to fill the canvas: every pixel cluster is a big hard-edged square block of ONE flat colour. Absolutely no strand-by-strand hair, no speckled colour noise, no soft gradients, no airbrush modelling, no anti-aliased edges. 4-6 flat tones per material, shaped into deliberate clusters, with clean one-pixel-wide dark contour outlines. Hair is a few chunky tufts reading as a silhouette, not thousands of strands. Skin is pale peach-pink with lifted shadows — never orange, never half-buried in black; amber light appears only as a narrow warm rim along one edge of the face and hair, with a restrained cool-blue edge on the other side. Face is simple and readable: small eyes each with a single white highlight pixel, thin brows, a small mouth, ears exposed; relaxed and quietly present, not stern or brooding. Facing the viewer, slightly below eye level, the way Coffee Talk customers sit at the counter. FRAMING: the whole bust must fit inside the canvas — the hair must not touch the top edge and both shoulders/upper arms must stay fully inside the left and right edges, cut off cleanly only at the bottom. BACKGROUND: the PNG must have a REAL alpha channel around the bust — do NOT paint a grey-and-white checkerboard to fake transparency; if alpha is impossible, fill the whole background with ONE flat solid #00ff00. No text, no watermark, no signature, no frame, no border, no UI chrome, no brand marks or logos on any garment."
+      "prompt": "A one-off Späti customer: a Berlin techno clubber stumbling in at 6am, late 20s, androgynous, still glowing from the night. Short bleached-platinum hair in three or four CHUNKY TUFTS with a clearly visible band of DARK BROWN ROOTS along the parting and temples (two flat values, a hard edge — the roots must actually read, not be lost in the blonde). Small round sunglasses pushed up on top of the head as a simple dark shape. A scatter of glitter on the cheekbones rendered as five or six single bright pixels — not sparkle noise, not a dusting. Smudged dark eyeliner as ONE thick simple line under each eye. Eyes built from compact flat clusters with a single white highlight pixel each, heavy-lidded; a soft happy half-smile made of one crisp mouth line and one light plane. A black mesh top — render the mesh as a coarse, deliberate checker dither of two values on a big grid, never as fine noise — under an open bomber jacket in a saturated magenta-pink (the one saturated accent colour), and a tiny bag on a thin silver chain across the chest. Expression: blissed-out, tired, quietly happy. Head-and-shoulders dialogue bust, facing the viewer, slightly below eye level, the way Coffee Talk customers stand at the counter. RENDERING — this is the axis that failed the previous round (pixel_rendering scored 38–56), so obey it literally. Draw this as a TRUE LOW-RESOLUTION PIXEL SPRITE that has been enlarged with NEAREST-NEIGHBOUR, not as a smooth illustration. Build it mentally on a coarse grid of about 190 by 230 art pixels and then blow each art pixel up into a solid 6x6 square of ONE flat colour. Every diagonal and every curve therefore reads as a visible hard STAIRCASE of those squares. There must be no in-between colour anywhere in the image: no anti-aliased edge pixels, no soft colour ramps, no airbrushed cheeks, no gradient fills, no glossy specular blobs, no blur, no strand-by-strand hair, no narrow highlight ribbons, no speckled noise. Each material gets 4–6 flat tones arranged as contiguous hard-edged clusters, plus a clean one-art-pixel dark contour. The whole image uses at most about 28 colours in total. This is emphatically NOT an anime or manga portrait, NOT clean vector lineart, NOT a polished digital painting shrunk down — it is the deliberate, blocky, hand-placed pixel work of the reference image. LIGHT — restrained: a BROKEN one-art-pixel rim of muted amber along a few right-facing edges of hair, cheek and shoulder, and a dimmer desaturated slate-blue edge on the opposite side. NO outward glow, NO halo, NO bloom, no saturated orange or cobalt line tracing the entire silhouette, and nothing at all painted in the background. Skin is desaturated pale peach with muted rosy midtones and lifted mauve-grey shadows — never salmon, never orange, never tan, never crushed to black. Dark garments are dark plum-charcoal resolved into three readable planes (sleeve, chest, fold); near-black is reserved for contours and small occlusions only. FRAMING: the whole bust sits fully inside the canvas with clear empty space on every side except the bottom — the widest point (the shoulders and upper arms, and anything held) must stop at least 8% of the canvas width short of the left and right edges, and the hair must stop well short of the top edge. The figure is cut ONLY by the bottom edge. BACKGROUND: the PNG must have a REAL alpha channel around the bust — do NOT paint a grey-and-white checkerboard and do NOT paint a dark room or a glow behind the character; if alpha is impossible, fill the whole background with ONE flat solid #00ff00. No text, no watermark, no signature, no frame, no border, no UI chrome, no brand marks or logos on any garment or object."
     },
     {
       "id": "char/oneoff_tourist_neutral",
@@ -200,7 +200,7 @@
       "transparent": true,
       "gen": "1024x1536",
       "aspect": "portrait",
-      "prompt": "A one-off Späti customer: a lost tourist in their 30s, rain-damp and slightly sheepish. A bright saturated yellow rain jacket (the one accent colour) with the hood pushed half down behind the head, a few flat blue-white water beads on the shoulders, damp dark hair flattened to the forehead in chunky clumps. A wide grey backpack strap over one shoulder. Holding a phone up near the chest with both thumbs, screen glowing a soft cyan onto the underside of the chin and hands — that cool phone glow is the character's signature lighting note, set against the warm amber rim from the other side. Expression: polite confused smile, eyebrows slightly raised, eyes looking a touch off to one side as if comparing the map to the street. Head-and-shoulders dialogue bust. RENDERING — this is exactly where the first calibration portrait lost its points (66/100), so obey it literally: draw a TRUE PIXEL-ART SPRITE, not a painted illustration. Imagine a 190x230-pixel sprite blown up to fill the canvas: every pixel cluster is a big hard-edged square block of ONE flat colour. Absolutely no strand-by-strand hair, no speckled colour noise, no soft gradients, no airbrush modelling, no anti-aliased edges. 4-6 flat tones per material, shaped into deliberate clusters, with clean one-pixel-wide dark contour outlines. Hair is a few chunky tufts reading as a silhouette, not thousands of strands. Skin is pale peach-pink with lifted shadows — never orange, never half-buried in black; amber light appears only as a narrow warm rim along one edge of the face and hair, with a restrained cool-blue edge on the other side. Face is simple and readable: small eyes each with a single white highlight pixel, thin brows, a small mouth, ears exposed; relaxed and quietly present, not stern or brooding. Facing the viewer, slightly below eye level, the way Coffee Talk customers sit at the counter. FRAMING: the whole bust must fit inside the canvas — the hair must not touch the top edge and both shoulders/upper arms must stay fully inside the left and right edges, cut off cleanly only at the bottom. BACKGROUND: the PNG must have a REAL alpha channel around the bust — do NOT paint a grey-and-white checkerboard to fake transparency; if alpha is impossible, fill the whole background with ONE flat solid #00ff00. No text, no watermark, no signature, no frame, no border, no UI chrome, no brand marks or logos on any garment."
+      "prompt": "A one-off Späti customer: a lost tourist in their 30s, rain-damp and slightly sheepish. A bright saturated yellow rain jacket (the one accent colour) resolved into 4 flat yellow values with angular fold clusters, the hood pushed half down behind the head, a few flat blue-white water beads on the shoulders, damp dark hair flattened to the forehead in three or four CHUNKY CLUMPS with a hard silhouette — no wispy flyaway strands at the crown, no stray speckled pixels above the head. A wide grey backpack strap over one shoulder. Holding a phone up near the chest with both thumbs: the phone SCREEN IS A BRIGHT PALE-CYAN BLOCK and it throws a clear cool cyan light onto the underside of the chin, the throat and the tops of the hands as two or three flat cyan-tinted clusters — that cool glow is the character's signature lighting note, set against the warm amber rim from the other side, and it must be unmistakable. Eyes built from compact flat clusters with a single white highlight pixel each, looking a touch off to one side; thin brows slightly raised; a polite confused closed smile of one crisp mouth line. Stubble, if any, is one flat cluster with a hard edge — never dots. Head-and-shoulders dialogue bust, facing the viewer, slightly below eye level, the way Coffee Talk customers stand at the counter. RENDERING — this is the axis that failed the previous round (pixel_rendering scored 38–56), so obey it literally. Draw this as a TRUE LOW-RESOLUTION PIXEL SPRITE that has been enlarged with NEAREST-NEIGHBOUR, not as a smooth illustration. Build it mentally on a coarse grid of about 190 by 230 art pixels and then blow each art pixel up into a solid 6x6 square of ONE flat colour. Every diagonal and every curve therefore reads as a visible hard STAIRCASE of those squares. There must be no in-between colour anywhere in the image: no anti-aliased edge pixels, no soft colour ramps, no airbrushed cheeks, no gradient fills, no glossy specular blobs, no blur, no strand-by-strand hair, no narrow highlight ribbons, no speckled noise. Each material gets 4–6 flat tones arranged as contiguous hard-edged clusters, plus a clean one-art-pixel dark contour. The whole image uses at most about 28 colours in total. This is emphatically NOT an anime or manga portrait, NOT clean vector lineart, NOT a polished digital painting shrunk down — it is the deliberate, blocky, hand-placed pixel work of the reference image. LIGHT — restrained: a BROKEN one-art-pixel rim of muted amber along a few right-facing edges of hair, cheek and shoulder, and a dimmer desaturated slate-blue edge on the opposite side. NO outward glow, NO halo, NO bloom, no saturated orange or cobalt line tracing the entire silhouette, and nothing at all painted in the background. Skin is desaturated pale peach with muted rosy midtones and lifted mauve-grey shadows — never salmon, never orange, never tan, never crushed to black. Dark garments are dark plum-charcoal resolved into three readable planes (sleeve, chest, fold); near-black is reserved for contours and small occlusions only. FRAMING: the whole bust sits fully inside the canvas with clear empty space on every side except the bottom — the widest point (the shoulders and upper arms, and anything held) must stop at least 8% of the canvas width short of the left and right edges, and the hair must stop well short of the top edge. The figure is cut ONLY by the bottom edge. BACKGROUND: the PNG must have a REAL alpha channel around the bust — do NOT paint a grey-and-white checkerboard and do NOT paint a dark room or a glow behind the character; if alpha is impossible, fill the whole background with ONE flat solid #00ff00. No text, no watermark, no signature, no frame, no border, no UI chrome, no brand marks or logos on any garment or object."
     },
     {
       "id": "sku/beer",
@@ -221,7 +221,7 @@
       "transparent": true,
       "gen": "1024x1536",
       "aspect": "portrait",
-      "filter": "lanczos",
+      "filter": "nearest",
       "prompt": "A single clear glass bottle of a yellow-brown mate-style soft drink, standing upright, straight-on front view, centred, filling the canvas height. THIS IS A TINY SHELF SPRITE: in game it is only 14x36 pixels on a 480x270 base grid. Draw it as a TRUE 14 x 36 logical-pixel sprite and scale that up with nearest-neighbour so every logical pixel is one large, uniform, perfectly square block (~73 canvas px across) with hard edges. Nothing may be smaller than one whole block; nothing off-grid; no anti-aliasing, no gradients, no soft edges, no dithering, no speckles, no isolated stray blocks, no fine texture, no noise, no drop shadow. Bold, simple, high-contrast blocks only - it must read instantly at thumbnail size.\nUSE ONLY THESE 7 COLOURS IN THE WHOLE IMAGE, and make every pair of neighbouring tones differ strongly in brightness so the sprite survives a 70x downscale: (1) near-black brown outline, (2) dark rust brown, (3) mid amber brown, (4) pale warm gold highlight, (5) muted blue-grey cool rim, (6) muted golden yellow label, (7) dark ochre label shadow. Do not invent intermediate shades, do not blend two tones, do not add an eighth colour.\nOUTLINE: draw the near-black contour TWO blocks thick all the way round the silhouette - it has to survive the downscale as one pixel.\nSHAPE: symmetric stepped contour - yellow-ochre screw cap 2 blocks tall, narrow 4-block neck, sloping shoulders, straight body 8-10 blocks wide, flat base.\nLIGHTING: ONE warm pale-gold highlight column 1-2 blocks wide down the LEFT side of the body, stepping narrower toward the base; ONE muted blue-grey rim column exactly 1 block wide down the RIGHT side. Keep the whole interior of the body dark rust and mid amber so that highlight is the only bright thing on the glass.\nNECK: no wide pale horizontal band and no metallic collar - the neck is dark amber glass with a single 1-block pale reflection on its LEFT and a 1-block blue-grey edge on its RIGHT, carrying the body's light direction.\nLABEL: a flat MUTED golden-yellow band across the middle of the body, 8-9 blocks tall, built from exactly three vertical clusters - a 1-block warm pale left edge, the muted golden fill, and a 1-2 block dark ochre right edge - plus one dark ochre row along its bottom. It must NOT glow and must NOT be the brightest thing in the sprite. Absolutely NO text, NO letters, NO numbers, NO logo, NO picture. Brandless.",
       "bgTol": 0.25
     },
@@ -244,7 +244,7 @@
       "transparent": true,
       "gen": "1024x1536",
       "aspect": "portrait",
-      "filter": "lanczos",
+      "filter": "nearest",
       "prompt": "A single clear plastic water bottle, standing upright, straight-on front view, centred, filling the canvas height. THIS IS A TINY SHELF SPRITE: in game it is only 14x36 pixels on a 480x270 base grid. Draw it as a TRUE 14 x 36 logical-pixel sprite and scale that up with nearest-neighbour so every logical pixel is one large, uniform, perfectly square block (~73 canvas px across) with hard edges. Nothing may be smaller than one whole block; nothing off-grid; no anti-aliasing, no gradients, no soft edges, no dithering, no speckles, no isolated stray blocks, no fine texture, no noise, no drop shadow. Bold, simple, high-contrast blocks only - it must read instantly at thumbnail size.\nUSE ONLY THESE 7 COLOURS IN THE WHOLE IMAGE, and make every pair of neighbouring tones differ strongly in brightness so the sprite survives a 70x downscale: (1) deep navy outline, (2) dark steel blue shadow, (3) mid blue-grey glass, (4) pale ice blue, (5) warm ivory highlight, (6) pale cyan rim, (7) pale blue label. Do not invent intermediate shades, do not blend, do not add an eighth colour.\nOUTLINE: an UNBROKEN deep navy contour TWO blocks thick around the ENTIRE silhouette, including both long sides of the body. The contour must never fade into mid blue, and no reflection may replace it.\nSHAPE: pale blue screw cap 2 blocks tall, narrow 4-block neck, short shoulders, straight body 8-10 blocks wide, flat base. Suggest moulded grip ribs with exactly TWO short 1-block accent rows, one above and one below the label - no more ribs than that.\nLIGHTING: the LEFT reflection is WARM IVORY, not icy - one single connected column 1-2 blocks wide running most of the body's height (never scattered cells), with one column of desaturated warm grey beside it. The RIGHT side gets a pale cyan rim exactly 1 block wide placed ONE block INSIDE the navy contour. This is a cool bottle lit by a warm shop lamp on the left.\nLABEL: a flat pale blue band 7-8 blocks tall with one darker blue row along its bottom edge and nothing else. Absolutely NO text, NO letters, NO logo, NO mountain, NO picture. Brandless.\nIt is the brightest, airiest bottle on the shelf, but its contour stays dark."
     },
     {
@@ -381,7 +381,7 @@
       "gen": "1024x1536",
       "aspect": "portrait",
       "id": "char/brandt_neutral",
-      "prompt": "Frau Brandt, the property developer's agent (the Lindner Group), late 40s — composed, courteous, unreadable; the machine with a human face. She is NOT a villain and NOT heavy or grim: keep her trim, poised and quietly polite. FACE: a slim oval face with clean high cheekbones, pale cool-peach skin with lifted shadows, small readable grey-blue eyes each with a single white highlight pixel, thin arched brows, a small closed neutral mouth with the faintest professional courtesy at one corner, ears exposed. Her age is told by exactly two or three DELIBERATE one-pixel crease lines (one at each outer eye corner, one faint line beside the mouth) — never by painterly wrinkle texture, never by sagging or jowls. HEAD: a precise chin-length dark-brown bob, drawn as four or five chunky flat clusters with a hard silhouette and one bright grey streak sweeping back from the left temple; the hair must NOT fall past the jawline and must NOT be a long mane. Small silver stud earrings, each a single bright pixel. CLOTHES: a sharp, expensive charcoal-grey blazer with crisp square shoulders and a clean lapel over a cream blouse buttoned high — the cream is the only bright note, the palette is deliberately cool and corporate against the shop's amber. SIGNATURE PROP: a slim dark tablet held flat against her chest with one hand, its edge-on rectangle reading as a simple shape in the lower third of the bust — the screen is a plain dark slab with NO text, NO icons, NO logo and NO glow. No brand marks anywhere on her clothes. Head-and-shoulders dialogue bust, facing the viewer, slightly below eye level, the way Coffee Talk customers stand at the counter. LIGHT: a narrow warm amber rim along one edge of the face, hair and shoulder, with a restrained cool-blue edge on the other side; skin is never orange and never half-buried in black. RENDERING — this is exactly where the first calibration portrait lost its points (66/100), so obey it literally: draw a TRUE PIXEL-ART SPRITE, not a painted illustration. Imagine a 190x230-pixel sprite blown up to fill the canvas: every pixel cluster is a big hard-edged square block of ONE flat colour. Absolutely no strand-by-strand hair, no speckled colour noise, no soft gradients, no airbrush modelling, no anti-aliased edges, no glossy highlights. 4-6 flat tones per material, shaped into deliberate clusters, with clean one-pixel-wide dark contour outlines. FRAMING: the whole bust must fit inside the canvas — the hair must not touch the top edge and both shoulders/upper arms must stay fully inside the left and right edges, cut off cleanly only at the bottom. BACKGROUND: the PNG must have a REAL alpha channel around the bust — do NOT paint a grey-and-white checkerboard to fake transparency; if alpha is impossible, fill the whole background with ONE flat solid #00ff00. No text, no watermark, no signature, no frame, no border, no UI chrome."
+      "prompt": "Frau Brandt, the property developer's agent (the Lindner Group), late 40s — composed, courteous, unreadable; the machine with a human face. She is NOT a villain and NOT heavy or grim: trim, poised, quietly polite. FACE: a slim oval face, pale cool-peach skin with lifted shadows, small readable grey-blue eyes built from compact flat clusters (sclera block, iris block, one white highlight pixel, a heavy upper-lid line), thin arched brows, a small closed mouth with the faintest courteous lift at one corner, ears exposed. She is turned squarely toward the viewer and her eyes meet the viewer — not glancing off to the side. Her age is told by exactly two or three DELIBERATE one-art-pixel crease lines (one at each outer eye corner, one short muted shadow beside the mouth) and by nothing else — never painterly wrinkle texture, never sagging, never jowls, and never glossy eye detailing. HEAD: a precise chin-length dark-brown bob grouped into only THREE OR FOUR substantial lock shapes, each a broad flat cluster of 4 brown values with a hard silhouette; a single bright grey streak sweeping back from the left temple drawn as ONE clear graphic shape in 2 values. No narrow highlight ribbons, no fine strand highlights. The hair must not fall past the jawline and must not be a long mane. Small silver stud earrings, one bright pixel each. CLOTHES: a sharp charcoal blazer with crisp square shoulders and a clean lapel over a cream blouse buttoned high; folds are angular shadow clusters, not soft creases. The cream blouse is the only bright note; the palette is deliberately cool and corporate against the shop's amber. SIGNATURE PROP: a slim dark tablet held flat against her chest with one hand, reading as a simple rectangle in the lower third — the screen is a plain dark slab with NO text, NO icons, NO logo, NO glow. Head-and-shoulders dialogue bust, facing the viewer, slightly below eye level, the way Coffee Talk customers stand at the counter. RENDERING — this is the axis that failed the previous round (pixel_rendering scored 38–56), so obey it literally. Draw this as a TRUE LOW-RESOLUTION PIXEL SPRITE that has been enlarged with NEAREST-NEIGHBOUR, not as a smooth illustration. Build it mentally on a coarse grid of about 190 by 230 art pixels and then blow each art pixel up into a solid 6x6 square of ONE flat colour. Every diagonal and every curve therefore reads as a visible hard STAIRCASE of those squares. There must be no in-between colour anywhere in the image: no anti-aliased edge pixels, no soft colour ramps, no airbrushed cheeks, no gradient fills, no glossy specular blobs, no blur, no strand-by-strand hair, no narrow highlight ribbons, no speckled noise. Each material gets 4–6 flat tones arranged as contiguous hard-edged clusters, plus a clean one-art-pixel dark contour. The whole image uses at most about 28 colours in total. This is emphatically NOT an anime or manga portrait, NOT clean vector lineart, NOT a polished digital painting shrunk down — it is the deliberate, blocky, hand-placed pixel work of the reference image. LIGHT — restrained: a BROKEN one-art-pixel rim of muted amber along a few right-facing edges of hair, cheek and shoulder, and a dimmer desaturated slate-blue edge on the opposite side. NO outward glow, NO halo, NO bloom, no saturated orange or cobalt line tracing the entire silhouette, and nothing at all painted in the background. Skin is desaturated pale peach with muted rosy midtones and lifted mauve-grey shadows — never salmon, never orange, never tan, never crushed to black. Dark garments are dark plum-charcoal resolved into three readable planes (sleeve, chest, fold); near-black is reserved for contours and small occlusions only. FRAMING: the whole bust sits fully inside the canvas with clear empty space on every side except the bottom — the widest point (the shoulders and upper arms, and anything held) must stop at least 8% of the canvas width short of the left and right edges, and the hair must stop well short of the top edge. The figure is cut ONLY by the bottom edge. BACKGROUND: the PNG must have a REAL alpha channel around the bust — do NOT paint a grey-and-white checkerboard and do NOT paint a dark room or a glow behind the character; if alpha is impossible, fill the whole background with ONE flat solid #00ff00. No text, no watermark, no signature, no frame, no border, no UI chrome, no brand marks or logos on any garment or object."
     },
     {
       "kind": "portrait",
@@ -391,7 +391,7 @@
       "gen": "1024x1536",
       "aspect": "portrait",
       "id": "char/tobias_neutral",
-      "prompt": "Tobias, the new-money startup transplant who moved into the Kiez last year, early 30s — friendly, over-eager, a little oblivious; comic and slightly poignant, never smug or cruel. FACE: a youthful open face with a rounded jaw, pale peach-pink skin with lifted shadows, small readable warm-brown eyes each with a single white highlight pixel, thin brows lifted a touch in eager friendliness, a small closed pleasant mouth. HEAD: a neat undercut — the sides are ONE flat dark cluster shaved close, the top a chunky swept-back block of mid-brown in three or four flat tones with a clean one-pixel contour; ears exposed. His short beard is ONE flat cool-brown cluster with a hard clean edge along the jaw and chin — never speckled dots, never individual hairs, never smudged stubble noise. One small white wireless earbud in the visible ear, drawn as a two-pixel rounded blob. CLOTHES: a premium heather-grey hoodie, hood bunched behind the neck, under a slim matte-black bomber jacket with a clean ribbed collar; a small smart watch on the raised wrist shown as a dark band with a single pale screen block. Everything is deliberately unbranded — NO logos, NO wordmarks, NO swooshes, NO text on the cup, the watch, the hoodie or the jacket. SIGNATURE PROP: a pale cream takeaway coffee cup with a plain sleeve and a small dark lid, held up near the chest in one hand in the lower-left of the bust, small enough that it never crowds the face; one short flat steam wisp of two or three pixels above the lid. ACCENT: the cream cup plus a single saturated mint-teal drawstring detail at the hood are the only bright notes against the grey and black. Head-and-shoulders dialogue bust, facing the viewer, slightly below eye level, the way Coffee Talk customers stand at the counter. LIGHT: a narrow warm amber rim along one edge of the face, hair and shoulder, with a restrained cool-blue edge on the other side; skin is never orange, never tan, never half-buried in black. RENDERING — this is exactly where the first calibration portrait lost its points (66/100), so obey it literally: draw a TRUE PIXEL-ART SPRITE, not a painted illustration. Imagine a 190x230-pixel sprite blown up to fill the canvas: every pixel cluster is a big hard-edged square block of ONE flat colour. Absolutely no strand-by-strand hair, no speckled colour noise, no soft gradients, no airbrush modelling, no anti-aliased edges, no glossy highlights. 4-6 flat tones per material, shaped into deliberate clusters, with clean one-pixel-wide dark contour outlines. FRAMING: the whole bust must fit inside the canvas — the hair must not touch the top edge and both shoulders/upper arms (and the cup) must stay fully inside the left and right edges, cut off cleanly only at the bottom. BACKGROUND: the PNG must have a REAL alpha channel around the bust — do NOT paint a grey-and-white checkerboard to fake transparency; if alpha is impossible, fill the whole background with ONE flat solid #00ff00. No text, no watermark, no signature, no frame, no border, no UI chrome."
+      "prompt": "Tobias, the new-money startup transplant who moved into the Kiez last year, early 30s — friendly, over-eager, a little oblivious; comic and slightly poignant, never smug, and NOT a glossy handsome-man illustration. FACE: a youthful open face with a rounded jaw, small readable warm-brown eyes built from compact flat clusters (sclera block, iris block, one white highlight pixel, a clean upper-lid line), thin brows lifted a touch in eager friendliness, and a simple smile made of one crisp mouth line plus a single light plane — no glossy lips, no sparkle. HEAD: a neat undercut — the sides ONE flat dark cluster shaved close, the top grouped into three or four BROAD ANGULAR LOCKS in four brown values with a clean one-art-pixel contour; no narrow highlight ribbons, no strand noise. His short beard is a clean stepped silhouette with exactly two interior tones — never speckled dots, never individual hairs, never smudged stubble. One small white wireless earbud in the visible ear, a two-pixel rounded blob. CLOTHES: a heather-grey hoodie, hood bunched behind the neck, under a slim matte bomber jacket in dark plum-charcoal resolved into three readable planes (sleeve, chest, fold) with near-black used only for contours; a small smart watch on the raised wrist as a dark band with one pale screen block. Everything is unbranded — NO logos, NO wordmarks, NO text on the cup, watch, hoodie or jacket. SIGNATURE PROP: a pale cream takeaway coffee cup with a plain sleeve and a small dark lid, held near the chest in one hand in the lower-left, small enough never to crowd the face; one short flat steam wisp of two or three pixels above the lid. ACCENT: the cream cup plus a single saturated mint-teal hood drawstring are the only bright notes. Head-and-shoulders dialogue bust, facing the viewer, slightly below eye level, the way Coffee Talk customers stand at the counter. RENDERING — this is the axis that failed the previous round (pixel_rendering scored 38–56), so obey it literally. Draw this as a TRUE LOW-RESOLUTION PIXEL SPRITE that has been enlarged with NEAREST-NEIGHBOUR, not as a smooth illustration. Build it mentally on a coarse grid of about 190 by 230 art pixels and then blow each art pixel up into a solid 6x6 square of ONE flat colour. Every diagonal and every curve therefore reads as a visible hard STAIRCASE of those squares. There must be no in-between colour anywhere in the image: no anti-aliased edge pixels, no soft colour ramps, no airbrushed cheeks, no gradient fills, no glossy specular blobs, no blur, no strand-by-strand hair, no narrow highlight ribbons, no speckled noise. Each material gets 4–6 flat tones arranged as contiguous hard-edged clusters, plus a clean one-art-pixel dark contour. The whole image uses at most about 28 colours in total. This is emphatically NOT an anime or manga portrait, NOT clean vector lineart, NOT a polished digital painting shrunk down — it is the deliberate, blocky, hand-placed pixel work of the reference image. LIGHT — restrained: a BROKEN one-art-pixel rim of muted amber along a few right-facing edges of hair, cheek and shoulder, and a dimmer desaturated slate-blue edge on the opposite side. NO outward glow, NO halo, NO bloom, no saturated orange or cobalt line tracing the entire silhouette, and nothing at all painted in the background. Skin is desaturated pale peach with muted rosy midtones and lifted mauve-grey shadows — never salmon, never orange, never tan, never crushed to black. Dark garments are dark plum-charcoal resolved into three readable planes (sleeve, chest, fold); near-black is reserved for contours and small occlusions only. FRAMING: the whole bust sits fully inside the canvas with clear empty space on every side except the bottom — the widest point (the shoulders and upper arms, and anything held) must stop at least 8% of the canvas width short of the left and right edges, and the hair must stop well short of the top edge. The figure is cut ONLY by the bottom edge. BACKGROUND: the PNG must have a REAL alpha channel around the bust — do NOT paint a grey-and-white checkerboard and do NOT paint a dark room or a glow behind the character; if alpha is impossible, fill the whole background with ONE flat solid #00ff00. No text, no watermark, no signature, no frame, no border, no UI chrome, no brand marks or logos on any garment or object."
     },
     {
       "kind": "portrait",
@@ -532,6 +532,149 @@
       ],
       "$resumeNote": "Generate only after char/nadia_neutral is final (its raw is the second reference image).",
       "prompt": "Nadia, a night-shift nurse and single mum, mid 30s: teal scrubs under an open dark parka, hair tied back tightly, tired-kind eyes with faint shadows, a lanyard, a paper coffee cup held near her chin as her signature prop. Warm but running on empty. Image 2 is THIS character — reproduce the exact face, hair, colours and clothes; change ONLY the expression. This is the UPSET expression: jaw set, brows drawn together, mouth flat, eyes cut to the side, shoulders tense. Head-and-shoulders bust for a dialogue portrait, Coffee Talk proportions and outline weight, real alpha background."
+    },
+    {
+      "id": "sku/energy",
+      "kind": "prop",
+      "w": 14,
+      "h": 36,
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "filter": "lanczos",
+      "prompt": "A single slim generic energy-drink can, dark blue with a plain silver stripe and no text, standing upright, front view, Coffee Talk material shading."
+    },
+    {
+      "id": "sku/schrippe",
+      "kind": "prop",
+      "w": 26,
+      "h": 30,
+      "transparent": true,
+      "gen": "1024x1024",
+      "aspect": "square",
+      "filter": "lanczos",
+      "prompt": "A single crusty Berlin bread roll (Schrippe), golden-brown with a floury split top, resting on a small paper square, front/slightly-above view, Coffee Talk material shading."
+    },
+    {
+      "id": "sku/tobacco",
+      "kind": "prop",
+      "w": 26,
+      "h": 30,
+      "transparent": true,
+      "gen": "1024x1024",
+      "aspect": "square",
+      "filter": "lanczos",
+      "prompt": "A single generic pouch of rolling tobacco, plain olive-green soft pouch with a folded flap and no text, front view, Coffee Talk material shading."
+    },
+    {
+      "id": "sku/papers",
+      "kind": "prop",
+      "w": 22,
+      "h": 26,
+      "transparent": true,
+      "gen": "1024x1024",
+      "aspect": "square",
+      "filter": "lanczos",
+      "prompt": "A single small packet of rolling papers, plain cream booklet with a thin brown band and no text, front view, Coffee Talk material shading."
+    },
+    {
+      "id": "sku/tp",
+      "kind": "prop",
+      "w": 26,
+      "h": 30,
+      "transparent": true,
+      "gen": "1024x1024",
+      "aspect": "square",
+      "filter": "lanczos",
+      "prompt": "A single roll of toilet paper wrapped in plain pale-blue paper with no text, front/slightly-above view, Coffee Talk material shading."
+    },
+    {
+      "id": "sku/condoms",
+      "kind": "prop",
+      "w": 22,
+      "h": 26,
+      "transparent": true,
+      "gen": "1024x1024",
+      "aspect": "square",
+      "filter": "lanczos",
+      "prompt": "A single small generic box of condoms, plain dark-teal box with a simple white circle and no text, front view, Coffee Talk material shading."
+    },
+    {
+      "id": "sku/batteries",
+      "kind": "prop",
+      "w": 24,
+      "h": 26,
+      "transparent": true,
+      "gen": "1024x1024",
+      "aspect": "square",
+      "filter": "lanczos",
+      "prompt": "A blister pack of four generic AA batteries, plain grey card with a clear bubble, copper-and-black cells, no text, front view, Coffee Talk material shading."
+    },
+    {
+      "id": "sku/painkillers",
+      "kind": "prop",
+      "w": 22,
+      "h": 26,
+      "transparent": true,
+      "gen": "1024x1024",
+      "aspect": "square",
+      "filter": "lanczos",
+      "prompt": "A single small generic pharmacy box of painkillers, plain white box with a single red stripe and no text, front view, Coffee Talk material shading."
+    },
+    {
+      "id": "sku/currywurst",
+      "kind": "prop",
+      "w": 26,
+      "h": 30,
+      "transparent": true,
+      "gen": "1024x1024",
+      "aspect": "square",
+      "filter": "lanczos",
+      "prompt": "A paper tray of currywurst: sliced sausage slathered in red-brown curry sauce with a dusting of powder and a small wooden fork, front/slightly-above view, Coffee Talk material shading."
+    },
+    {
+      "id": "sku/icecream",
+      "kind": "prop",
+      "w": 14,
+      "h": 36,
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "filter": "lanczos",
+      "prompt": "A single generic ice-cream bar on a stick, plain pale-yellow wrapper with a simple blue wave and no text, standing upright, front view, Coffee Talk material shading."
+    },
+    {
+      "id": "sku/milk",
+      "kind": "prop",
+      "w": 14,
+      "h": 36,
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "filter": "lanczos",
+      "prompt": "A single generic 1-litre milk carton, plain white and pale-blue carton with a simple drop shape and no text, standing upright, front view, Coffee Talk material shading."
+    },
+    {
+      "id": "sku/eggs",
+      "kind": "prop",
+      "w": 26,
+      "h": 30,
+      "transparent": true,
+      "gen": "1024x1024",
+      "aspect": "square",
+      "filter": "lanczos",
+      "prompt": "A closed six-egg carton in plain grey pulp cardboard with no text, front/slightly-above view, Coffee Talk material shading."
+    },
+    {
+      "id": "sku/vape",
+      "kind": "prop",
+      "w": 14,
+      "h": 36,
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "filter": "lanczos",
+      "prompt": "A single generic disposable vape pen, matte purple body with a small black mouthpiece and no text, standing upright, front view, Coffee Talk material shading."
     }
   ],
   "modelByKind": {
