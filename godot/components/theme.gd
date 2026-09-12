@@ -59,10 +59,10 @@ const NEON_GLOW := Color(1.0, 0.31, 0.85, 0.10)
 ## the cool edge it falls off into. Both judges (2026-09-13) scored the flat tint "predominantly cold
 ## grey-blue" — the target has a warm interior against the blue night.
 const LIGHT_POOL_DUSK := Color(1.0, 0.80, 0.52, 0.20)
-const LIGHT_POOL_NIGHT := Color(1.0, 0.84, 0.58, 0.17)
+const LIGHT_POOL_NIGHT := Color(1.0, 0.84, 0.58, 0.08)   # a broad pale wash read as "washed-out grey" (v9); the warmth has to come from the art, the overlay only darkens the edges
 const LIGHT_POOL_DAWN := Color(0.90, 0.88, 0.80, 0.06)
 const LIGHT_EDGE_DUSK := Color(0.45, 0.30, 0.24, 0.10)
-const LIGHT_EDGE_NIGHT := Color(0.08, 0.14, 0.32, 0.30)
+const LIGHT_EDGE_NIGHT := Color(0.06, 0.11, 0.28, 0.34)
 const LIGHT_EDGE_DAWN := Color(0.18, 0.42, 0.66, 0.30)
 ## Rain on the GLASS. It is drawn in the door/window opening only and BEHIND the counter, because rain
 ## inside the shop is a bug — and at this alpha it is actually visible at x4 (verify round 3).
