@@ -296,6 +296,8 @@ func _place_chrome(v: Dictionary) -> void:
 	var hud := get_node_or_null("%Hud") as Hud
 	if hud != null:
 		hud.set_compact(serve_open)
+		# A conversation — a talk OR a pending story beat/vignette with its lines — gets Coffee Talk's minimal HUD.
+		hud.set_focus(not talk.is_empty() or not (v.get("dialogue", {}) as Dictionary).is_empty())
 	_seat_portrait()
 
 ## The plain order a customer speaks when no story beat is pending. Presentation only — the engine

@@ -41,14 +41,31 @@ func render(view: Dictionary) -> void:
 ## does the night/queue tail of the left line, which at 16 px runs under the panel's edge. The clock,
 ## the cash and the Pfand count stay: those are what you check while ringing someone up.
 func set_compact(on: bool) -> void:
+	_compact = on
 	var plate := get_node_or_null("%RightPlate") as Control
 	if plate != null:
-		plate.visible = not on
+		plate.visible = not on and not _focus
 	var meta := get_node_or_null("%MetaPlate") as Control
 	if meta == null:
 		meta = get_node_or_null("%Meta") as Control
 	if meta != null:
 		meta.visible = not on
+
+## While a CONVERSATION is open the HUD steps back to Coffee Talk's minimum: the clock and the night/queue
+## line. Cash, Pfand and the two meters are serving/managing information — both judges (2026-09-13) read
+## the full strip as "dense RPG status bars" over a dialogue scene. Compact (serve panel open) still wins.
+var _focus: bool = false
+func set_focus(on: bool) -> void:
+	_focus = on
+	for path in ["%LeftPlate/Line/CashBox", "%LeftPlate/Line/PfandBox"]:
+		var n := get_node_or_null(path) as Control
+		if n != null:
+			n.visible = not on
+	var plate := get_node_or_null("%RightPlate") as Control
+	if plate != null and not _compact:
+		plate.visible = not on
+
+var _compact: bool = false
 
 func _meter(unique: String, icon_id: String, fill: Color, value: float, label: String) -> void:
 	var m := get_node_or_null(unique) as Meter

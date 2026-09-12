@@ -101,6 +101,9 @@ ${fs.readFileSync(path.resolve(REPO, 'tools/codex/verdict.schema.json'), 'utf8')
 // STALLS: an astra request sometimes emits one reasoning item and then nothing for 15+ minutes (rollout
 // 00:24, 2026-09-13) while an identical request finished in 45 s. A stalled request is killed and retried,
 // not waited on: `--timeout` is per attempt, `--attempts` bounds the retries.
+// Astra + the strict --output-schema stalls (four of four runs on 2026-09-13); the same request with the shape
+// given in the prompt answers in ~45 s. So astra judges WITHOUT the schema unless --schema=1 forces it.
+if ((a.model || CODEX_MODEL_HERO) === CODEX_MODEL_HERO && !a.schema && a['no-schema'] === undefined) a['no-schema'] = 1;
 const attempts = Number(a.attempts || 3);
 const perAttempt = a.timeout ? Number(a.timeout) : 420;
 let r = null;

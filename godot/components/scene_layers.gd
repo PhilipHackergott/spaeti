@@ -123,21 +123,42 @@ func _refresh_art() -> void:
 		counter.texture = tex
 		_edge = -1  # a new counter asset re-measures its own occlusion line
 		if tex != null:
-			# The counter band is always flush with the bottom of the frame, whatever height the
-			# art turns out to be, so the customer's lower body is hidden exactly as in Coffee Talk.
+			# The counter band hangs from `COUNTER_LIFT` above the bottom of the frame (its lowest rows are
+			# under the dialogue panel anyway), whatever height the art turns out to be, so the customer's
+			# lower body is hidden exactly as in Coffee Talk and a real countertop band stays readable.
 			counter.size = tex.get_size()
-			counter.position = Vector2(0, float(Palette.BASE.y) - tex.get_size().y)
+			counter.position = Vector2(0, float(Palette.BASE.y - Palette.COUNTER_LIFT) - tex.get_size().y)
 
+const LIGHT_SHADER := preload("res://components/light_pool.gdshader")
+
+## The time-of-night light is SHAPED, not flat (2026-09-13): a warm fluorescent pool over the counter and
+## the customer that falls off, in stepped bands, into the cool night at the fridge and the door. The
+## ColorRect keeps a flat colour only as the fallback when the shader is unavailable (headless import).
 func _refresh_tint() -> void:
 	var tint := get_node_or_null("%Tint") as ColorRect
 	if tint == null:
 		return
-	var c: Color
+	var warm: Color
+	var cool: Color
 	if night_progress < 0.5:
-		c = Palette.TINT_DUSK.lerp(Palette.TINT_DEEP, night_progress / 0.5)
+		var t := night_progress / 0.5
+		warm = Palette.LIGHT_POOL_DUSK.lerp(Palette.LIGHT_POOL_NIGHT, t)
+		cool = Palette.LIGHT_EDGE_DUSK.lerp(Palette.LIGHT_EDGE_NIGHT, t)
 	else:
-		c = Palette.TINT_DEEP.lerp(Palette.TINT_DAWN, (night_progress - 0.5) / 0.5)
-	tint.color = c
+		var t2 := (night_progress - 0.5) / 0.5
+		warm = Palette.LIGHT_POOL_NIGHT.lerp(Palette.LIGHT_POOL_DAWN, t2)
+		cool = Palette.LIGHT_EDGE_NIGHT.lerp(Palette.LIGHT_EDGE_DAWN, t2)
+	var mat := tint.material as ShaderMaterial
+	if mat == null:
+		mat = ShaderMaterial.new()
+		mat.shader = LIGHT_SHADER
+		tint.material = mat
+	tint.color = Color.WHITE   # the shader paints; the rect's own colour must not multiply into it
+	mat.set_shader_parameter("warm", warm)
+	mat.set_shader_parameter("cool", cool)
+	mat.set_shader_parameter("centre", Vector2(float(Palette.PORTRAIT_CENTRE_X) / float(Palette.BASE.x), 0.62))
+	mat.set_shader_parameter("radius", 0.62)
+	mat.set_shader_parameter("steps", 4)
 
 func _rebuild_rain() -> void:
 	var rain := get_node_or_null("%Rain") as Node2D

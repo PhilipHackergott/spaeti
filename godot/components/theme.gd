@@ -55,6 +55,15 @@ const TINT_DEEP := Color(0.10, 0.16, 0.32, 0.20)
 const TINT_DAWN := Color(0.18, 0.42, 0.66, 0.30)
 ## The SPÄTI sign's bloom over the backdrop.
 const NEON_GLOW := Color(1.0, 0.31, 0.85, 0.10)
+## The shaped light on the set (light_pool.gdshader): the warm pool over the counter by night phase, and
+## the cool edge it falls off into. Both judges (2026-09-13) scored the flat tint "predominantly cold
+## grey-blue" — the target has a warm interior against the blue night.
+const LIGHT_POOL_DUSK := Color(1.0, 0.80, 0.52, 0.16)
+const LIGHT_POOL_NIGHT := Color(1.0, 0.86, 0.62, 0.11)
+const LIGHT_POOL_DAWN := Color(0.90, 0.88, 0.80, 0.06)
+const LIGHT_EDGE_DUSK := Color(0.45, 0.30, 0.24, 0.10)
+const LIGHT_EDGE_NIGHT := Color(0.10, 0.16, 0.32, 0.22)
+const LIGHT_EDGE_DAWN := Color(0.18, 0.42, 0.66, 0.30)
 ## Rain on the GLASS. It is drawn in the door/window opening only and BEHIND the counter, because rain
 ## inside the shop is a bug — and at this alpha it is actually visible at x4 (verify round 3).
 const RAIN := Color(0.72, 0.90, 1.0, 0.55)
@@ -106,6 +115,10 @@ const SERVE_RECT := Rect2i(228, 8, 248, 256)
 ## How many base pixels of a customer's bust sit behind the counter layer (docs/02 framing table).
 ## `Portrait.place_behind()` derives the bust's y from this and the counter art's real opaque edge;
 ## the clamp keeps the hair inside the frame when the art is taller than the table assumes.
+## How far the counter layer is raised above the bottom of the frame (2026-09-13, both judges: "a narrow
+## grey strip above the dialogue panel", "Lena looks submerged behind the counter"). The r6 strip's own top
+## 37 rows are the wall behind the counter, so flush-with-the-bottom hid the countertop under the panel.
+const COUNTER_LIFT := 20
 const PORTRAIT_OVERLAP := 30
 const PORTRAIT_TOP_MIN := 24
 ## The bust is anchored by its BOTTOM-CENTRE, never by a spec rectangle: shipped art is narrower than
