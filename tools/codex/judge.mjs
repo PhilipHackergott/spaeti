@@ -48,6 +48,10 @@ const r = await runCodex({ prompt, images: [a.candidate, ...refs], schema: 'tool
   sandbox: 'read-only', effort: a.effort, timeout: a.timeout ? Number(a.timeout) : 600, quiet: true });
 let verdict = null;
 try { verdict = JSON.parse(r.last); } catch { /* handled below */ }
+if (r.blocked) {
+  console.error(`judge: BLOCKED (${r.blocked}): ${r.blockLine}`);
+  process.exit(75);
+}
 if (!verdict) {
   console.error(`judge: no JSON verdict (exit ${r.code}, ${r.seconds}s)\n${r.log.slice(-1500)}`);
   process.exit(3);

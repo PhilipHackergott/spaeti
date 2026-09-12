@@ -1,0 +1,93 @@
+class_name Portrait
+extends Control
+## A character bust at the counter. The texture is placed at its NATIVE size on integer pixels — never
+## scaled — so the pixel grid survives; the counter band in SceneLayers hides the lower body, exactly
+## like Coffee Talk. Expression ids and the fallback chain live in Assets.portrait().
+
+@export var portrait_id: String = "char/lena":
+	set(v):
+		portrait_id = v
+		_refresh()
+
+@export var expression: String = "neutral":
+	set(v):
+		expression = v
+		_refresh()
+
+## Idle 1-px breathing. Off when Palette.reduce_motion is set.
+@export var breathe: bool = true
+
+var _breath: Tween = null
+
+func _ready() -> void:
+	Palette.prepare()
+	_refresh()
+	_start_breathing()
+
+## `active` is `view.active` — empty hides the bust.
+func set_from_active(active: Dictionary) -> void:
+	if active.is_empty():
+		visible = false
+		return
+	visible = true
+	portrait_id = String(active.get("portrait", "char/oneoff_clubber"))
+	expression = String(active.get("expression", "neutral"))
+
+func _refresh() -> void:
+	var bust := get_node_or_null("%Bust") as TextureRect
+	if bust == null:
+		return
+	var tex := Assets.portrait(portrait_id, expression)
+	bust.texture = tex
+	if tex != null:
+		bust.size = tex.get_size()
+		custom_minimum_size = tex.get_size()
+		size = tex.get_size()
+
+## Slide + fade in from the side of the counter (Coffee Talk's customer entrance).
+func slide_in(instant: bool = false) -> void:
+	visible = true
+	var bust := get_node_or_null("%Bust") as TextureRect
+	if bust == null:
+		return
+	if instant or Palette.reduce_motion or not is_inside_tree():
+		bust.modulate.a = 1.0
+		bust.position = Vector2.ZERO
+		return
+	bust.modulate.a = 0.0
+	bust.position = Vector2(0, 6)
+	var tw := create_tween().set_parallel(true)
+	tw.tween_property(bust, "modulate:a", 1.0, 0.25)
+	tw.tween_method(_set_entry_offset, 6.0, 0.0, 0.25)
+
+func slide_out(instant: bool = false) -> void:
+	var bust := get_node_or_null("%Bust") as TextureRect
+	if bust == null:
+		return
+	if instant or Palette.reduce_motion or not is_inside_tree():
+		visible = false
+		return
+	var tw := create_tween()
+	tw.tween_property(bust, "modulate:a", 0.0, 0.2)
+	tw.tween_callback(func() -> void: visible = false)
+
+func _set_entry_offset(v: float) -> void:
+	var bust := get_node_or_null("%Bust") as TextureRect
+	if bust != null:
+		bust.position = Vector2(0, roundf(v))
+
+func _start_breathing() -> void:
+	if not breathe or Palette.reduce_motion or not is_inside_tree():
+		return
+	var bust := get_node_or_null("%Bust") as TextureRect
+	if bust == null:
+		return
+	_breath = create_tween().set_loops()
+	# Stepped, not eased: the bust may only ever sit on whole pixels.
+	_breath.tween_method(_set_breath, 0.0, 1.0, 2.4)
+	_breath.tween_method(_set_breath, 1.0, 0.0, 2.4)
+
+func _set_breath(t: float) -> void:
+	var bust := get_node_or_null("%Bust") as TextureRect
+	if bust != null:
+		bust.position = Vector2(0, -roundf(t))

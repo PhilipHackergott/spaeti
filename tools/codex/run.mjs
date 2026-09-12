@@ -41,7 +41,12 @@ export function runCodex({ prompt, images = [], schema, sandbox = 'read-only', c
       clearTimeout(killer);
       const last = fs.existsSync(lastFile) ? fs.readFileSync(lastFile, 'utf8').trim() : '';
       const m = log.match(/tokens used\s*\n\s*([\d.,]+)/);
-      resolve({ code: timedOut ? 124 : code, last, log, seconds: Math.round((Date.now() - started) / 1000), tokens: m ? m[1] : '', timedOut });
+      // Account-level refusals: surface them by name so callers abort instead of retrying blind.
+      const blockLine = (log.match(/.*(spend cap|usage limit|rate limit|quota|too many requests|not logged in|login required).*/i) || [])[0];
+      const blocked = blockLine ? (/spend cap/i.test(blockLine) ? 'spend-cap' : /login|logged/i.test(blockLine) ? 'auth' : 'rate-limit') : null;
+      // The session id scopes any look-up under ~/.codex/generated_images — never scan other lanes' sessions.
+      const sessionId = (log.match(/session id:\s*([0-9a-f-]{8,})/i) || [])[1] || '';
+      resolve({ code: timedOut ? 124 : code, last, log, seconds: Math.round((Date.now() - started) / 1000), tokens: m ? m[1] : '', timedOut, blocked, blockLine: blockLine ? blockLine.trim() : '', sessionId });
     });
   });
 }
@@ -55,6 +60,7 @@ if (isMain(import.meta.url)) {
     cwd: a.cwd ? path.resolve(REPO, a.cwd) : REPO, model: a.model, effort: a.effort,
     timeout: a.timeout ? Number(a.timeout) : undefined, out: a.out, quiet: !!a.quiet });
   if (a.quiet) console.log(r.last);
+  if (r.blocked) console.error(`[codex] BLOCKED (${r.blocked}): ${r.blockLine}`);
   console.error(`[codex] exit=${r.code} ${r.seconds}s tokens=${r.tokens}${r.timedOut ? ' TIMEOUT' : ''}`);
-  process.exit(r.code ?? 1);
+  process.exit(r.blocked ? 75 : (r.code ?? 1));
 }

@@ -1,0 +1,62 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://components/till.gd" id="1_script"]
+[ext_resource type="Theme" path="res://components/Theme.tres" id="2_theme"]
+[ext_resource type="PackedScene" path="res://components/PixelButton.tscn" id="3_button"]
+
+[node name="Till" type="PanelContainer"]
+custom_minimum_size = Vector2(228, 84)
+offset_right = 228.0
+offset_bottom = 84.0
+theme = ExtResource("2_theme")
+script = ExtResource("1_script")
+
+[node name="Box" type="VBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 1
+
+[node name="Head" type="Label" parent="Box"]
+layout_mode = 2
+theme_type_variation = &"SmallLabel"
+text = "TILL"
+
+[node name="Lines" type="VBoxContainer" parent="Box"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 26)
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="TotalRow" type="HBoxContainer" parent="Box"]
+layout_mode = 2
+
+[node name="TotalLabel" type="Label" parent="Box/TotalRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Total"
+
+[node name="Total" type="Label" parent="Box/TotalRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"SpeakerLabel"
+text = "0,00"
+horizontal_alignment = 2
+
+[node name="Buttons" type="HBoxContainer" parent="Box"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="RingUp" parent="Box/Buttons" instance=ExtResource("3_button")]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Ring up"
+
+[node name="PfandButton" parent="Box/Buttons" instance=ExtResource("3_button")]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Pfand"
+
+[node name="WaveOff" parent="Box/Buttons" instance=ExtResource("3_button")]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Wave off"

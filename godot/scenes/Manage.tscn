@@ -1,0 +1,32 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scenes/manage.gd" id="1_script"]
+[ext_resource type="Theme" path="res://components/Theme.tres" id="2_theme"]
+[ext_resource type="PackedScene" path="res://components/SceneLayers.tscn" id="3_layers"]
+[ext_resource type="PackedScene" path="res://components/Modal.tscn" id="4_modal"]
+[ext_resource type="PackedScene" path="res://components/ManageBoard.tscn" id="5_board"]
+
+[node name="Manage" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_theme")
+script = ExtResource("1_script")
+default_preset = "manage"
+
+[node name="SceneLayers" parent="." instance=ExtResource("3_layers")]
+unique_name_in_owner = true
+raining = false
+
+[node name="Modal" parent="." instance=ExtResource("4_modal")]
+unique_name_in_owner = true
+title = "Laden"
+closable = false
+
+[node name="ManageBoard" parent="." instance=ExtResource("5_board")]
+unique_name_in_owner = true
+offset_left = 40.0
+offset_top = 46.0
+offset_right = 440.0
+offset_bottom = 242.0

@@ -52,47 +52,62 @@ ${refs.length ? `\nThe attached image(s) are STYLE/CONTENT REFERENCES (image 1 =
 ${feedback ? `\n=== FEEDBACK FROM THE PREVIOUS ATTEMPT (fix these) ===\n${feedback}\n` : ''}`;
 }
 
-function newestGenerated(since) {
-  if (!fs.existsSync(CODEX_GENERATED)) return null;
+// Only ever look inside THIS run's session folder: with several lanes generating at once, "newest PNG anywhere"
+// happily adopts another lane's image (it did — a counter strip became "Lena").
+function newestGenerated(since, sessionId) {
+  if (!sessionId) return null;
+  const d = path.join(CODEX_GENERATED, sessionId);
+  if (!fs.existsSync(d)) return null;
   let best = null;
-  for (const dir of fs.readdirSync(CODEX_GENERATED)) {
-    const d = path.join(CODEX_GENERATED, dir);
-    if (!fs.statSync(d).isDirectory()) continue;
-    for (const f of fs.readdirSync(d)) {
-      if (!f.toLowerCase().endsWith('.png')) continue;
-      const p = path.join(d, f);
-      const st = fs.statSync(p);
-      if (st.mtimeMs >= since && (!best || st.mtimeMs > best.mtimeMs)) best = { p, mtimeMs: st.mtimeMs };
-    }
+  for (const f of fs.readdirSync(d)) {
+    if (!f.toLowerCase().endsWith('.png')) continue;
+    const p = path.join(d, f);
+    const st = fs.statSync(p);
+    if (st.mtimeMs >= since && (!best || st.mtimeMs > best.mtimeMs)) best = { p, mtimeMs: st.mtimeMs };
   }
   return best ? best.p : null;
+}
+// Rejected attempts are kept beside the canonical raw so the evidence (and a possibly-salvageable image) survives.
+function shelveRaw(rawPath, attempt) {
+  if (!fs.existsSync(rawPath)) return null;
+  const shelved = rawPath.replace(/\.png$/i, `-att${attempt}.png`);
+  fs.renameSync(rawPath, shelved);
+  return fwd(shelved);
 }
 
 const started = Date.now();
 let feedback = a.feedback || '';
 let attempts = 0;
-let result = { id: entry.id, ok: false };
+let result = { id: entry.id, ok: false, errors: [] };
 let totalTokens = 0;
 // --reuse-raw: skip generation when art/raw/<id>.png already exists (re-snap after a spec/grid change).
 const reuse = !!a['reuse-raw'] && fs.existsSync(raw);
 while (attempts <= retries) {
   attempts++;
-  let r = { last: '', tokens: '' };
+  let r = { last: '', tokens: '', sessionId: '' };
   if (!reuse || attempts > 1) {
-    if (fs.existsSync(raw)) fs.unlinkSync(raw);
+    if (fs.existsSync(raw)) shelveRaw(raw, attempts - 1);
     const t0 = Date.now();
     r = await runCodex({ prompt: buildPrompt(feedback), images: refs, sandbox: 'danger-full-access', cwd: REPO,
       effort: a.effort, timeout: a.timeout ? Number(a.timeout) : 600, quiet: true });
     totalTokens += Number(String(r.tokens).replace(/[.,]/g, '')) || 0;
+    if (r.blocked) {
+      // Spend cap / auth / rate limit: retrying cannot help — report the real reason and stop.
+      result.error = `BLOCKED (${r.blocked}): ${r.blockLine}`;
+      result.errors.push(result.error);
+      result.blocked = r.blocked;
+      break;
+    }
     if (!fs.existsSync(raw)) {
-      // Codex sometimes leaves the file only under ~/.codex/generated_images — take the newest one from this run.
-      const fallback = newestGenerated(t0 - 1000);
+      // Codex sometimes leaves the file only under ~/.codex/generated_images/<this session> — take the newest one from there.
+      const fallback = newestGenerated(t0 - 1000, r.sessionId);
       if (fallback) fs.copyFileSync(fallback, raw);
     }
   }
   if (!fs.existsSync(raw)) {
     feedback = `No image file was written (codex said: ${r.last.slice(0, 300) || '(nothing)'}). Generate the image and copy it to the exact path.`;
     result.error = feedback;
+    result.errors.push(`attempt ${attempts}: ${feedback}`);
     continue;
   }
   const rawInfo = pngInfo(raw);
@@ -103,11 +118,14 @@ while (attempts <= retries) {
   const snap = snapImage({ in: raw, out, w: entry.w, h: entry.h, mode: entry.mode || (entry.transparent ? 'fit' : 'cover'),
     filter: entry.filter || 'lanczos', crop: entry.crop, 'alpha-threshold': entry.transparent ? (entry.alphaThreshold ?? 0.5) : undefined,
     trim: entry.transparent && entry.trim !== false ? 1 : undefined,
-    key: entry.transparent ? keyColour : undefined, 'key-tol': entry.transparent ? (entry.keyTol ?? 0.18) : undefined, 'auto-key': entry.transparent ? 1 : undefined });
+    key: entry.transparent ? keyColour : undefined, 'key-tol': entry.transparent ? (entry.keyTol ?? 0.18) : undefined, 'auto-key': entry.transparent ? 1 : undefined,
+    'auto-bg': entry.transparent ? 1 : undefined, 'bg-tol': entry.transparent ? (entry.bgTol ?? 0.16) : undefined });
   // Transparency is judged on real pixels after Godot decoded (and possibly keyed) the file — not on the PNG header.
   if (entry.transparent && snap.transparentFrac < 0.02) {
-    feedback = `The background was NOT transparent (under 2% transparent pixels after decoding, and it was not the flat #${keyColour} key colour either). Use image_gen's transparent-background option, or a single flat solid #${keyColour} background. Never a checkerboard.`;
+    feedback = `The background was NOT transparent (under 2% transparent pixels after decoding, and neither the flat #${keyColour} key colour nor a flat/checker backdrop the border flood-fill could remove). Use image_gen's transparent-background option, or a single flat solid #${keyColour} background that no part of the subject touches.`;
     result.error = feedback;
+    result.errors.push(`attempt ${attempts}: ${feedback} (kept as ${shelveRaw(raw, attempts)})`);
+    if (fs.existsSync(out)) fs.unlinkSync(out);
     continue;
   }
   result = { id: entry.id, ok: true, raw: fwd(raw), out: fwd(out), rawSize: `${rawInfo.width}x${rawInfo.height}`,
@@ -117,4 +135,4 @@ while (attempts <= retries) {
 result.seconds = Math.round((Date.now() - started) / 1000);
 result.tokens = totalTokens;
 console.log(JSON.stringify(result));
-process.exit(result.ok ? 0 : 1);
+process.exit(result.ok ? 0 : (result.blocked ? 75 : 1));

@@ -1,0 +1,19 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://components/portrait.gd" id="1_script"]
+[ext_resource type="Theme" path="res://components/Theme.tres" id="2_theme"]
+
+[node name="Portrait" type="Control"]
+custom_minimum_size = Vector2(190, 230)
+offset_right = 190.0
+offset_bottom = 230.0
+mouse_filter = 2
+theme = ExtResource("2_theme")
+script = ExtResource("1_script")
+
+[node name="Bust" type="TextureRect" parent="."]
+unique_name_in_owner = true
+offset_right = 190.0
+offset_bottom = 230.0
+mouse_filter = 2
+stretch_mode = 2

@@ -33,6 +33,10 @@ func _init() -> void:
 		var auto_key := int(a.get("auto-key", "0")) == 1
 		if not auto_key or raw_alpha0 < 0.02:
 			keyed = _chroma_key(img, Color.html("#" + String(a["key"]).trim_prefix("#")), float(a.get("key-tol", "0.18")))
+	# Magic wand from the border: removes whatever flat or checkerboard backdrop the model painted instead of
+	# using alpha. Only fires when the image still has (almost) no transparency.
+	if int(a.get("auto-bg", "0")) == 1 and _transparent_fraction(img) < 0.02:
+		keyed += _auto_background(img, float(a.get("bg-tol", "0.16")))
 	# Binarise alpha on the raw image first so faint halos do not inflate the trim box or bleed into the resize.
 	if a.has("alpha-threshold"):
 		_threshold_alpha(img, float(a["alpha-threshold"]))
@@ -114,6 +118,105 @@ func _chroma_key(img: Image, key: Color, tol: float) -> int:
 				img.set_pixel(x, y, Color(0, 0, 0, 0))
 				n += 1
 	return n
+
+## Estimates up to two background colours from the top edge + upper halves of the side edges (a bust may be cut
+## by the bottom edge, so the bottom is never sampled), then flood-fills from every border pixel through pixels
+## within `tol` of those colours, clearing their alpha. A final pass clears one ring of near-background fringe.
+func _auto_background(img: Image, tol: float) -> int:
+	var w := img.get_width()
+	var h := img.get_height()
+	var data := img.get_data()
+	var sample: Array[Vector3] = []
+	for x in w:
+		sample.append(_rgb(data, x, w))
+	for y in int(h / 2.0):
+		sample.append(_rgb(data, y * w, w))
+		sample.append(_rgb(data, y * w + w - 1, w))
+	var bins := {}
+	for v in sample:
+		var k := "%d_%d_%d" % [int(v.x * 11.99), int(v.y * 11.99), int(v.z * 11.99)]
+		if not bins.has(k):
+			bins[k] = [0, Vector3.ZERO]
+		bins[k][0] += 1
+		bins[k][1] += v
+	var keys := bins.keys()
+	keys.sort_custom(func(p, q): return bins[p][0] > bins[q][0])
+	var bgs: Array[Vector3] = []
+	for k in keys:
+		if bins[k][0] < 0.15 * sample.size():
+			break
+		var c: Vector3 = bins[k][1] / float(bins[k][0])
+		var distinct := true
+		for b in bgs:
+			if (b - c).length() / 1.7320508 < tol:
+				distinct = false
+		if distinct:
+			bgs.append(c)
+		if bgs.size() == 2:
+			break
+	if bgs.is_empty():
+		return 0
+	var removed := PackedByteArray()
+	removed.resize(w * h)
+	var visited := PackedByteArray()
+	visited.resize(w * h)
+	var queue := PackedInt32Array()
+	for x in w:
+		queue.append(x)
+		queue.append((h - 1) * w + x)
+	for y in h:
+		queue.append(y * w)
+		queue.append(y * w + w - 1)
+	var n := 0
+	var head := 0
+	while head < queue.size():
+		var idx := queue[head]
+		head += 1
+		if visited[idx] == 1:
+			continue
+		visited[idx] = 1
+		if not _near_any(_rgb(data, idx, w), bgs, tol):
+			continue
+		removed[idx] = 1
+		n += 1
+		var px := idx % w
+		var py := idx / w
+		if px > 0:
+			queue.append(idx - 1)
+		if px < w - 1:
+			queue.append(idx + 1)
+		if py > 0:
+			queue.append(idx - w)
+		if py < h - 1:
+			queue.append(idx + w)
+	# fringe: one ring of not-yet-removed pixels next to removed ones that are still close to the background
+	var fringe := PackedInt32Array()
+	for idx in w * h:
+		if removed[idx] == 1:
+			continue
+		var px := idx % w
+		var py := idx / w
+		var touches := (px > 0 and removed[idx - 1] == 1) or (px < w - 1 and removed[idx + 1] == 1) or (py > 0 and removed[idx - w] == 1) or (py < h - 1 and removed[idx + w] == 1)
+		if touches and _near_any(_rgb(data, idx, w), bgs, tol * 1.8):
+			fringe.append(idx)
+	for idx in fringe:
+		removed[idx] = 1
+		n += 1
+	for idx in w * h:
+		if removed[idx] == 1:
+			data[idx * 4 + 3] = 0
+	img.set_data(w, h, false, Image.FORMAT_RGBA8, data)
+	return n
+
+func _rgb(data: PackedByteArray, idx: int, _w: int) -> Vector3:
+	var o := idx * 4
+	return Vector3(data[o] / 255.0, data[o + 1] / 255.0, data[o + 2] / 255.0)
+
+func _near_any(c: Vector3, bgs: Array[Vector3], tol: float) -> bool:
+	for b in bgs:
+		if (b - c).length() / 1.7320508 < tol:
+			return true
+	return false
 
 func _args() -> Dictionary:
 	var d := {}

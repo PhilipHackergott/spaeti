@@ -158,7 +158,18 @@ static func _normalise(s: Dictionary) -> Dictionary:
 		progress["last_day"] = int(progress["last_day"])
 	for entry in s["log"]:
 		entry["ts"] = int(entry["ts"])
+		_normalise_data(entry["data"])
 	return s
+
+## Log `data` payloads are free-form (the FX/SFX stream reads them), so the rule is: whole numbers are
+## ints, never 2.0 — then re-integering every integral float here restores the state exactly as written.
+static func _normalise_data(data: Dictionary) -> void:
+	for key in data:
+		var v: Variant = data[key]
+		if typeof(v) == TYPE_FLOAT and v == floorf(v):
+			data[key] = int(v)
+		elif typeof(v) == TYPE_DICTIONARY:
+			_normalise_data(v)
 
 static func _normalise_customer(c: Dictionary) -> void:
 	c["id"] = int(c["id"])

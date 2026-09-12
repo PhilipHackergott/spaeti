@@ -1,0 +1,60 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://components/dialogue_box.gd" id="1_script"]
+[ext_resource type="Theme" path="res://components/Theme.tres" id="2_theme"]
+
+[node name="DialogueBox" type="Control"]
+offset_left = 40.0
+offset_top = 196.0
+offset_right = 440.0
+offset_bottom = 262.0
+mouse_filter = 0
+theme = ExtResource("2_theme")
+script = ExtResource("1_script")
+
+[node name="Box" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"DialoguePanel"
+
+[node name="Text" type="VBoxContainer" parent="Box"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 1
+
+[node name="Speaker" type="Label" parent="Box/Text"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"SpeakerLabel"
+text = "Lena"
+
+[node name="Body" type="Label" parent="Box/Text"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+text = "They put the rent up again."
+autowrap_mode = 3
+
+[node name="Choices" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+anchor_right = 1.0
+offset_left = 96.0
+offset_top = -70.0
+offset_bottom = -3.0
+grow_horizontal = 2
+theme_override_constants/separation = 2
+alignment = 2
+
+[node name="Continue" type="Polygon2D" parent="."]
+unique_name_in_owner = true
+position = Vector2(386, 54)
+color = Color(0.949, 0.78, 0.478, 1)
+polygon = PackedVector2Array(0, 0, 7, 0, 3, 5)

@@ -6,6 +6,10 @@ config/name="Späti"
 run/main_scene="res://scenes/Main.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 
+[autoload]
+
+Session="*res://state/session.gd"
+
 [display]
 window/size/viewport_width=480
 window/size/viewport_height=270

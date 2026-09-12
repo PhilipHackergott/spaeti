@@ -1,0 +1,58 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://components/modal.gd" id="1_script"]
+[ext_resource type="Theme" path="res://components/Theme.tres" id="2_theme"]
+[ext_resource type="PackedScene" path="res://components/PixelButton.tscn" id="3_button"]
+
+[node name="Modal" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_theme")
+script = ExtResource("1_script")
+
+[node name="Dim" type="ColorRect" parent="."]
+unique_name_in_owner = true
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.55)
+
+[node name="Frame" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+offset_left = 34.0
+offset_top = 18.0
+offset_right = 446.0
+offset_bottom = 252.0
+
+[node name="Box" type="VBoxContainer" parent="Frame"]
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="Head" type="HBoxContainer" parent="Frame/Box"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Frame/Box/Head"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"LeadLabel"
+text = "Laden"
+
+[node name="Close" parent="Frame/Box/Head" instance=ExtResource("3_button")]
+unique_name_in_owner = true
+layout_mode = 2
+text = "×"
+
+[node name="Rule" type="ColorRect" parent="Frame/Box"]
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+color = Color(0.97, 0.92, 0.82, 0.22)
+
+[node name="Content" type="VBoxContainer" parent="Frame/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 2

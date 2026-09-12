@@ -1,0 +1,69 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://components/item_slot.gd" id="1_script"]
+[ext_resource type="Theme" path="res://components/Theme.tres" id="2_theme"]
+
+[node name="ItemSlot" type="PanelContainer"]
+custom_minimum_size = Vector2(44, 48)
+offset_right = 44.0
+offset_bottom = 48.0
+focus_mode = 2
+theme = ExtResource("2_theme")
+theme_type_variation = &"SlotPanel"
+script = ExtResource("1_script")
+
+[node name="Box" type="VBoxContainer" parent="."]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 0
+
+[node name="IconWrap" type="CenterContainer" parent="Box"]
+custom_minimum_size = Vector2(0, 22)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Icon" type="TextureRect" parent="Box/IconWrap"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+stretch_mode = 3
+
+[node name="Name" type="Label" parent="Box"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"SmallLabel"
+text = "Sterni"
+horizontal_alignment = 1
+clip_text = true
+
+[node name="Row" type="HBoxContainer" parent="Box"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 2
+
+[node name="Price" type="Label" parent="Box/Row"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"SmallLabel"
+text = "1,20"
+
+[node name="Stock" type="Label" parent="Box/Row"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_type_variation = &"SmallLabel"
+text = "x24"
+horizontal_alignment = 2
+
+[node name="Badge" type="Label" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"SmallLabel"
+text = "2"
+horizontal_alignment = 2
+vertical_alignment = 0

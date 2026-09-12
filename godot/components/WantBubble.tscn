@@ -1,0 +1,68 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://components/want_bubble.gd" id="1_script"]
+[ext_resource type="Theme" path="res://components/Theme.tres" id="2_theme"]
+
+[node name="WantBubble" type="Control"]
+custom_minimum_size = Vector2(86, 46)
+offset_right = 86.0
+offset_bottom = 46.0
+mouse_filter = 2
+theme = ExtResource("2_theme")
+script = ExtResource("1_script")
+
+[node name="Box" type="PanelContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"BubblePanel"
+
+[node name="Row" type="HBoxContainer" parent="Box"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 4
+
+[node name="IconWrap" type="CenterContainer" parent="Box/Row"]
+custom_minimum_size = Vector2(16, 36)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Icon" type="TextureRect" parent="Box/Row/IconWrap"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+stretch_mode = 3
+
+[node name="Text" type="VBoxContainer" parent="Box/Row"]
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+theme_override_constants/separation = 0
+
+[node name="Name" type="Label" parent="Box/Row/Text"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+text = "Mate"
+
+[node name="Price" type="Label" parent="Box/Row/Text"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"SmallLabel"
+text = "1,80 €"
+
+[node name="Line" type="Label" parent="Box/Row/Text"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"SmallLabel"
+
+[node name="Tail" type="Polygon2D" parent="."]
+unique_name_in_owner = true
+position = Vector2(12, 45)
+color = Color(0.165, 0.102, 0.071, 1)
+polygon = PackedVector2Array(0, 0, 10, 0, 2, 7)

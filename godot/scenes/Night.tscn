@@ -1,0 +1,54 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scenes/night.gd" id="1_script"]
+[ext_resource type="Theme" path="res://components/Theme.tres" id="2_theme"]
+[ext_resource type="PackedScene" path="res://components/SceneLayers.tscn" id="3_layers"]
+[ext_resource type="PackedScene" path="res://components/Portrait.tscn" id="4_portrait"]
+[ext_resource type="PackedScene" path="res://components/Hud.tscn" id="5_hud"]
+[ext_resource type="PackedScene" path="res://components/WantBubble.tscn" id="6_bubble"]
+[ext_resource type="PackedScene" path="res://components/DialogueBox.tscn" id="7_dialogue"]
+[ext_resource type="PackedScene" path="res://components/ServePanel.tscn" id="8_serve"]
+
+[node name="Night" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_theme")
+script = ExtResource("1_script")
+default_preset = "customer_at_counter"
+
+[node name="SceneLayers" parent="." instance=ExtResource("3_layers")]
+unique_name_in_owner = true
+
+[node name="Portrait" parent="." instance=ExtResource("4_portrait")]
+unique_name_in_owner = true
+offset_left = 145.0
+offset_top = 26.0
+offset_right = 335.0
+offset_bottom = 256.0
+
+[node name="Hud" parent="." instance=ExtResource("5_hud")]
+unique_name_in_owner = true
+
+[node name="WantBubble" parent="." instance=ExtResource("6_bubble")]
+unique_name_in_owner = true
+offset_left = 336.0
+offset_top = 62.0
+offset_right = 422.0
+offset_bottom = 108.0
+
+[node name="DialogueBox" parent="." instance=ExtResource("7_dialogue")]
+unique_name_in_owner = true
+
+[node name="ServeToggle" type="Button" parent="."]
+unique_name_in_owner = true
+offset_left = 396.0
+offset_top = 44.0
+offset_right = 476.0
+offset_bottom = 62.0
+theme = ExtResource("2_theme")
+text = "Bedienen"
+
+[node name="ServePanel" parent="." instance=ExtResource("8_serve")]
+unique_name_in_owner = true

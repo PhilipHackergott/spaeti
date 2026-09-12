@@ -1,0 +1,64 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://components/manage_board.gd" id="1_script"]
+[ext_resource type="Theme" path="res://components/Theme.tres" id="2_theme"]
+[ext_resource type="PackedScene" path="res://components/PixelButton.tscn" id="3_button"]
+
+[node name="ManageBoard" type="VBoxContainer"]
+offset_right = 400.0
+offset_bottom = 196.0
+theme = ExtResource("2_theme")
+theme_override_constants/separation = 2
+script = ExtResource("1_script")
+
+[node name="Head" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Section" type="Label" parent="Head"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"SmallLabel"
+text = "NACHBESTELLEN · PREISE"
+
+[node name="Cash" type="Label" parent="Head"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"SpeakerLabel"
+text = "Kasse 96,40 €"
+horizontal_alignment = 2
+
+[node name="Scroll" type="ScrollContainer" parent="."]
+custom_minimum_size = Vector2(0, 112)
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="Rows" type="VBoxContainer" parent="Scroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 1
+
+[node name="Rule" type="ColorRect" parent="."]
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+color = Color(0.97, 0.92, 0.82, 0.22)
+
+[node name="ModuleHead" type="Label" parent="."]
+layout_mode = 2
+theme_type_variation = &"SmallLabel"
+text = "MODULE"
+
+[node name="Modules" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 1
+
+[node name="Foot" type="HBoxContainer" parent="."]
+layout_mode = 2
+alignment = 2
+
+[node name="OpenNight" parent="Foot" instance=ExtResource("3_button")]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"TitleButton"
+text = "Aufmachen"

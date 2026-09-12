@@ -73,7 +73,7 @@ static func schedule_beats(s: Dictionary, rng: Rng) -> void:
 		arrivals.append({
 			"time_ms": _arrival_time(rng, arch, int(s["config"]["night_len_ms"])),
 			"archetype_id": archetype_id,
-			"want": _pick_want(rng, wants, arch["wants"], available),
+			"want": pick_want(rng, wants, arch["wants"], available),
 			"character_id": character_id,
 			"beat_id": beat["id"],
 			"vignette_id": "",
@@ -91,7 +91,7 @@ static func _arrival_time(rng: Rng, arch: Dictionary, night_len_ms: int) -> int:
 
 ## Weighted want from `wants`, restricted to what is actually on the shelf; falls back to the
 ## archetype's wants, then to anything at all (never an empty want — the serve needs a target).
-static func _pick_want(rng: Rng, wants: Dictionary, fallback_wants: Dictionary, available: Array) -> String:
+static func pick_want(rng: Rng, wants: Dictionary, fallback_wants: Dictionary, available: Array) -> String:
 	var ids: Array = []
 	var weights: Array = []
 	for id in wants:
@@ -104,8 +104,8 @@ static func _pick_want(rng: Rng, wants: Dictionary, fallback_wants: Dictionary, 
 				ids.append(id)
 				weights.append(float(fallback_wants[id]))
 	if ids.is_empty():
-		return rng.pick(available) if not available.is_empty() else "water"
-	return ids[rng.weighted_index(weights)]
+		return str(rng.pick(available)) if not available.is_empty() else "water"
+	return str(ids[rng.weighted_index(weights)])
 
 ## On a quiet night, pin a deterministically chosen unseen vignette onto a random ordinary arrival.
 static func _schedule_vignette(s: Dictionary, rng: Rng) -> void:
