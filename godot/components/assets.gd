@@ -13,7 +13,7 @@ const ROOT := "res://assets/"
 ## reads docs/asset-spec.json and fails the moment this table and the spec disagree.
 const SIZES := {
 	"scene/backdrop": Vector2i(480, 270),
-	"scene/counter": Vector2i(480, 140),
+	"scene/counter": Vector2i(480, 130),
 	"scene/title": Vector2i(480, 270),
 	"char/you_neutral": Vector2i(190, 230),
 	"char/lena_neutral": Vector2i(190, 230),
