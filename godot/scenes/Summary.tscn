@@ -22,7 +22,6 @@ unique_name_in_owner = true
 offset_right = 480.0
 offset_bottom = 270.0
 mouse_filter = 2
-color = Color(0.031, 0.027, 0.039, 0.62)
 
 [node name="Card" type="PanelContainer" parent="."]
 offset_left = 110.0
@@ -44,12 +43,11 @@ text = "Nacht 3 abgerechnet"
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"SmallLabel"
-text = "Donnerstag · 23 verkauft"
+text = "Mittwoch · 23 verkauft"
 
 [node name="Rule" type="ColorRect" parent="Card/Box"]
 custom_minimum_size = Vector2(0, 1)
 layout_mode = 2
-color = Color(0.97, 0.92, 0.82, 0.22)
 
 [node name="Tally" parent="Card/Box" instance=ExtResource("4_tally")]
 unique_name_in_owner = true
@@ -58,7 +56,6 @@ layout_mode = 2
 [node name="Rule2" type="ColorRect" parent="Card/Box"]
 custom_minimum_size = Vector2(0, 1)
 layout_mode = 2
-color = Color(0.97, 0.92, 0.82, 0.22)
 
 [node name="Cash" type="Label" parent="Card/Box"]
 unique_name_in_owner = true

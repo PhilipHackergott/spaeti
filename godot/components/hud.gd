@@ -6,9 +6,9 @@ extends Control
 func _ready() -> void:
 	Palette.prepare()
 	# The three corner icons are fixed, so they are wired once here rather than exported.
-	_set_icon("TopLeft/Stats/ClockBox/Icon", "ui/icon_clock")
-	_set_icon("TopLeft/Stats/CashBox/Icon", "ui/icon_cash")
-	_set_icon("TopLeft/Stats/PfandBox/Icon", "ui/icon_pfand")
+	_set_icon("LeftPlate/TopLeft/Stats/ClockBox/Icon", "ui/icon_clock")
+	_set_icon("LeftPlate/TopLeft/Stats/CashBox/Icon", "ui/icon_cash")
+	_set_icon("LeftPlate/TopLeft/Stats/PfandBox/Icon", "ui/icon_pfand")
 
 func _set_icon(path: String, id: String) -> void:
 	var t := get_node_or_null(path) as TextureRect
@@ -38,6 +38,12 @@ func render(view: Dictionary) -> void:
 		profit.fill = Palette.PROFIT
 		profit.icon_id = "ui/icon_profit"
 		profit.set_reading(float(rep.get("profit", 0.0)) / 100.0, String(hud.get("profit_label", "Profit")))
+
+## While the serve panel owns the right half, the meters step aside instead of being covered.
+func set_compact(on: bool) -> void:
+	var plate := get_node_or_null("RightPlate") as Control
+	if plate != null:
+		plate.visible = not on
 
 func _set_label(unique: String, text: String) -> void:
 	var l := get_node_or_null(unique) as Label

@@ -10,7 +10,8 @@ const PFAND_PER_BOTTLE := 0.15
 const NIGHT_START_MIN := 20 * 60
 const NIGHT_MINUTES := 10 * 60
 
-const WEEKDAY_NAMES := ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+## The UI is German throughout, so the weekday the HUD and the summary print is German too.
+const WEEKDAY_NAMES := ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
 
 # ───────────────────────────────── the reducer ─────────────────────────────────
 
@@ -381,6 +382,8 @@ static func view(s: Dictionary) -> Dictionary:
 		"time_label": time_label(progress),
 		"cash": Economy.round2(float(s["cash"])),
 		"pfand_held": int(s["pfand_held"]),
+		# The deposit the reducer actually pays per returned bottle — the till prints this, never its own rate.
+		"pfand_rate": PFAND_PER_BOTTLE,
 		"reputation": rep.duplicate(),
 		"hud": {
 			"kiez_label": "Kiez-Trust %d" % int(floorf(float(rep["kiez"]) + 0.5)),
@@ -458,5 +461,7 @@ static func _restock_options(s: Dictionary) -> Array:
 			"price": float(inv["price"]),
 			"fair_lo": float(def["fair_lo"]),
 			"fair_hi": float(def["fair_hi"]),
+			# The board colours the price from this — the bands live here, never in a component.
+			"tier": Economy.price_tier(def, float(inv["price"])),
 		})
 	return out

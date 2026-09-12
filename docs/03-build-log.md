@@ -333,3 +333,294 @@ band, cup + phone on the counter, wall of stuff, SPÄTI neon, Pfand crate, regis
 menu text over the bright window. Menu placement over the shop window is Coffee-Talk-appropriate.
 **Language decision needed (user):** UI chrome came out fully German (Neues Spiel / Bedienen / Tag · Donnerstag); the GDD
 specified an English base with German flavour words. Flagged; string-level either way.
+
+## 2026-09-12 — component pool + scenes (operator: components lane)
+
+**Built.** The whole pool in `godot/components/` (17 scene components + 4 code-only ones) and all five screens
+in `godot/scenes/`, replacing the bootstrap Main. Contracts are in `docs/04-component-catalog.md` (rewritten).
+
+- `theme.gd` (`class_name Palette`) + `Theme.tres` — the only place a colour, font size or layout constant lives.
+  VT323 at 12/16/24/48; the font's import defaults (antialias + hinting) are overridden **at runtime** in
+  `Palette.theme()` rather than in the `.import` file, so no other lane's re-import can undo it. Every stylebox
+  has `anti_aliasing = false`.
+- `assets.gd` (`class_name Assets`) — the art seam. `texture(id)` returns the real PNG if the art lane has made
+  it, otherwise a generated placeholder at the **exact** base-pixel size from `docs/asset-spec.json` (bust
+  silhouette for `char/*`, room for `scene/*`, bottle for props, disc for icons; hashed colour, id stamped with
+  a built-in 3×5 font). Art drops in with no code change; `portrait()` does the `_expression → _neutral` fallback.
+- `mock_view.gd` (`class_name MockView`) — read-models shaped exactly like `Rules.view()` for all nine presets, so
+  the screens ran, captured and were judged before touching the engine lane's files.
+- Screens: Title / Night / Manage / Summary + Main (shell + Transition). Each root has `render(view)` and
+  `apply_capture_preset(name)`; `dispatch(action)` uses `/root/Session` when it exists (it now does) and prints
+  otherwise. **A capture preset never reads Session** — determinism per docs/02.
+
+**Captured and eyeballed all nine presets** (`shots/*.png`), fixing the composition until it matched the Coffee
+Talk frames: full-frame set → bust centred behind the counter band → dark translucent dialogue box across the
+counter (coloured speaker name, white body, blinking ▾) → choices stacked above it → want bubble beside the
+customer → HUD in the corners → serve panel sliding over the right half with a shelf of ItemSlots and a Till.
+
+**Tests.** `godot/tests/unit/test_scenes.gd`: every component loads + instantiates, every screen applies every
+preset, the mock view keeps the docs/05 §5 keys and stays JSON-safe, placeholders keep their spec sizes, Palette
+tokens hold. Full suite: **55 run, 0 failed** (with the engine lane's tests).
+
+**Gotchas worth keeping**
+- `remove_child()` + `add_child()` **clears a node's `owner`**, which silently unregisters its scene-unique name —
+  `%Portrait` stopped resolving and the customer vanished from every Night capture. Use `reparent()` (and restore
+  `owner`) whenever a scene hands a node to a component slot (`SceneLayers.mount`, `Modal.add_content`).
+- Godot's TTF importer antialiases and hints by default; VT323 looks like mush at ×4 until you turn all three off
+  (antialiasing NONE, hinting NONE, subpixel DISABLED).
+- **VT323 has no `▾` (U+25BE)** — the continue mark is a `Polygon2D`. It does have `€`, `×`, `·` and the umlauts.
+- Exported setters run *before* a scene's children exist, so components resolve nodes lazily with
+  `get_node_or_null("%X")` and re-apply in `_ready()`; tweens are guarded by `is_inside_tree()` so a component
+  instantiated headless in a test cannot crash.
+- The art lane's `scene/counter.png` came in at 480×**123**, not the spec's 480×100 — `SceneLayers` now
+  bottom-aligns the counter band to whatever height the art is (and exposes `counter_top()`).
+- `shot.mjs` runs with the autoloads live, so a scene that reads `Session` would capture live state; hence the
+  capture-mode branch in `Screen.view()`.
+
+**Not done / for the next round**
+- Portraits: only `char/you_neutral` exists, so every customer in the captures is a placeholder silhouette —
+  `customer_at_counter` and `dialogue_choice` cannot pass the judge's ≥ 85 until Lena/Jürgen/one-offs land.
+  SKU props and the five `ui/icon_*` are placeholders too.
+- No `judge.mjs` run from this lane (the art lane owns Codex); the shots are eyeballed against the reference only.
+- Audio, pause menu, settings content, save/continue are still stubs; `Title → Fortsetzen` is disabled by design.
+- The Till lists at most two picked lines + a Pfand line (the panel has no room for more); a bigger order shows
+  "+N more".
+
+---
+
+## 2026-09-12 — Verification pass (engine lane + component/screen lane)
+
+Read-only audit of the two lanes that just landed. Everything below was **run**, not read off the reports.
+
+**Green.** `node tools/godot/test.mjs` → **55 run, 0 failed, 2856 asserts**, exit 0, no ERROR/WARNING/leak lines.
+All 17 component `.tscn` and all 5 screens load + instantiate (`test_scenes.gd` enumerates them). All **nine**
+presets captured with `shot.mjs` → `shots/verify-<preset>.png`, 1920×1080, `err=0`, no engine messages.
+
+**Contract (docs/05).** `godot/engine/` is clean of `Node|Input|OS.|Time.|get_ticks|randf|randi|get_tree`
+(the only hits are the seeded `Rng.randi_below` and its one caller in `storyflow.gd`). `Rules.apply` clones
+first and `return s` on every illegal branch. §2 state keys, §3's twelve actions and §5's seventeen `view()`
+keys all match exactly. `Session` is registered in `[autoload]`. Every `portrait` id in `characters.gd` has a
+`_neutral` entry in `docs/asset-spec.json`. `docs/04` documents all 21 component scripts + `Theme.tres`.
+
+**Blocking**
+1. `components/assets.gd` `portrait()` — the `_neutral` fallback is gated on `is_real()`, so with no art on
+   disk `char/oneoff_clubber_warm` reaches `_placeholder()`, misses `SIZES`, and renders at `FALLBACK_SIZE`
+   32×32. `shots/verify-serving.png` shows the customer as a tiny blob floating over the neon instead of a
+   bust behind the counter. Violates §6. Fix: resolve the expression before asking for a texture (fall back
+   when `not is_real(a) and not SIZES.has(a)`, or route through the already-tested `Content.portrait_asset()`).
+2. `components/assets.gd` `SIZES` has drifted from `docs/asset-spec.json`: `char/{brandt,tobias,schulz,nadia}_neutral`
+   are missing (→ 32×32 busts in the live game, same failure as 1) and `scene/counter` says 480×100 where the
+   spec says 480×130 and the shipped PNG is 480×123.
+3. `engine/rules.gd WEEKDAY_NAMES` is English ("Thu") and `hud.kiez_label` is `"Kiez-Trust %d"`, but
+   `mock_view.gd` fakes `"Donnerstag"` / `"Kiez 62"`. `hud.gd` prints both verbatim, so every judged capture
+   shows text the engine will never produce (and the real label overflows the HUD plate).
+   `test_mock_view_matches_the_contract` only checks key presence, so nothing catches it.
+4. Raw colour literals in scene files — `scenes/Summary.tscn:25,52,61`, `scenes/Title.tscn:45` — against
+   docs/04 rule 1. (Components also carry raw colours: `scene_layers.gd:36-38`, `modal.gd:22`, `meter.gd:23`.)
+
+**Non-blocking, worth a round**
+- `night.gd::_place_bubble` moves the want bubble, dialogue box and HUD out of the serve panel's half but not
+  the `Portrait`: in `verify-pfand.png` Jürgen is ~55 % hidden behind the panel.
+- **VT323 at `FONT_BODY 16` drops the middle stroke of `M m W w`** (verified on ×2 crops): "Mate"→"Nate",
+  "Miete"→"Niete", "Umsatz"→"Unsatz", "Wasser"→"Masser", "im Kiez"→"in Kiez". Every screen is affected.
+- `assets.gd::_stamp_id` clips on narrow props — `sku/coffee` reads "FFEE", `sku/chocolate` "COLATE",
+  `sku/cigarettes` "TTES" in `verify-serving.png`.
+- `verify-manage.png`: the restock list clips a row mid-height at the scroll boundary; reads as a fault.
+- `docs/05 §7` still documents `Session.load()`; the implementation is `load_save()`.
+- `docs/asset-spec.json` has no `_warm/_upset/_wary` entries for mehmet/brandt/tobias/schulz/nadia although
+  `characters.gd` declares those expressions. `char/you_neutral` shipped 155×230 vs the spec's 190×230.
+- `late_night` *does* differ from `empty_counter` (mean channel delta ≈ 17 over the lower frame) — the grade is
+  just subtle. Not a bug.
+
+## 2026-09-12 — FIXER lane: the four blocking verifier findings
+
+**Fixed**
+1. `components/assets.gd::portrait()` resolves the **expression before the texture**: `pid_exp` that is neither
+   real art nor a `SIZES` entry falls back to `pid_neutral` (docs/05 §6). The `serving` clubber
+   (`char/oneoff_clubber` + `"warm"`) is a 190×230 bust behind the counter again instead of a 32×32 blob —
+   `shots/fix-serving.png`.
+2. `Assets.SIZES` re-mirrored on `docs/asset-spec.json`: added `char/{brandt,tobias,schulz,nadia}_neutral`
+   (190×230) and corrected `scene/counter` to 480×130. New `test_asset_sizes_match_the_spec` parses
+   `docs/asset-spec.json` (via `ProjectSettings.globalize_path`) and fails on any drift in either direction,
+   so the hand-mirror cannot rot again.
+3. `Rules.WEEKDAY_NAMES` is German (`Montag…Sonntag`) — the whole UI is German — and `mock_view.gd` now prints
+   the engine's own strings: `"Kiez-Trust 62"` (was `"Kiez 62"`) and `"Mittwoch"` (day 3, since day 1 is a
+   Montag). New `test_mock_view_speaks_the_engines_language` compares the mock's `hud.kiez_label`,
+   `hud.profit_label` and `weekday_name` against `Rules.view(SpatiState.new_game())`, not just key presence.
+   The real label does **not** overflow the HUD plate: `shots/fix-customer_at_counter.png` shows
+   "Kiez-Trust 62" + the 8-cell bar inside the right plate.
+4. No screen writes a colour any more. New `Palette.SCRIM / DIM / RULE`; `Summary.tscn`'s Dim + two Rules and
+   `Title.tscn`'s Vignette lost their `color = Color(...)` lines and are painted from the tokens in
+   `summary.gd` / `title.gd` `_ready()`. New `test_scenes_write_no_colours` greps every screen `.tscn`.
+   Re-captured: `shots/fix-summary.png`, `shots/fix-title.png`.
+
+Editor placeholders that had gone stale were corrected with them (`Hud.tscn` "Tag 3 · Mittwoch",
+`Meter.tscn` "Kiez-Trust 62", `Summary.tscn` Sub "Mittwoch · 23 verkauft"); all are overwritten by `render()`.
+
+`node tools/godot/test.mjs` → **59 run, 0 failed** (55 before + 4 new).
+
+**Not done / gotchas**
+- `scene/counter` still has three numbers: the spec and `Assets.SIZES` now agree on 480×130, but the shipped
+  `godot/assets/scene/counter.png` is 480×123. Only the placeholder uses `SIZES` (`SceneLayers.counter_top()`
+  measures the real texture), so nothing moved — but the art lane owns closing that 7-px gap.
+- Components still carry raw colours (`scene_layers.gd` DUSK/DEEP/DAWN, `modal.gd`, `meter.gd`'s `fill`
+  default, `Hud.tscn`'s `fill = Color(...)`). Rule 1 says a component may not write a raw hex either; out of
+  scope for this pass, and `hud.gd` overwrites the meter fills from `Palette` at render time.
+- The non-blocking findings (VT323 losing the middle stroke of `M/W`, `_stamp_id` clipping narrow props, the
+  portrait hiding behind the serve panel in `pfand`) were left alone — not this lane.
+
+## 2026-09-12 — verification pass (read-only lane)
+
+Ran, did not read: `node tools/godot/test.mjs` → **59 run / 0 failed / 2968 asserts**, exit 0, no `ERROR`,
+`SCRIPT ERROR` or leak lines in the full log. Captured all nine `docs/02` presets fresh via
+`tools/godot/shot.mjs` (`shots/verify-<preset>.png`, plus `shots/verify-main.png` through the Main shell) —
+all `err=0`, all 1920×1080 — and looked at every PNG (plus 1:1 crops of the till, the HUD plate, the manage
+row list and the wordmark). Grepped `godot/engine/` for `Node|Input|OS.|Time.|get_ticks|randf|randi`: the only
+hit is the seeded `Rng.randi_below`. Grepped `godot/scenes/` for `StyleBoxFlat`/`Color(`: none. State keys,
+the 12 actions, `legal_actions` gating and `view()` keys match docs/05 §2/§3/§5; `Session` is registered in
+`[autoload]`.
+
+**Blocking (found by reading what the captures cannot show — every one of these is live-Session only):**
+1. `components/till.gd:106,109` hardcodes the Pfand rate at `0,08` while `Rules.PFAND_PER_BOTTLE = 0.15`.
+   The `pfand` capture therefore shows "Pfand 6 x 0,08 → −0,48 €, Total 0,72 €" where the engine will take
+   €0.90 and leave €0.30. Fix: read the rate from the engine (add `pfand_rate` to `Rules.view()` or use
+   `Rules.PFAND_PER_BOTTLE`), including the literal in the row label.
+2. `components/manage_board.gd:66` re-implements `Economy.price_tier` with `hi * 1.15`; the engine uses
+   `hi * 1.25`. Prices in that band are painted "gouge" red while the rules still call them "high".
+   Fix: put `tier` on each `manage.restock_options` entry (`Economy.price_tier`) and delete `_tier()`.
+3. Nothing ever dispatches `close_night` and no screen leaves Night. Manage→Night and Summary→Manage are
+   wired; Night→Summary is not, so a live run reaches the first night and stays there. Fix: in `night.gd`,
+   on `night_progress >= 1.0` (or `v.phase != "night"`) dispatch `close_night` and
+   `request_screen.emit("summary")`.
+4. `components/dialogue_box.gd::show_dialogue` resets `_line_index = 0` and restarts the typewriter on every
+   call, and `night.gd::render` calls it on every `Session.changed` — i.e. 60×/s during the night. Live, the
+   line never types out and `advance()` cannot stick. Fix: no-op when the incoming speaker+lines+choices equal
+   what is displayed.
+
+**Non-blocking:** `mock_view.gd` invents archetypes the registry does not have (`pfand_sammler`, `clubber`,
+"Studentin") and German SKU names (`Wasser`, `Schoki`, `Kippen`, `Feuer`) where `skus.gd` says `Water`,
+`Chocolate`, `Cigarettes`, `Lighter` — so every capture shows text the engine cannot produce, which is exactly
+what docs/04 claims `test_mock_view_speaks_the_engines_language` prevents (it only checks the two HUD labels
+and the weekday). · A new game stocks **17** SKUs; the mock shelf shows 10, and `Shelf` is an unbounded
+5-wide grid inside a 240×252 `ServePanel` — 4 rows will push the Till out of the panel. · `night.gd:136`
+invents a speaker name from the character id (`juergen` → "Juergen", not "'Bottle' Jürgen"); `view.active`
+should carry the character's `name`. · 8 expressions declared in `content/characters.gd`
+(`mehmet_warm/wary`, `brandt_wary`, `tobias_warm/upset`, `schulz_wary`, `nadia_warm/upset`) have no
+`docs/asset-spec.json` entry, so the art lane has no work item and they will silently render `_neutral`. ·
+The Manage restock list clips mid-widget: the row after Kaffee is sliced, leaving 8-px button stubs above the
+divider. · VT323 at 12/16 px: `8` reads as `B` ("0,0B", "B,50") and `M` reads as `N` ("Nittwoch", "Nate",
+"Nave off") — money and names are the worst places for it; it is crisp at 24/48 (the Manage header's
+"Mittwoch" is correct). · `late_night` rain is 0.10–0.26-alpha cyan streaks over the whole frame, so it is
+invisible in the capture and, per the layer order, falls *inside* the shop. · `_stamp_id` keeps the tail of
+an id, so placeholders read "FFEE", "COLATE", "TTES". · `project.godot` does not set
+`snap_2d_transforms_to_pixel`, which docs/01 says is on. · `test_scenes.gd::COMPONENTS` is a hand-written
+list — a new `.tscn` in the pool is not tested until someone adds it.
+
+## 2026-09-12 — Fixer lane: the four blocking findings
+
+All four are fixed; `node tools/godot/test.mjs` = **61 run, 0 failed, 3022 asserts** (2 new tests).
+
+1. **The till quoted a deposit the reducer does not pay.** `Rules.view()` now carries
+   **`pfand_rate` (= `Rules.PFAND_PER_BOTTLE`, 0.15)** — a contract addition to docs/05 §5 (noted here
+   because the fixer lane does not own that doc; someone should paste the key into §5's read-model block).
+   `till.gd` gained `pfand_rate` + `set_pfand_rate()` and formats both the row label and the total from it
+   (the two `0.08` literals and the hardcoded "0,08" string are gone); `serve_panel.gd::render` feeds it from
+   the view. `MockView` publishes `Rules.PFAND_PER_BOTTLE` too, so captures cannot drift. `shots/fix-pfand.png`
+   now reads `Pfand 6 x 0,15 → -0,90 €`, `Total 0,30 €` — exactly what `serve_active` will charge.
+2. **The Manage board re-derived the price tier.** `Rules._restock_options` now puts
+   `tier: Economy.price_tier(def, price)` on every entry (alongside `fair_lo/fair_hi`); `manage_board.gd`
+   colours from `entry["tier"]` and `_tier()` (the 1.15-vs-1.25 copy) is deleted. `MockView._restock()` carries
+   the matching tiers and a new assert checks them against `Economy.price_tier` for both the mock and the real
+   read-model. `shots/fix-manage.png`: Cola 1,70 in a 1,20–1,60 band is now amber "high", not red.
+3. **The loop ran into the first night and stopped.** `night.gd::render` now calls `_advance_phase(v)`
+   (skipped in capture mode): at `night_progress >= 1.0` with an empty counter (`active` empty, `queue_len` 0)
+   it dispatches `close_night`, and on `phase == "summary"` it emits `request_screen("summary")`. Two latches
+   (`_closing`, `_leaving`) keep each transition firing once even though `Session._process` re-renders every
+   frame. Manage→Night→Summary→Manage is now closed. A customer mid-beat holds the night open on purpose
+   (patience does not run during a conversation) — the choice still has to be made.
+4. **The typewriter restarted 60×/s.** `dialogue_box.gd` keeps `_current` and `show_dialogue()` returns early
+   when speaker/portrait/kind/lines/choices are unchanged (`_same_dialogue`), so a beat now types out once and
+   `advance()` sticks; `clear()` resets it. `show_final()` (captures) is unaffected —
+   `shots/fix-dialogue_choice.png` is identical to before.
+
+Also, minimally: `screen.gd::session()` returns `null` when the screen is not inside the tree (an absolute
+`/root/Session` path errors out there) — needed so a component/screen instantiated by a test or a capture can
+call `dispatch()` without spewing engine errors.
+
+New tests in `tests/unit/test_scenes.gd`: `test_night_screen_closes_the_night_and_hands_over` (renders an
+over-time night, then a summary view twice, and asserts one `request_screen`) and
+`test_dialogue_survives_being_re_rendered` (re-sending the same beat does not rewind the line; a different one
+does). `VIEW_KEYS` gained `pfand_rate`, and `test_mock_view_speaks_the_engines_language` now checks the rate
+and every restock tier against the engine.
+
+**Not done / for other lanes:** docs/05 §5's read-model block still lists the old key set (no `pfand_rate`, no
+`tier` on `restock_options`) — outside this lane's ownership. · `content/skus.gd` carries a per-SKU `deposit`
+(beer 0.08) that nothing reads; either the reducer should use it per SKU or it should go, because it is what
+the till's wrong 0,08 was copied from. · The non-blocking list above (mock vocabulary, Manage row clipping,
+VT323 `8`/`M`, placeholder stamps) is untouched.
+
+## 2026-09-12 — VERIFIER lane (second pass, after the FIXER round)
+
+Everything below was established by running things, not by reading the previous lanes' reports.
+
+**Tests.** `node tools/godot/test.mjs` → **61 run, 0 failed, 3022 asserts**, exit 0. A full re-run scanned for
+`SCRIPT ERROR|ERROR:|WARNING|leaked|Parse Error` — **zero hits**; the leaked-instance warnings the component
+lane reported are gone.
+
+**Captures.** All nine documented presets re-captured from scratch (stale `verify-*.png` deleted first) with
+`shot.mjs` → `shots/verify-<preset>.png`, every one `err=0`, 1920×1080, no engine messages. `Main.tscn` also
+captures (`verify-main.png`). Every PNG was read and inspected; two were re-cropped at ×2/×3 for glyph and
+clipping checks.
+
+**Contract (docs/05) — verified directly.**
+- `godot/engine/` grep for `Node|Input|OS.|Time.|get_ticks|randf|randi|Engine.|SceneTree`: the only hits are
+  `Rng.randi_below` and its one caller in `storyflow.gd`. Pure.
+- `Rules.apply` clones first and `return s` on every illegal branch; `test_night.gd` asserts it with
+  `is_same()` (identity), not `==`. All twelve §3 actions handled, no thirteenth.
+- `SpatiState.new_game` emits exactly the §2 keys, `active` as `{}`.
+- `Rules.view()` carries every §5 key — **plus `pfand_rate`**, an 18th key (see below).
+- `Session` registered in `[autoload]`; §7 API matches (`load` → `load_save`, the documented deviation).
+- Every `portrait` id in `characters.gd` has a `_neutral` entry in `docs/asset-spec.json` (the art lane's
+  brandt/tobias/schulz/nadia rows have landed).
+- `godot/scenes/` greps clean for `StyleBoxFlat` / `Color(` / `add_theme_*_override` in both `.gd` and `.tscn`.
+- `docs/04-component-catalog.md` documents all 21 component scripts + `Theme.tres` + all 5 screens — complete.
+- Summary capture satisfies the P&L identity by arithmetic: 142,80 + 8,40 − 61,20 − 35,00 − 4,80 = **+50,20**.
+- `late_night` really is graded cold (mean B 66,8 > R 55,5) against `empty_counter`'s warm (R 81,0 > B 48,2).
+
+**BLOCKING — 1 finding**
+1. **`components/theme.gd::_pixelate` destroys glyphs: `M m W w 8` lose their middle stroke at every size.**
+   Verified on ×3 crops of `verify-serving.png` and `verify-summary.png`: "Mate"→"Nate", "Wasser"→"Masser",
+   "Miete + Strom"→"Niete + Stron", "MODULE"→"NODULE", "Mittwoch"→"Nittwoch", and — worst — **"1,80"→"1,B0"**,
+   **"x18"→"x1B"**. Prices and stock counts read as the wrong characters on every screen. `Title.tscn` really
+   does say "eine Nacht im Kiez"; the frame shows "in Kiez". Cause: `_pixelate` sets `hinting = HINTING_NONE`
+   *and* `antialiasing = FONT_ANTIALIASING_NONE`, so VT323's one-unit middle stems land between pixel centres
+   and are dropped with nothing to snap or smooth them. The previous lane logged this as non-blocking; it is
+   not — no hero capture can reach the judge's ≥ 85 while the product names and the money are misspelled.
+   Fix, cheapest first: (a) keep antialiasing off but set `ff.hinting = TextServer.HINTING_NORMAL` and
+   `ff.force_autohinter = true` so stems snap to the grid; (b) if that does not restore all five glyphs, sweep
+   `FONT_SMALL/BODY/LEAD/TITLE` for a size where VT323 keeps them and re-capture; (c) the certain fix is to
+   drop VT323 for a genuine bitmap pixel font (Pixel Operator / m5x7 / m6x11, OFL) whose glyphs are defined on
+   the pixel grid and cannot lose a stroke. Re-verify by cropping "Mate", "Wasser", "1,80" at ×3.
+
+**NON-BLOCKING**
+- `assets.gd::_stamp_id` clips the id on narrow props: `sku/coffee` reads "FFEE", `sku/chocolate` "COLATE",
+  `sku/cigarettes` "TTES" in `verify-serving.png`. Placeholder-only; it disappears when the art lands.
+- `verify-manage.png`: the restock list clips row 6 mid-height at the scroll boundary — reads as a rendering
+  fault rather than a scroll affordance. Clip on a row boundary or fade the last row.
+- `verify-pfand.png`: `night.gd::_place_bubble` relocates the bubble/dialogue/HUD out of the serve panel's
+  half but not the `Portrait` — Jürgen sits ~55 % behind the panel.
+- `docs/05 §5` lists 17 `view()` keys; the implementation and `test_scenes.gd::VIEW_KEYS` carry 18.
+  Add `pfand_rate` to §5 (the till must quote the reducer's deposit, so the key is right — the doc is stale).
+- `components/till.gd` and `components/serve_panel.gd` reference `Rules.PFAND_PER_BOTTLE` as a default. A
+  component reaching into the engine; the view already carries the value, so default to `0.0`.
+- Shipped art drifts from `docs/asset-spec.json`: `char/you_neutral.png` is 155×230 (spec 190×230) and
+  `scene/counter.png` is 480×123 (spec 480×130). Placeholders use the spec size, so layout shifts when real
+  art lands. Art lane owns it.
+- `docs/asset-spec.json` still has no `_warm/_upset/_wary` entries for mehmet/brandt/tobias/schulz/nadia,
+  although `characters.gd` declares those expressions (they fall back to `_neutral`, no crash).
+- Components still write raw colours (`scene_layers.gd` DUSK/DEEP/DAWN, `modal.gd`, `meter.gd`, `Hud.tscn`),
+  against docs/04 rule 1. Scenes are clean.
+- Language is mixed: the chrome is German (Laden, Nachbestellen, Kasse, Aufmachen, Gewinn, Bedienen) while all
+  dialogue and every module name/description is English ("Second fridge", "Patience +15 % when it rains").
+  The GDD flags localisation scope as an open decision (⚑) — it needs one before the content lane writes more.
+- `late_night` is graded correctly but the rain layer is invisible in the capture; docs/02 asks for rain.

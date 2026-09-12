@@ -37,6 +37,8 @@ func render(view: Dictionary) -> void:
 	_pfand_available = int(view.get("pfand_held", 0))
 	var shelf := get_node_or_null("%Shelf") as Shelf
 	var t := till()
+	if t != null:
+		t.set_pfand_rate(float(view.get("pfand_rate", Rules.PFAND_PER_BOTTLE)))
 	if shelf != null:
 		shelf.set_items(_shelf_items, t.counts() if t != null else {})
 	var want := get_node_or_null("%Want") as Label

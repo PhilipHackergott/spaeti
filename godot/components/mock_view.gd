@@ -91,14 +91,18 @@ static func _base() -> Dictionary:
 	return {
 		"phase": "night",
 		"day": 3,
-		"weekday_name": "Donnerstag",
+		"weekday_name": "Mittwoch",  # day 3 = Rules.WEEKDAY_NAMES[2]; day 1 is a Montag
 		"clock_ms": 9600000,
 		"night_progress": 0.33,
 		"time_label": "22:40",
 		"cash": 84.5,
 		"pfand_held": 12,
+		# The engine constant, not a copy of it: a mock that quotes a stale deposit lies in every capture.
+		"pfand_rate": Rules.PFAND_PER_BOTTLE,
 		"reputation": {"kiez": 62.0, "profit": 48.0, "integrity": 71.0},
-		"hud": {"kiez_label": "Kiez 62", "profit_label": "Profit 48"},
+		# Verbatim the strings Rules.view() formats ("Kiez-Trust %d" / "Profit %d") — a mock that
+		# prints shorter text than the engine hides the overflow the real HUD would show.
+		"hud": {"kiez_label": "Kiez-Trust 62", "profit_label": "Profit 48"},
 		"active": {},
 		"queue_len": 0,
 		"dialogue": {},
@@ -162,14 +166,14 @@ static func _shelf() -> Array:
 
 static func _restock() -> Array:
 	return [
-		{"sku_id": "beer", "name": "Sterni", "cost": 0.55, "stock": 24, "price": 1.2, "fair_lo": 1.0, "fair_hi": 1.5},
-		{"sku_id": "mate", "name": "Mate", "cost": 0.9, "stock": 18, "price": 1.8, "fair_lo": 1.5, "fair_hi": 2.1},
-		{"sku_id": "cola", "name": "Cola", "cost": 0.7, "stock": 12, "price": 1.7, "fair_lo": 1.2, "fair_hi": 1.6},
-		{"sku_id": "water", "name": "Wasser", "cost": 0.35, "stock": 20, "price": 1.0, "fair_lo": 0.8, "fair_hi": 1.2},
-		{"sku_id": "coffee", "name": "Kaffee", "cost": 0.6, "stock": 8, "price": 1.5, "fair_lo": 1.3, "fair_hi": 1.8},
-		{"sku_id": "chips", "name": "Chips", "cost": 0.95, "stock": 9, "price": 1.9, "fair_lo": 1.6, "fair_hi": 2.2},
-		{"sku_id": "chocolate", "name": "Schoki", "cost": 0.6, "stock": 14, "price": 1.1, "fair_lo": 1.2, "fair_hi": 1.6},
-		{"sku_id": "cigarettes", "name": "Kippen", "cost": 6.4, "stock": 6, "price": 8.5, "fair_lo": 7.0, "fair_hi": 8.0},
+		{"sku_id": "beer", "name": "Sterni", "cost": 0.55, "stock": 24, "price": 1.2, "fair_lo": 1.0, "fair_hi": 1.5, "tier": "fair"},
+		{"sku_id": "mate", "name": "Mate", "cost": 0.9, "stock": 18, "price": 1.8, "fair_lo": 1.5, "fair_hi": 2.1, "tier": "fair"},
+		{"sku_id": "cola", "name": "Cola", "cost": 0.7, "stock": 12, "price": 1.7, "fair_lo": 1.2, "fair_hi": 1.6, "tier": "high"},
+		{"sku_id": "water", "name": "Wasser", "cost": 0.35, "stock": 20, "price": 1.0, "fair_lo": 0.8, "fair_hi": 1.2, "tier": "fair"},
+		{"sku_id": "coffee", "name": "Kaffee", "cost": 0.6, "stock": 8, "price": 1.5, "fair_lo": 1.3, "fair_hi": 1.8, "tier": "fair"},
+		{"sku_id": "chips", "name": "Chips", "cost": 0.95, "stock": 9, "price": 1.9, "fair_lo": 1.6, "fair_hi": 2.2, "tier": "fair"},
+		{"sku_id": "chocolate", "name": "Schoki", "cost": 0.6, "stock": 14, "price": 1.1, "fair_lo": 1.2, "fair_hi": 1.6, "tier": "steal"},
+		{"sku_id": "cigarettes", "name": "Kippen", "cost": 6.4, "stock": 6, "price": 8.5, "fair_lo": 7.0, "fair_hi": 8.0, "tier": "high"},
 	]
 
 static func _modules() -> Array:

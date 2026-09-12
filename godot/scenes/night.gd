@@ -5,8 +5,13 @@ extends Screen
 ## sliding in over the right half. Every one of those is a component; this file only arranges them
 ## and turns clicks into engine actions.
 
-const BUBBLE_RIGHT := Vector2(336, 62)
+const BUBBLE_RIGHT := Vector2(340, 74)
 const BUBBLE_LEFT := Vector2(44, 62)
+
+## The night ends itself. Session ticks every frame, so `render` is the place both transitions are
+## noticed — these two latches keep each one firing exactly once per night.
+var _closing: bool = false
+var _leaving: bool = false
 
 func _ready() -> void:
 	super._ready()
@@ -34,6 +39,9 @@ func _ready() -> void:
 
 func render(v: Dictionary) -> void:
 	if v.is_empty():
+		return
+	# 06:00 with an empty counter closes the books; once the reducer is in `summary` the shell takes over.
+	if not _capture_mode and _advance_phase(v):
 		return
 	var layers := _layers()
 	if layers != null:
@@ -66,6 +74,30 @@ func render(v: Dictionary) -> void:
 	var toggle := get_node_or_null("%ServeToggle") as Button
 	if toggle != null:
 		toggle.disabled = active.is_empty() or not dialogue.is_empty()
+
+## Closes the night when the clock has run out and nobody is left waiting, and hands over to the
+## summary screen once the reducer has moved on. Returns true when the screen is in transition and
+## should not keep drawing this frame's (already stale) counter.
+func _advance_phase(v: Dictionary) -> bool:
+	match String(v.get("phase", "")):
+		"night":
+			_leaving = false
+			if float(v.get("night_progress", 0.0)) < 1.0:
+				_closing = false
+				return false
+			# Whoever is still at the counter is served first; the last balk clears it either way.
+			var counter_clear := (v.get("active", {}) as Dictionary).is_empty() and int(v.get("queue_len", 0)) == 0
+			if not _closing and counter_clear:
+				_closing = true
+				dispatch({"type": "close_night"})
+				return true
+			return false
+		"summary":
+			if not _leaving:
+				_leaving = true
+				request_screen.emit("summary")
+			return true
+	return false
 
 func apply_capture_preset(preset_name: String) -> void:
 	super.apply_capture_preset(preset_name)
@@ -115,10 +147,17 @@ func toggle_serve() -> void:
 		panel.open()
 	_place_bubble(panel.is_open)
 
+## With the serve panel open the counter chrome moves left so nothing is hidden behind it.
 func _place_bubble(serve_open: bool) -> void:
 	var bubble := get_node_or_null("%WantBubble") as WantBubble
 	if bubble != null:
 		bubble.position = BUBBLE_LEFT if serve_open else BUBBLE_RIGHT
+	var box := _dialogue()
+	if box != null:
+		box.size = Vector2(188.0 if serve_open else 400.0, 66.0)
+	var hud := get_node_or_null("%Hud") as Hud
+	if hud != null:
+		hud.set_compact(serve_open)
 
 ## The plain order a customer speaks when no story beat is pending. Presentation only — the engine
 ## read-model carries `dialogue` just for beats and vignettes (docs/05 section 4).

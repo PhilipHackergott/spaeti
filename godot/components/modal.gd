@@ -43,8 +43,17 @@ func content() -> Control:
 
 func add_content(n: Node) -> void:
 	var c := content()
-	if c != null:
+	if c == null or n == null or n.get_parent() == c:
+		return
+	var keep_owner := n.owner
+	if n.is_inside_tree() and n.get_parent() != null:
+		n.reparent(c, false)   # keeps `owner`, so %-names inside still resolve
+	else:
+		if n.get_parent() != null:
+			n.get_parent().remove_child(n)
 		c.add_child(n)
+	if keep_owner != null:
+		n.owner = keep_owner
 
 func clear_content() -> void:
 	var c := content()

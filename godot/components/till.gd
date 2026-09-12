@@ -12,8 +12,11 @@ signal line_removed(sku_id: String)
 ## [{sku_id, name, price, qty}] — UI selection, never game state.
 var lines: Array = []
 var pfand_bottles: int = 0
+## Paid per returned bottle. Set from `view.pfand_rate` (docs/05 section 5) so the tray never quotes a
+## deposit the reducer will not pay; the engine constant is only the standalone default.
+var pfand_rate: float = Rules.PFAND_PER_BOTTLE
 
-const MAX_ROWS := 3
+const MAX_ROWS := 2
 
 func _ready() -> void:
 	Palette.prepare()
@@ -45,6 +48,10 @@ func add_sku(entry: Dictionary) -> void:
 		"price": float(entry.get("price", 0.0)),
 		"qty": 1,
 	})
+	_refresh()
+
+func set_pfand_rate(rate: float) -> void:
+	pfand_rate = maxf(0.0, rate)
 	_refresh()
 
 func set_pfand(bottles: int) -> void:
@@ -103,13 +110,17 @@ func _refresh() -> void:
 		if lines.size() > shown:
 			rows.add_child(_row("+%d more" % (lines.size() - shown), "", Palette.TEXT_DIM))
 		if pfand_bottles > 0:
-			rows.add_child(_row("Pfand %d x 0,08" % pfand_bottles, "-" + Palette.money(pfand_bottles * 0.08), Palette.PFAND))
+			rows.add_child(_row("Pfand %d x %s" % [pfand_bottles, _rate_text()], "-" + Palette.money(float(pfand_bottles) * pfand_rate), Palette.PFAND))
 	var total_label := get_node_or_null("%Total") as Label
 	if total_label != null:
-		total_label.text = Palette.money(total() - pfand_bottles * 0.08)
+		total_label.text = Palette.money(total() - float(pfand_bottles) * pfand_rate)
 	var ring := get_node_or_null("%RingUp") as Button
 	if ring != null:
 		ring.disabled = lines.is_empty() and pfand_bottles == 0
+
+## The rate as the row prints it: "0,15" (no euro sign — the row is already a price line).
+func _rate_text() -> String:
+	return ("%.2f" % pfand_rate).replace(".", ",")
 
 func _row(left: String, right: String, col: Color) -> HBoxContainer:
 	var row := HBoxContainer.new()

@@ -9,9 +9,11 @@ const ROOT := "res://assets/"
 
 ## id -> base-pixel size, mirrored from docs/asset-spec.json. A placeholder must occupy the same
 ## footprint as the final art, or the composition would shift the day the art lands.
+## The mirror is not trusted to stay honest by hand: test_scenes.gd::test_asset_sizes_match_the_spec
+## reads docs/asset-spec.json and fails the moment this table and the spec disagree.
 const SIZES := {
 	"scene/backdrop": Vector2i(480, 270),
-	"scene/counter": Vector2i(480, 100),
+	"scene/counter": Vector2i(480, 130),
 	"scene/title": Vector2i(480, 270),
 	"char/you_neutral": Vector2i(190, 230),
 	"char/lena_neutral": Vector2i(190, 230),
@@ -20,6 +22,10 @@ const SIZES := {
 	"char/juergen_neutral": Vector2i(190, 230),
 	"char/juergen_warm": Vector2i(190, 230),
 	"char/mehmet_neutral": Vector2i(190, 230),
+	"char/brandt_neutral": Vector2i(190, 230),
+	"char/tobias_neutral": Vector2i(190, 230),
+	"char/schulz_neutral": Vector2i(190, 230),
+	"char/nadia_neutral": Vector2i(190, 230),
 	"char/oneoff_clubber_neutral": Vector2i(190, 230),
 	"char/oneoff_tourist_neutral": Vector2i(190, 230),
 	"sku/beer": Vector2i(14, 36),
@@ -73,11 +79,13 @@ static func texture(id: String) -> Texture2D:
 static func portrait(portrait_id: String, expression: String = "neutral") -> Texture2D:
 	var pid := portrait_id if portrait_id != "" else "char/oneoff_clubber"
 	var exp_name := expression if expression != "" else "neutral"
-	if is_real(pid + "_" + exp_name):
-		return texture(pid + "_" + exp_name)
-	if is_real(pid + "_neutral"):
-		return texture(pid + "_neutral")
-	return texture(pid + "_" + exp_name)
+	# Resolve the EXPRESSION first, then ask for a texture. An expression we have neither art nor a
+	# documented size for is not a portrait we know at all, so it falls back to _neutral (docs/05 §6)
+	# — otherwise the placeholder would come back at FALLBACK_SIZE and the bust would shrink to 32px.
+	var id := pid + "_" + exp_name
+	if not is_real(id) and not SIZES.has(id):
+		id = pid + "_neutral"
+	return texture(id)
 
 static func clear_cache() -> void:
 	_cache.clear()
@@ -92,6 +100,7 @@ static func _placeholder(id: String) -> ImageTexture:
 	img.fill(Color(0, 0, 0, 0))
 	var col := _hash_colour(id)
 	if id.begins_with("char/"):
+		col = Color.from_hsv(col.h, 0.26, 0.44, 1.0)
 		_draw_bust(img, col)
 		_outline(img, Color(0.06, 0.04, 0.05, 1.0))
 	elif id.begins_with("scene/"):
@@ -222,13 +231,15 @@ static func _stamp_id(img: Image, id: String) -> void:
 	var h := img.get_height()
 	if w < 20 or h < 12:
 		return
+	# On a bust the label goes on the chest: the bottom of the image is behind the counter.
+	var baseline := h - 9 if not id.begins_with("char/") else int(h * 0.68)
 	var text := id.to_upper()
 	var max_chars := int((w - 4) / 4)
 	if text.length() > max_chars:
 		text = text.substr(text.length() - max_chars, max_chars)
 	var tw := text.length() * 4
 	var x0 := maxi(1, (w - tw) / 2)
-	var y0 := h - 9
+	var y0 := baseline
 	_rect(img, Rect2i(x0 - 2, y0 - 2, tw + 3, 9), Color(0, 0, 0, 0.62))
 	for i in text.length():
 		var rows: Array = GLYPHS.get(text[i], GLYPHS[" "])

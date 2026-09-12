@@ -19,6 +19,10 @@ var _line_index: int = 0
 var _choices: Array = []
 var _typing: bool = false
 var _revealed: float = 0.0
+## The dialogue currently on screen. `night.gd::render` re-sends the same one on every Session tick
+## (~60x/s during the night), so without this the typewriter would restart from character 0 forever
+## and `advance()` would be undone on the next frame.
+var _current: Dictionary = {}
 
 func _ready() -> void:
 	Palette.prepare()
@@ -33,6 +37,9 @@ func show_dialogue(d: Dictionary, instant: bool = false) -> void:
 	if d.is_empty():
 		clear()
 		return
+	if _same_dialogue(d):
+		return
+	_current = d.duplicate(true)
 	visible = true
 	_lines = d.get("lines", [])
 	_choices = d.get("choices", [])
@@ -55,6 +62,7 @@ func show_final(d: Dictionary) -> void:
 
 func clear() -> void:
 	visible = false
+	_current = {}
 	_lines = []
 	_choices = []
 	_typing = false
@@ -75,6 +83,29 @@ func advance() -> void:
 		return
 	if _choices.is_empty():
 		finished.emit()
+
+## Same speaker, same words, same choices = the same moment; only a real change retypes.
+func _same_dialogue(d: Dictionary) -> bool:
+	if _current.is_empty():
+		return false
+	for key in ["speaker", "portrait", "kind"]:
+		if String(d.get(key, "")) != String(_current.get(key, "")):
+			return false
+	var lines: Array = d.get("lines", [])
+	var was: Array = _current.get("lines", [])
+	if lines.size() != was.size():
+		return false
+	for i in lines.size():
+		if String(lines[i]) != String(was[i]):
+			return false
+	var choices: Array = d.get("choices", [])
+	var had: Array = _current.get("choices", [])
+	if choices.size() != had.size():
+		return false
+	for i in choices.size():
+		if String((choices[i] as Dictionary).get("label", "")) != String((had[i] as Dictionary).get("label", "")):
+			return false
+	return true
 
 func is_typing() -> bool:
 	return _typing

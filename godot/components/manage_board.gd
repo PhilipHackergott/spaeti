@@ -53,23 +53,14 @@ func _row(entry: Dictionary) -> HBoxContainer:
 	var price := float(entry.get("price", 0.0))
 	var lo := float(entry.get("fair_lo", 0.0))
 	var hi := float(entry.get("fair_hi", 0.0))
-	var price_label := _label(Palette.money(price), 54, Palette.tier_colour(_tier(price, lo, hi)))
+	# The band is the engine's verdict (view.manage.restock_options[].tier) — never re-derived here.
+	var price_label := _label(Palette.money(price), 54, Palette.tier_colour(String(entry.get("tier", "fair"))))
 	price_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	row.add_child(price_label)
 	row.add_child(_button("-", _on_price.bind(sku_id, price, -PRICE_STEP)))
 	row.add_child(_button("+", _on_price.bind(sku_id, price, PRICE_STEP)))
-	row.add_child(_label("fair %s-%s" % [_short(lo), _short(hi)], 62, Palette.TEXT_DIM))
+	row.add_child(_label("%s-%s" % [_short(lo), _short(hi)], 70, Palette.TEXT_DIM))
 	return row
-
-## Same bands the engine's Economy.price_tier uses; here only to colour the number.
-func _tier(price: float, lo: float, hi: float) -> String:
-	if price < lo:
-		return "steal"
-	if price > hi * 1.15:
-		return "gouge"
-	if price > hi:
-		return "high"
-	return "fair"
 
 func _build_modules(modules: Array) -> void:
 	var box := get_node_or_null("%Modules") as VBoxContainer

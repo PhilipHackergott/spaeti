@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=15 format=3]
+[gd_resource type="Theme" load_steps=18 format=3]
 
 [ext_resource type="FontFile" path="res://assets/fonts/VT323-Regular.ttf" id="1_font"]
 
@@ -192,6 +192,52 @@ border_width_left = 2
 border_color = Color(0.949, 0.78, 0.478, 1)
 anti_aliasing = false
 
+[sub_resource type="StyleBoxFlat" id="SB_Choice"]
+content_margin_left = 8.0
+content_margin_top = 2.0
+content_margin_right = 8.0
+content_margin_bottom = 2.0
+bg_color = Color(0.035, 0.03, 0.045, 0.94)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.97, 0.92, 0.82, 0.3)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id="SB_ChoiceHover"]
+content_margin_left = 8.0
+content_margin_top = 2.0
+content_margin_right = 8.0
+content_margin_bottom = 2.0
+bg_color = Color(0.24, 0.15, 0.09, 0.97)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.949, 0.78, 0.478, 0.9)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id="SB_HudPlate"]
+content_margin_left = 3.0
+content_margin_top = 1.0
+content_margin_right = 3.0
+content_margin_bottom = 1.0
+bg_color = Color(0.031, 0.027, 0.039, 0.5)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+anti_aliasing = false
+
 [sub_resource type="StyleBoxFlat" id="SB_Flat"]
 bg_color = Color(0, 0, 0, 0)
 anti_aliasing = false
@@ -214,9 +260,15 @@ Button/styles/normal = SubResource("SB_BtnNormal")
 Button/styles/pressed = SubResource("SB_BtnPressed")
 ChoiceButton/base_type = &"Button"
 ChoiceButton/font_sizes/font_size = 16
+ChoiceButton/styles/focus = SubResource("SB_ChoiceHover")
+ChoiceButton/styles/hover = SubResource("SB_ChoiceHover")
+ChoiceButton/styles/normal = SubResource("SB_Choice")
+ChoiceButton/styles/pressed = SubResource("SB_ChoiceHover")
 DialoguePanel/base_type = &"PanelContainer"
 DialoguePanel/styles/panel = SubResource("SB_Dialogue")
 FlatPanel/base_type = &"PanelContainer"
+HudPlate/base_type = &"PanelContainer"
+HudPlate/styles/panel = SubResource("SB_HudPlate")
 FlatPanel/styles/panel = SubResource("SB_Flat")
 Label/colors/font_color = Color(0.957, 0.906, 0.824, 1)
 Label/font_sizes/font_size = 16

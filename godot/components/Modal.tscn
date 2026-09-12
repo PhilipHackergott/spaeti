@@ -22,10 +22,10 @@ color = Color(0, 0, 0, 0.55)
 
 [node name="Frame" type="PanelContainer" parent="."]
 unique_name_in_owner = true
-offset_left = 34.0
-offset_top = 18.0
-offset_right = 446.0
-offset_bottom = 252.0
+offset_left = 24.0
+offset_top = 10.0
+offset_right = 456.0
+offset_bottom = 260.0
 
 [node name="Box" type="VBoxContainer" parent="Frame"]
 layout_mode = 2

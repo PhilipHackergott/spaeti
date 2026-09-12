@@ -23,6 +23,11 @@ const RED_HOODIE := Color("c0392b")
 const INK := Color(0.047, 0.039, 0.055, 0.86)
 const INK_DEEP := Color(0.031, 0.027, 0.039, 0.94)
 const EDGE := Color(0.97, 0.92, 0.82, 0.30)
+## Full-frame veils and the hairline inside a card. They live here because a screen may not write a
+## colour of its own (docs/04 rule 1); each screen assigns them to its ColorRects in _ready().
+const SCRIM := Color(0.031, 0.027, 0.039, 0.28)   # over title art, so the wordmark stays legible
+const DIM := Color(0.031, 0.027, 0.039, 0.62)     # behind a card/modal: the set recedes
+const RULE := Color(0.97, 0.92, 0.82, 0.22)       # the 1-px separator inside a card
 const TEXT := Color("f4e7d2")
 const TEXT_WHITE := Color("ffffff")
 const TEXT_DIM := Color("9c8c7d")

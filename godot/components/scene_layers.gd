@@ -52,11 +52,19 @@ func _ready() -> void:
 ## Where the customer bust goes: in front of the backdrop, behind the counter.
 func mount(node: Node) -> void:
 	var slot := get_node_or_null("%Characters") as Control
-	if slot == null:
+	if slot == null or node == null or node.get_parent() == slot:
 		return
-	if node.get_parent() != null:
-		node.get_parent().remove_child(node)
-	slot.add_child(node)
+	# reparent() keeps `owner`; remove_child()+add_child() would clear it and with it the node's
+	# scene-unique name (%Portrait would stop resolving and the bust would vanish).
+	var keep_owner := node.owner
+	if node.is_inside_tree() and node.get_parent() != null:
+		node.reparent(slot, false)
+	else:
+		if node.get_parent() != null:
+			node.get_parent().remove_child(node)
+		slot.add_child(node)
+	if keep_owner != null:
+		node.owner = keep_owner
 
 func set_time(progress: float) -> void:
 	night_progress = progress

@@ -1,9 +1,19 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scenes/title.gd" id="1_script"]
 [ext_resource type="Theme" path="res://components/Theme.tres" id="2_theme"]
 [ext_resource type="PackedScene" path="res://components/PixelButton.tscn" id="3_button"]
 [ext_resource type="PackedScene" path="res://components/Modal.tscn" id="4_modal"]
+
+[sub_resource type="Gradient" id="G_Scrim"]
+offsets = PackedFloat32Array(0, 1)
+colors = PackedColorArray(0.02, 0.016, 0.027, 0.88, 0.02, 0.016, 0.027, 0)
+
+[sub_resource type="GradientTexture2D" id="GT_Scrim"]
+gradient = SubResource("G_Scrim")
+width = 250
+height = 270
+fill_to = Vector2(1, 0)
 
 [node name="Title" type="Control"]
 anchor_right = 1.0
@@ -21,11 +31,17 @@ offset_bottom = 270.0
 mouse_filter = 2
 stretch_mode = 2
 
+[node name="Scrim" type="TextureRect" parent="."]
+offset_right = 250.0
+offset_bottom = 270.0
+mouse_filter = 2
+texture = SubResource("GT_Scrim")
+stretch_mode = 2
+
 [node name="Vignette" type="ColorRect" parent="."]
 offset_right = 480.0
 offset_bottom = 270.0
 mouse_filter = 2
-color = Color(0.031, 0.027, 0.039, 0.45)
 
 [node name="Wordmark" type="VBoxContainer" parent="."]
 offset_left = 36.0
@@ -45,7 +61,7 @@ text = "SPÄTI"
 layout_mode = 2
 mouse_filter = 2
 theme_type_variation = &"SmallLabel"
-text = "eine Nacht im Kiez · Berlin, 03:00"
+text = "eine Nacht im Kiez"
 
 [node name="Menu" type="VBoxContainer" parent="."]
 offset_left = 36.0

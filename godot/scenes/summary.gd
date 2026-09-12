@@ -4,6 +4,11 @@ extends Screen
 
 func _ready() -> void:
 	super._ready()
+	# The veil and the two hairlines are Palette tokens, never colours written into the .tscn
+	# (docs/04 rule 1) — a palette change has to reach every surface.
+	_paint("Dim", Palette.DIM)
+	_paint("Card/Box/Rule", Palette.RULE)
+	_paint("Card/Box/Rule2", Palette.RULE)
 	var cont := get_node_or_null("%Continue") as Button
 	if cont != null and not cont.pressed.is_connected(_on_continue):
 		cont.pressed.connect(_on_continue)
@@ -44,6 +49,11 @@ func render(v: Dictionary) -> void:
 func _on_continue() -> void:
 	dispatch({"type": "advance_day"})
 	request_screen.emit("manage")
+
+func _paint(path: String, col: Color) -> void:
+	var r := get_node_or_null(path) as ColorRect
+	if r != null:
+		r.color = col
 
 func _tally() -> SummaryTally:
 	return get_node_or_null("%Tally") as SummaryTally

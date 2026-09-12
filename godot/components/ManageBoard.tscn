@@ -28,7 +28,7 @@ text = "Kasse 96,40 €"
 horizontal_alignment = 2
 
 [node name="Scroll" type="ScrollContainer" parent="."]
-custom_minimum_size = Vector2(0, 112)
+custom_minimum_size = Vector2(0, 92)
 layout_mode = 2
 horizontal_scroll_mode = 0
 

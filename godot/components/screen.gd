@@ -25,7 +25,10 @@ func _ready() -> void:
 	refresh()
 
 func session() -> Node:
-	# Autoloads are children of /root — `Engine.has_singleton` would never see them.
+	# Autoloads are children of /root — `Engine.has_singleton` would never see them. A screen the tests
+	# or a capture instantiate outside the tree has no Session at all (an absolute path would error).
+	if not is_inside_tree():
+		return null
 	return get_node_or_null("/root/Session")
 
 func view() -> Dictionary:

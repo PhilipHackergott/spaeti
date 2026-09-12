@@ -8,6 +8,10 @@ func _ready() -> void:
 	var art := get_node_or_null("%Art") as TextureRect
 	if art != null:
 		art.texture = Assets.texture("scene/title")
+	# The vignette over the art is a Palette token, not a colour in the .tscn (docs/04 rule 1).
+	var vignette := get_node_or_null("Vignette") as ColorRect
+	if vignette != null:
+		vignette.color = Palette.SCRIM
 	_wire("%NewGame", _on_new_game)
 	_wire("%Continue", _on_continue)
 	_wire("%Settings", _on_settings)

@@ -13,112 +13,122 @@ mouse_filter = 2
 theme = ExtResource("2_theme")
 script = ExtResource("1_script")
 
-[node name="TopLeft" type="VBoxContainer" parent="."]
-offset_left = 4.0
-offset_top = 3.0
-offset_right = 200.0
-offset_bottom = 37.0
+[node name="LeftPlate" type="PanelContainer" parent="."]
+offset_left = 2.0
+offset_top = 1.0
+offset_right = 176.0
+offset_bottom = 35.0
+mouse_filter = 2
+theme_type_variation = &"HudPlate"
+
+[node name="TopLeft" type="VBoxContainer" parent="LeftPlate"]
+layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 0
 
-[node name="Stats" type="HBoxContainer" parent="TopLeft"]
+[node name="Stats" type="HBoxContainer" parent="LeftPlate/TopLeft"]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 7
 
-[node name="ClockBox" type="HBoxContainer" parent="TopLeft/Stats"]
+[node name="ClockBox" type="HBoxContainer" parent="LeftPlate/TopLeft/Stats"]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 2
 
-[node name="Icon" type="TextureRect" parent="TopLeft/Stats/ClockBox"]
+[node name="Icon" type="TextureRect" parent="LeftPlate/TopLeft/Stats/ClockBox"]
 custom_minimum_size = Vector2(16, 16)
 layout_mode = 2
 size_flags_vertical = 4
 mouse_filter = 2
 stretch_mode = 3
 
-[node name="Clock" type="Label" parent="TopLeft/Stats/ClockBox"]
+[node name="Clock" type="Label" parent="LeftPlate/TopLeft/Stats/ClockBox"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 4
 mouse_filter = 2
 text = "22:40"
 
-[node name="CashBox" type="HBoxContainer" parent="TopLeft/Stats"]
+[node name="CashBox" type="HBoxContainer" parent="LeftPlate/TopLeft/Stats"]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 2
 
-[node name="Icon" type="TextureRect" parent="TopLeft/Stats/CashBox"]
+[node name="Icon" type="TextureRect" parent="LeftPlate/TopLeft/Stats/CashBox"]
 custom_minimum_size = Vector2(16, 16)
 layout_mode = 2
 size_flags_vertical = 4
 mouse_filter = 2
 stretch_mode = 3
 
-[node name="Cash" type="Label" parent="TopLeft/Stats/CashBox"]
+[node name="Cash" type="Label" parent="LeftPlate/TopLeft/Stats/CashBox"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 4
 mouse_filter = 2
 text = "84,50 €"
 
-[node name="PfandBox" type="HBoxContainer" parent="TopLeft/Stats"]
+[node name="PfandBox" type="HBoxContainer" parent="LeftPlate/TopLeft/Stats"]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 2
 
-[node name="Icon" type="TextureRect" parent="TopLeft/Stats/PfandBox"]
+[node name="Icon" type="TextureRect" parent="LeftPlate/TopLeft/Stats/PfandBox"]
 custom_minimum_size = Vector2(16, 16)
 layout_mode = 2
 size_flags_vertical = 4
 mouse_filter = 2
 stretch_mode = 3
 
-[node name="Pfand" type="Label" parent="TopLeft/Stats/PfandBox"]
+[node name="Pfand" type="Label" parent="LeftPlate/TopLeft/Stats/PfandBox"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 4
 mouse_filter = 2
 text = "12"
 
-[node name="Sub" type="HBoxContainer" parent="TopLeft"]
+[node name="Sub" type="HBoxContainer" parent="LeftPlate/TopLeft"]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 6
 
-[node name="Day" type="Label" parent="TopLeft/Sub"]
+[node name="Day" type="Label" parent="LeftPlate/TopLeft/Sub"]
 unique_name_in_owner = true
 layout_mode = 2
 mouse_filter = 2
 theme_type_variation = &"SmallLabel"
-text = "Tag 3 · Donnerstag"
+text = "Tag 3 · Mittwoch"
 
-[node name="Queue" type="Label" parent="TopLeft/Sub"]
+[node name="Queue" type="Label" parent="LeftPlate/TopLeft/Sub"]
 unique_name_in_owner = true
 layout_mode = 2
 mouse_filter = 2
 theme_type_variation = &"SmallLabel"
 text = "2 wartend"
 
-[node name="TopRight" type="VBoxContainer" parent="."]
+[node name="RightPlate" type="PanelContainer" parent="."]
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -136.0
-offset_top = 3.0
-offset_right = -4.0
+offset_left = -142.0
+offset_top = 1.0
+offset_right = -2.0
 offset_bottom = 39.0
 grow_horizontal = 0
+mouse_filter = 2
+theme_type_variation = &"HudPlate"
+
+[node name="TopRight" type="VBoxContainer" parent="RightPlate"]
+layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 2
 alignment = 2
 
-[node name="Trust" parent="TopRight" instance=ExtResource("3_meter")]
+[node name="Trust" parent="RightPlate/TopRight" instance=ExtResource("3_meter")]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="Profit" parent="TopRight" instance=ExtResource("3_meter")]
+[node name="Profit" parent="RightPlate/TopRight" instance=ExtResource("3_meter")]
 unique_name_in_owner = true
 layout_mode = 2
 icon_id = "ui/icon_profit"

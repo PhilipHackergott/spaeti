@@ -33,10 +33,10 @@ unique_name_in_owner = true
 
 [node name="WantBubble" parent="." instance=ExtResource("6_bubble")]
 unique_name_in_owner = true
-offset_left = 336.0
-offset_top = 62.0
-offset_right = 422.0
-offset_bottom = 108.0
+offset_left = 340.0
+offset_top = 74.0
+offset_right = 426.0
+offset_bottom = 120.0
 
 [node name="DialogueBox" parent="." instance=ExtResource("7_dialogue")]
 unique_name_in_owner = true
