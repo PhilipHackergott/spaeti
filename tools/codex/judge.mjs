@@ -69,6 +69,10 @@ function normalise(v) {
   const out = { ...v };
   out.overall = Number(pick('overall', 'overall_score', 'score', 'total') ?? NaN);
   out.axes = pick('axes', 'scores', 'axis_scores', 'axes_scores') || {};
+  // Some replies flatten the axes to the top level (v5): gather the rubric's six names.
+  for (const k of ['composition', 'palette_lighting', 'pixel_rendering', 'character_fidelity', 'ui_style', 'berlin_reskin']) {
+    if (out.axes[k] === undefined && typeof v[k] === 'number') out.axes[k] = v[k];
+  }
   if (out.overall !== out.overall && typeof out.axes === 'object' && 'overall' in out.axes) out.overall = Number(out.axes.overall);
   out.verdict = String(pick('verdict', 'decision', 'result') || (out.overall >= threshold ? 'pass' : 'revise'));
   out.fixes = pick('fixes', 'actionable_fixes', 'recommendations', 'fix_list') || [];
