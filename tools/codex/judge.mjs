@@ -13,6 +13,11 @@ import { runCodex } from './run.mjs';
 
 const a = parseArgs(process.argv.slice(2));
 if (!a.candidate) { console.error('need --candidate image'); process.exit(2); }
+if (!fs.existsSync(path.resolve(REPO, String(a.candidate)))) {
+  // A missing candidate must never reach the judge: Codex then scores "nothing" with zero placeholders.
+  console.error(`judge: candidate not found: ${a.candidate}`);
+  process.exit(2);
+}
 // The generated Berlin-Späti interaction concept (astra) becomes reference 2 as soon as it exists; the user's OG
 // interaction image stays reference 1 — the judge is told which is which.
 // Prefer the grid-snapped 16:9 ×4 version (the concept at the game's real density and framing) when it exists.

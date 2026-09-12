@@ -223,10 +223,11 @@ func _despeckle(img: Image) -> int:
 			var o := (y * w + x) * 4
 			if src[o + 3] < 128:
 				continue
-			var me := (src[o] << 16) | (src[o + 1] << 8) | src[o + 2]
+			var me: int = (src[o] << 16) | (src[o + 1] << 8) | src[o + 2]
 			var nb: Array[int] = []
-			for d in [-4, 4, -w * 4, w * 4]:
-				var p := o + d
+			var offsets: Array[int] = [-4, 4, -w * 4, w * 4]
+			for d in offsets:
+				var p: int = o + d
 				if src[p + 3] < 128:
 					continue
 				nb.append((src[p] << 16) | (src[p + 1] << 8) | src[p + 2])
