@@ -107,3 +107,13 @@ intermediate tones the judge calls painterly. **Default is now `nearest` for eve
 55 % transparent (prop: 75 %) is rejected — that is the signature of a painted checkerboard whose white squares connected
 through the subject and let the flood-fill eat it; and every keyed sprite reports a `fringe` count (opaque pixels still near
 the key colour) — above 20 the wrapper re-snaps once with a wider key tolerance and keeps the cleaner result.
+
+## Judging composed frames: lean by default (2026-09-13)
+
+Three 1080p hero-frame judges in a row hit the 1500 s cap with no verdict (three astra sessions open at once). The same
+frame **at half size** — a lossless ×2 of the 480×270 grid, made with nearest sampling at exactly ½ so every 2×2 block is
+one game pixel — with three references (OG target, the concept grid at ×2, one Coffee Talk frame) and effort `high`
+came back in **45 s** with a full verdict (71). `judge.mjs` now does this automatically for any candidate ≥ 1920 px wide
+(`--full` judges the file as given, `--refs=full` attaches all three Coffee Talk frames); the verdict records
+`_meta.lean`. The judge is told about the scale and confirmed it scores pixel discipline on the 480×270 grid ("crisp x2
+blocks are not themselves a defect"). Run judges one at a time regardless.
