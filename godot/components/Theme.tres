@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=22 format=3]
+[gd_resource type="Theme" load_steps=25 format=3]
 
 [ext_resource type="FontFile" path="res://assets/fonts/Jersey10-Regular.ttf" id="1_j10"]
 [ext_resource type="FontFile" path="res://assets/fonts/Jersey20-Regular.ttf" id="2_j20"]
@@ -275,6 +275,36 @@ corner_radius_bottom_right = 2
 corner_radius_bottom_left = 2
 anti_aliasing = false
 
+[sub_resource type="StyleBoxFlat" id="SB_ScrollTrack"]
+content_margin_left = 3.0
+content_margin_right = 3.0
+bg_color = Color(0.031, 0.027, 0.039, 0.5)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id="SB_ScrollGrab"]
+content_margin_left = 3.0
+content_margin_right = 3.0
+bg_color = Color(0.91, 0.635, 0.29, 0.55)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id="SB_ScrollGrabHi"]
+content_margin_left = 3.0
+content_margin_right = 3.0
+bg_color = Color(0.949, 0.78, 0.478, 0.9)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+anti_aliasing = false
+
 [sub_resource type="StyleBoxFlat" id="SB_Flat"]
 bg_color = Color(0, 0, 0, 0)
 anti_aliasing = false
@@ -342,6 +372,11 @@ TinyLabel/base_type = &"Label"
 TinyLabel/colors/font_color = Color(0.957, 0.906, 0.824, 1)
 TinyLabel/fonts/font = ExtResource("1_j10")
 TinyLabel/font_sizes/font_size = 16
+VScrollBar/styles/grabber = SubResource("SB_ScrollGrab")
+VScrollBar/styles/grabber_highlight = SubResource("SB_ScrollGrabHi")
+VScrollBar/styles/grabber_pressed = SubResource("SB_ScrollGrabHi")
+VScrollBar/styles/scroll = SubResource("SB_ScrollTrack")
+VScrollBar/styles/scroll_focus = SubResource("SB_ScrollTrack")
 TitleButton/base_type = &"Button"
 TitleButton/colors/font_outline_color = Color(0.02, 0.016, 0.027, 1)
 TitleButton/constants/outline_size = 1

@@ -156,7 +156,7 @@ func _build_choices() -> void:
 		var entry: Dictionary = _choices[i]
 		var btn: PixelButton = CHOICE_SCENE.instantiate()
 		btn.theme_type_variation = &"ChoiceButton"
-		btn.text = "%d. %s" % [i + 1, String(entry.get("label", ""))]
+		btn.text = Strings.CHOICE_NUMBER % [i + 1, String(entry.get("label", ""))]
 		btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		btn.action = {"choice": i}
 		btn.pressed.connect(_on_choice.bind(i))

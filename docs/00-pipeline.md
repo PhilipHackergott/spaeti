@@ -32,6 +32,7 @@ row stop improving — a "dry" loop is reported, never silently accepted.
 | `node tools/codex/run.mjs --prompt "..." [--image=x.png]` | Any other Codex call (read-only by default). |
 | `node tools/godot/shot.mjs --scene res://scenes/Night.tscn --out shots/night.png --preset customer_at_counter` | Capture a scene at the base grid, upscaled to 1080p. |
 | `node tools/godot/test.mjs [--filter x]` | Headless unit tests (`godot/tests/unit/test_*.gd`). |
+| `node tools/godot/play.mjs [--timeout 240]` | Plays a whole night through the real screens (windowed, locked, watchdogged) → `shots/play-NN-<step>.png` + `shots/play-log.json`. |
 | `node tools/godot/img.mjs --in a.png --out b.png --w 160 --h 200` | Snap any image to the pixel grid. |
 
 Hard-won rules these wrappers encode (do not bypass them by calling `codex`/`godot` raw):

@@ -9,14 +9,23 @@ neighbourhood.
 
 ## Run it
 
-Open `godot/` in **Godot 4.7.2** (standard build) and press Play — or from the repo root with Node 18+:
+Open `godot/` in **Godot 4.7.2** (standard build) and press Play. It boots `scenes/Main.tscn` → the title
+screen: **New game** → the Manage hour (restock, prices, modules) → **Open up** → the night at the counter
+(Serve → pick → Ring up / Wave off, story beats answered in the dialogue box) → 06:00 closes the books →
+the Summary → **Next day**. Space or a click advances a conversation; Esc closes a modal.
+
+Or from the repo root with Node 18+:
 
 ```bash
-node tools/godot/test.mjs                                   # headless unit tests
+node tools/godot/test.mjs                                   # headless unit tests (66)
+node tools/godot/play.mjs                                   # plays a whole night for real -> shots/play-*.png
 node tools/godot/shot.mjs --scene res://scenes/Night.tscn --out shots/night.png --preset customer_at_counter
 node tools/codex/judge.mjs --candidate shots/night.png      # Codex scores it against the concept art
 node tools/codex/art.mjs --id char/lena_neutral             # Codex generates an asset from docs/asset-spec.json
 ```
+
+`play.mjs` is the proof the loop is playable: it drives the real screens through their own handlers, saves a
+1080p frame after every step (`shots/play-NN-<step>.png`) and logs the read-model to `shots/play-log.json`.
 
 Requires the Godot binary (path in `tools/paths.mjs`, or `GODOT_BIN`) and a signed-in Codex CLI for the art tools.
 

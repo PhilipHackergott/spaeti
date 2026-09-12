@@ -57,8 +57,16 @@ customer, fixed clock) so the judge compares like with like.
 - Textures are nearest-filtered project-wide; never enable per-sprite filtering, never scale sprites non-integer at runtime.
 - UI chrome (dialogue box, panels, buttons, meters) is **code-drawn** with `StyleBoxFlat`/`StyleBoxTexture` in the Coffee Talk
   language: dark translucent rounded boxes, 1-px light edge, coloured speaker name, white body. Bitmap *icons* come from the asset spec.
-- One pixel font (OFL/CC0 — record the licence in `assets/fonts/LICENSE.txt`), sized to the grid (8–12 px), `subpixel_positioning` off,
-  hinting none, antialiasing off → crisp at ×4.
+- **The font is Jersey** (OFL, `assets/fonts/OFL-Jersey.txt`) — Jersey 10 for everything a player reads,
+  Jersey 25 for the wordmark — with `antialiasing`, `hinting` and `subpixel_positioning` all OFF (set in the
+  `.import` files *and* forced in `Palette.theme()`, so neither can rot alone). VT323 is gone: it is an outline
+  face, and at 16 base px its one-unit middle stems fell between pixel centres and vanished ("Mate"→"Nate",
+  "MODULES"→"NODULES", "8"→"B").
+- **A pixel face is only crisp at the sizes its own grid divides evenly**, and that is measured, never assumed:
+  `godot/tools/FontProbe.tscn` prints a sample in every face at every candidate size; capture it with
+  `shot.mjs` and read it. Jersey 10 is clean at **16 / 20 / 25 / 50** and broken at 10 ("KIEZ"→"HIEZ") and 14;
+  Jersey 20 drops the middle of an `8` at 20. So the ladder is **one text size** — `FONT_TINY = FONT_SMALL =
+  FONT_BODY = 16`, `FONT_LEAD = 20`, `FONT_TITLE = 50` — and a new size gets probed before it ships.
 - Palette tokens live in one place: `components/Theme.tres` (+ `engine`-free `components/theme.gd` constants). Chrome never uses a raw hex.
 
 ## Tests

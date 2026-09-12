@@ -36,6 +36,9 @@ const NOBODY_WAITING := "no one waiting"
 const WANT_LINE := "%s: %s"                     # who is waiting: what they asked for
 const ORDER_LINE := "%s, please."               # the plain order when no beat is pending
 const SOMEONE := "Someone"                      # a customer with neither a name nor an archetype
+const CHOICE_NUMBER := "%d. %s"                 # how a dialogue choice is numbered
+const STOCK_COUNT := "x%d"                      # how many of a SKU are on the shelf
+const RESTRICTED := "18"                        # the age gate badge on a restricted SKU
 
 # ── the till ─────────────────────────────────────────────────────────────────────────────────
 const TILL := "Till"

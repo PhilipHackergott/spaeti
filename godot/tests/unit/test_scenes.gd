@@ -22,6 +22,7 @@ const COMPONENTS := [
 	"res://components/ManageBoard.tscn",
 	"res://components/Modal.tscn",
 	"res://components/Transition.tscn",
+	"res://components/Fx.tscn",
 ]
 
 const SCENE_PRESETS := {
@@ -47,6 +48,18 @@ func test_components_instantiate() -> void:
 		var inst := packed.instantiate()
 		assert_true(inst != null, "instantiate " + path)
 		_dispose(inst)
+
+## COMPONENTS is written by hand, so a new widget in the pool used to go untested until someone
+## remembered to add it. This is the reminder: the directory is the truth.
+func test_the_pool_list_is_complete() -> void:
+	var dir := DirAccess.open("res://components")
+	assert_true(dir != null, "components/ is readable")
+	if dir == null:
+		return
+	for file in dir.get_files():
+		if not file.ends_with(".tscn"):
+			continue
+		assert_true(COMPONENTS.has("res://components/" + file), "test_scenes.gd::COMPONENTS lists " + file)
 
 func test_scenes_apply_every_capture_preset() -> void:
 	for path in SCENE_PRESETS:

@@ -720,3 +720,5 @@ failed, not that the art is wrong.** The r2 prompts now also forbid any mark, gl
 subject for exactly this reason.
 
 - **Incident 20:52–20:58:** adding `--despeckle` to `img.gd` introduced a GDScript parse error (`var p := o + d` with an untyped loop var) that broke EVERY snap for ~4 min — the art lanes logged 11 `img.gd failed` results (raws are kept; re-snap with `art.mjs --reuse-raw`). Fixed (typed loop), verified, committed. `judge.mjs` now refuses a missing candidate instead of returning a zero-filled verdict.
+
+- Ladder completed: +quantise 64 → **81** (pixel 76); +quantise 96 + 2× despeckle → **82** (pixel 77, Lena judged as NPC: fidelity 85). Astra: "further progress needs targeted cluster redraws". **Decision: the standard chain is snap-only; `--quantize` / `--despeckle` are opt-in polish** (≈ +1 each, some banding risk). The lever for ≥ 85 is the generation prompt (TRUE-PIXEL-ART clauses) + astra as generator + the judge loop.
