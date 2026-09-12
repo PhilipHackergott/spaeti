@@ -58,11 +58,11 @@ const NEON_GLOW := Color(1.0, 0.31, 0.85, 0.10)
 ## The shaped light on the set (light_pool.gdshader): the warm pool over the counter by night phase, and
 ## the cool edge it falls off into. Both judges (2026-09-13) scored the flat tint "predominantly cold
 ## grey-blue" — the target has a warm interior against the blue night.
-const LIGHT_POOL_DUSK := Color(1.0, 0.80, 0.52, 0.16)
-const LIGHT_POOL_NIGHT := Color(1.0, 0.86, 0.62, 0.11)
+const LIGHT_POOL_DUSK := Color(1.0, 0.80, 0.52, 0.20)
+const LIGHT_POOL_NIGHT := Color(1.0, 0.84, 0.58, 0.17)
 const LIGHT_POOL_DAWN := Color(0.90, 0.88, 0.80, 0.06)
 const LIGHT_EDGE_DUSK := Color(0.45, 0.30, 0.24, 0.10)
-const LIGHT_EDGE_NIGHT := Color(0.10, 0.16, 0.32, 0.22)
+const LIGHT_EDGE_NIGHT := Color(0.08, 0.14, 0.32, 0.30)
 const LIGHT_EDGE_DAWN := Color(0.18, 0.42, 0.66, 0.30)
 ## Rain on the GLASS. It is drawn in the door/window opening only and BEHIND the counter, because rain
 ## inside the shop is a bug — and at this alpha it is actually visible at x4 (verify round 3).
@@ -118,9 +118,9 @@ const SERVE_RECT := Rect2i(228, 8, 248, 256)
 ## How far the counter layer is raised above the bottom of the frame (2026-09-13, both judges: "a narrow
 ## grey strip above the dialogue panel", "Lena looks submerged behind the counter"). The r6 strip's own top
 ## 37 rows are the wall behind the counter, so flush-with-the-bottom hid the countertop under the panel.
-const COUNTER_LIFT := 20
+const COUNTER_LIFT := 0   # r7 carries its laminate edge in its top 10 rows; the 20-px lift was for r6 (37 rows of wall above the edge)
 const PORTRAIT_OVERLAP := 30
-const PORTRAIT_TOP_MIN := 24
+const PORTRAIT_TOP_MIN := 14   # 2026-09-13: with the 144x174 busts the clamp, not the overlap, decided the seat; 14 lets the forearms clear the counter edge
 ## The bust is anchored by its BOTTOM-CENTRE, never by a spec rectangle: shipped art is narrower than
 ## the 190-px placeholder box (you_neutral is 155), so a left-anchored bust would slide off centre.
 ## docs/02 "Night framing" puts the customer at x 250; with the serve panel open it steps left so the
@@ -152,6 +152,9 @@ const QUEUE_GAP := 5
 const QUEUE_SLOTS := 4
 ## Six stats down the left edge, BELOW the neon (y 62) and LEFT of the bust (x 155). Toggled with Tab.
 const STATS_RECT := Rect2i(2, 64, 136, 98)
+## The sheet steps UP when a choice list grows the dialogue box into its column, but never past this:
+## the HUD owns the top 20 px, and a sheet under the clock is no more readable than one under the box.
+const STATS_TOP_MIN := 22
 ## The serve panel is a secondary affordance now (docs/06 section 5: "reachable, not the demo path"),
 ## so its toggle is a small plate tucked under the HUD instead of a button in the middle of the set.
 const SERVE_TOGGLE_RECT := Rect2i(5, 25, 62, 18)   # under the inset HUD (which now ends at y 22)
@@ -255,6 +258,14 @@ static func box(fill: Color = INK, edge: Color = EDGE, radius: int = 3, pad: int
 static func money(v: float) -> String:
 	var s := "%.2f" % absf(v)
 	return ("-" if v < 0.0 else "") + s.replace(".", ",") + " €"
+
+## Where the character sheet's TOP edge belongs, given the dialogue box's current one. The box keeps
+## its bottom on DIALOGUE_RECT and grows UPWARD for a choice list (dialogue_box.gd), it starts at the
+## same x as the sheet, and it is a later sibling in Night.tscn - so a grown box prints over the
+## sheet's last rows at exactly the moment the sheet is wanted (Tab during a conversation, to read
+## Schnauze before picking a "[Schnauze 12]" line). The sheet gives way instead, and only then.
+static func stats_top(box_top: float) -> float:
+	return maxf(float(STATS_TOP_MIN), minf(float(STATS_RECT.position.y), box_top - float(STATS_RECT.size.y)))
 
 static func snap(p: Vector2) -> Vector2:
 	return Vector2(roundf(p.x), roundf(p.y))
