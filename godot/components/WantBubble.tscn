@@ -4,9 +4,9 @@
 [ext_resource type="Theme" path="res://components/Theme.tres" id="2_theme"]
 
 [node name="WantBubble" type="Control"]
-custom_minimum_size = Vector2(86, 46)
-offset_right = 86.0
-offset_bottom = 46.0
+custom_minimum_size = Vector2(78, 40)
+offset_right = 78.0
+offset_bottom = 40.0
 mouse_filter = 2
 theme = ExtResource("2_theme")
 script = ExtResource("1_script")
@@ -17,7 +17,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-theme_type_variation = &"BubblePanel"
+theme_type_variation = &"DialoguePanel"
 
 [node name="Row" type="HBoxContainer" parent="Box"]
 layout_mode = 2
@@ -25,7 +25,7 @@ mouse_filter = 2
 theme_override_constants/separation = 4
 
 [node name="IconWrap" type="CenterContainer" parent="Box/Row"]
-custom_minimum_size = Vector2(16, 36)
+custom_minimum_size = Vector2(16, 28)
 layout_mode = 2
 mouse_filter = 2
 
@@ -63,5 +63,5 @@ theme_type_variation = &"SmallLabel"
 
 [node name="Tail" type="Polygon2D" parent="."]
 unique_name_in_owner = true
-position = Vector2(12, 45)
+position = Vector2(12, 39)
 polygon = PackedVector2Array(0, 0, 10, 0, 2, 7)

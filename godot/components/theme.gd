@@ -28,6 +28,7 @@ const EDGE := Color(0.97, 0.92, 0.82, 0.30)
 const SCRIM := Color(0.031, 0.027, 0.039, 0.28)   # over title art, so the wordmark stays legible
 const DIM := Color(0.031, 0.027, 0.039, 0.62)     # behind a card/modal: the set recedes
 const RULE := Color(0.97, 0.92, 0.82, 0.22)       # the 1-px separator inside a card
+const CHOICE_FILL := Color(0.97, 0.92, 0.82, 0.05) # a choice row inside the dialogue panel: a breath lighter than the ink, no box of its own
 const TEXT := Color("f4e7d2")
 const TEXT_WHITE := Color("ffffff")
 const TEXT_DIM := Color("9c8c7d")
@@ -210,6 +211,21 @@ static func tier_colour(tier: String) -> Color:
 	return TIER.get(tier, TEXT_DIM)
 
 ## A Coffee-Talk chrome box: dark translucent fill, 1-px light edge, small radius.
+## A choice ROW inside the dialogue panel (docs/06 §2, 2026-09-13): no box of its own — a faint fill, a
+## hairline under it, 1-px vertical padding — so two choices cost 2 x 18 px, not a stack of bordered chips
+## that covered the counter (the judge: "the dialogue stack consumes ~42 % of the frame").
+static func flat_row(fill: Color = CHOICE_FILL, rule: Color = RULE) -> StyleBoxFlat:
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = fill
+	sb.border_color = rule
+	sb.border_width_bottom = 1
+	sb.content_margin_left = PAD
+	sb.content_margin_right = PAD
+	sb.content_margin_top = 1
+	sb.content_margin_bottom = 1
+	sb.anti_aliasing = false
+	return sb
+
 static func box(fill: Color = INK, edge: Color = EDGE, radius: int = 3, pad: int = PAD) -> StyleBoxFlat:
 	var sb := StyleBoxFlat.new()
 	sb.bg_color = fill

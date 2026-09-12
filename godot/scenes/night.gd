@@ -288,7 +288,7 @@ func _place_chrome(v: Dictionary) -> void:
 			w = Palette.DIALOGUE_W_SERVING
 		elif queue_shown:
 			w = Palette.DIALOGUE_W_QUEUE
-		box.size = Vector2(float(w), float(r.size.y))
+		box.set_width(float(w))   # the box owns its height (it grows upward for a choice list)
 	var hud := get_node_or_null("%Hud") as Hud
 	if hud != null:
 		hud.set_compact(serve_open)

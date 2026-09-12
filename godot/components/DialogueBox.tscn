@@ -41,16 +41,12 @@ mouse_filter = 2
 text = "They put the rent up again."
 autowrap_mode = 3
 
-[node name="Choices" type="VBoxContainer" parent="."]
+[node name="Choices" type="VBoxContainer" parent="Box/Text"]
 unique_name_in_owner = true
 visible = false
-anchor_right = 1.0
-offset_left = 0.0
-offset_top = -104.0
-offset_bottom = -3.0
-grow_horizontal = 2
-theme_override_constants/separation = 2
-alignment = 2
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 1
 
 [node name="Continue" type="Polygon2D" parent="."]
 unique_name_in_owner = true

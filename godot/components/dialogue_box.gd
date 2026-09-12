@@ -2,7 +2,9 @@ class_name DialogueBox
 extends Control
 ## The centrepiece (art-direction.md section 5): a dark translucent box across the counter with the
 ## speaker's name in their own colour, white body text typed out, a blinking continue mark, and the
-## choices stacked just above it. It renders `view.dialogue` (docs/05 section 5) and emits the index
+## choices listed INSIDE the same panel under the last line (2026-09-13: they used to stack above it as
+## bordered chips, and the whole thing covered 42 % of the frame). The box keeps its bottom edge on
+## `Palette.DIALOGUE_RECT` and grows upward only as far as its content needs. It renders `view.dialogue` (docs/05 section 5) and emits the index
 ## the player chose — `resolve_beat` / `resolve_vignette` are built by the scene, not here.
 
 signal choice(index: int)
@@ -10,6 +12,8 @@ signal advanced()
 signal finished()
 
 const CHOICE_SCENE := preload("res://components/PixelButton.tscn")
+## The bottom edge never moves: the counter band ends where Coffee Talk's text box ends.
+const BOTTOM_Y := Palette.DIALOGUE_RECT.position.y + Palette.DIALOGUE_RECT.size.y
 
 ## Typewriter speed. The capture presets always render instantly, so a screenshot is never half-typed.
 @export var chars_per_second: float = 45.0
@@ -123,6 +127,38 @@ func _same_dialogue(d: Dictionary) -> bool:
 			return false
 	return true
 
+## The scene owns the WIDTH (the queue and the serve panel each take a column back); the box owns its
+## height. Setting the size directly from outside would fight `_fit_height`.
+func set_width(w: float) -> void:
+	if size.x != w:
+		size.x = w
+		_fit_height()
+
+## Bottom edge fixed at `BOTTOM_Y`; height = what the panel's content needs, never less than the authored
+## 64 px (one speaker line + up to two body lines), so the plain box keeps Coffee Talk's proportions
+## and only a choice list grows it. Deferred once as well, because an autowrapped label reports its
+## line count for the width it had when it was last laid out.
+var _fit_pending: bool = false
+
+func _fit_height() -> void:
+	_apply_height()
+	if not _fit_pending:
+		_fit_pending = true
+		call_deferred("_fit_deferred")
+
+func _fit_deferred() -> void:
+	_fit_pending = false
+	_apply_height()
+
+func _apply_height() -> void:
+	var box := get_node_or_null("%Box") as Control
+	if box == null:
+		return
+	var h := maxf(float(Palette.DIALOGUE_RECT.size.y), box.get_combined_minimum_size().y)
+	if h != size.y or position.y != float(BOTTOM_Y) - h:
+		size.y = h
+		position.y = float(BOTTOM_Y) - h
+
 func is_typing() -> bool:
 	return _typing
 
@@ -148,6 +184,7 @@ func _show_line(instant: bool) -> void:
 	if not _typing:
 		_reveal_all()
 	_update_mark()
+	_fit_height()
 
 func _reveal_all() -> void:
 	_typing = false
@@ -170,6 +207,7 @@ func _build_choices() -> void:
 		box.add_child(_choice_row(_choices[i], i))
 	box.visible = true
 	_update_mark()
+	_fit_height()
 
 ## A rolled choice puts its tag on the same line (it is short: "[Charisma 12]"). A GATE puts its
 ## reason underneath instead, because "locked: needs Strength 12" plus the choice itself does not fit
@@ -182,6 +220,9 @@ func _choice_row(entry: Dictionary, index: int) -> BoxContainer:
 	var btn: PixelButton = CHOICE_SCENE.instantiate()
 	btn.name = "Line"
 	btn.theme_type_variation = &"ChoiceButton"
+	# Inside the panel a choice is a LINE, not a chip: the Theme's bordered ChoiceButton box stays for hover
+	# and focus (the player must see what they are about to pick), the resting state is flat.
+	btn.add_theme_stylebox_override("normal", Palette.flat_row())
 	btn.text = Strings.CHOICE_NUMBER % [index + 1, _plain_label(entry)]
 	btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	btn.clip_text = true
@@ -195,7 +236,7 @@ func _choice_row(entry: Dictionary, index: int) -> BoxContainer:
 		# The Theme has no `disabled` box for a ChoiceButton, so a greyed choice fell back to the
 		# generic one and all but vanished over the bust (second capture: row 3 sat on Lena's face).
 		# A gate has to stay READABLE - it is information, not a disabled control.
-		btn.add_theme_stylebox_override("disabled", Palette.box(Palette.INK, Palette.RULE, 2, 4))
+		btn.add_theme_stylebox_override("disabled", Palette.flat_row(Palette.INK, Palette.RULE))
 		btn.add_theme_color_override("font_disabled_color", Palette.TEXT_DIM)
 	else:
 		btn.pressed.connect(_on_choice.bind(index))
@@ -258,6 +299,7 @@ func _clear_choices() -> void:
 		box.remove_child(c)
 		c.queue_free()
 	box.visible = false
+	_fit_height()
 
 func _on_choice(index: int) -> void:
 	choice.emit(index)

@@ -15,7 +15,7 @@ func _ready() -> void:
 	Palette.prepare()
 	var tail := get_node_or_null("%Tail") as Polygon2D
 	if tail != null:
-		tail.color = Palette.WOOD_DEEP
+		tail.color = Palette.INK_DEEP   # the same ink as the dialogue panel (one UI language, not a wooden bubble)
 	_refresh()
 
 ## `want` is `view.active.want`: {sku_id, name, price, stock, icon}.
