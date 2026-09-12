@@ -24,6 +24,25 @@ func _ready() -> void:
 	_refresh()
 	_start_breathing()
 
+## Seats the bust against the counter: `Palette.PORTRAIT_OVERLAP` base pixels of it sit BEHIND the
+## counter layer (docs/02 "Night framing"), with the top clamped to `Palette.PORTRAIT_TOP_MIN` so a
+## bust taller than the table assumes keeps its hair inside the frame instead of being decapitated.
+## Call it with `SceneLayers.counter_edge()`; it is idempotent and safe outside the tree.
+func place_behind(counter_edge_y: int) -> void:
+	var bust := get_node_or_null("%Bust") as TextureRect
+	var h := int(bust.size.y) if bust != null and bust.texture != null else int(size.y)
+	if h <= 0:
+		return
+	var top := counter_edge_y + Palette.PORTRAIT_OVERLAP - h
+	position = Palette.snap(Vector2(position.x, float(maxi(Palette.PORTRAIT_TOP_MIN, top))))
+
+## How many base pixels of the bust the counter actually hides, given where it now sits. The framing
+## table wants 25-35; a taller bust than the table assumes reports more, and that is the art's to fix.
+func overlap_behind(counter_edge_y: int) -> int:
+	var bust := get_node_or_null("%Bust") as TextureRect
+	var h := int(bust.size.y) if bust != null and bust.texture != null else int(size.y)
+	return int(position.y) + h - counter_edge_y
+
 ## `active` is `view.active` — empty hides the bust.
 func set_from_active(active: Dictionary) -> void:
 	if active.is_empty():

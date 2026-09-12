@@ -4,6 +4,10 @@ extends Screen
 ## counter, the want bubble beside the customer, the HUD tucked in the corners, and the serve panel
 ## sliding in over the right half. Every one of those is a component; this file only arranges them
 ## and turns clicks into engine actions.
+##
+## It renders `Session.view()` in the real game and `MockView.view(preset)` for a capture — the SAME
+## `render()`, never a second path (docs/04). The only capture-only branch is `_advance_phase`, which
+## would otherwise dispatch a `close_night` into a screenshot.
 
 const BUBBLE_RIGHT := Vector2(340, 74)
 const BUBBLE_LEFT := Vector2(44, 62)
@@ -12,6 +16,8 @@ const BUBBLE_LEFT := Vector2(44, 62)
 ## noticed — these two latches keep each one firing exactly once per night.
 var _closing: bool = false
 var _leaving: bool = false
+## Who is at the counter right now: when it changes, a half-filled till belongs to nobody.
+var _active_id: int = -1
 
 func _ready() -> void:
 	super._ready()
@@ -23,6 +29,7 @@ func _ready() -> void:
 		var pos := portrait.position
 		layers.mount(portrait)
 		portrait.position = pos
+	_seat_portrait()
 	var box := _dialogue()
 	if box != null:
 		if not box.choice.is_connected(_on_choice):
@@ -34,8 +41,20 @@ func _ready() -> void:
 		if not panel.waved_off.is_connected(_on_wave_off):
 			panel.waved_off.connect(_on_wave_off)
 	var toggle := get_node_or_null("%ServeToggle") as Button
-	if toggle != null and not toggle.pressed.is_connected(toggle_serve):
-		toggle.pressed.connect(toggle_serve)
+	if toggle != null:
+		toggle.text = Strings.SERVE
+		if not toggle.pressed.is_connected(toggle_serve):
+			toggle.pressed.connect(toggle_serve)
+	_connect_events()
+
+## The FX/SFX stream: every new log entry, in order (docs/05 §7). Visual only for now.
+func _connect_events() -> void:
+	var s := session()
+	var fx := _fx()
+	if s == null or fx == null:
+		return
+	if s.has_signal("event") and not s.is_connected("event", fx.on_event):
+		s.connect("event", fx.on_event)
 
 func render(v: Dictionary) -> void:
 	if v.is_empty():
@@ -51,9 +70,11 @@ func render(v: Dictionary) -> void:
 	if hud != null:
 		hud.render(v)
 	var active: Dictionary = v.get("active", {})
+	_notice_customer(active)
 	var portrait := _portrait()
 	if portrait != null:
 		portrait.set_from_active(active)
+		_seat_portrait()
 	var dialogue: Dictionary = v.get("dialogue", {})
 	var box := _dialogue()
 	if box != null:
@@ -92,12 +113,33 @@ func _advance_phase(v: Dictionary) -> bool:
 				dispatch({"type": "close_night"})
 				return true
 			return false
-		"summary":
+		"summary", "end":
 			if not _leaving:
 				_leaving = true
 				request_screen.emit("summary")
 			return true
 	return false
+
+## A new person at the counter gets a clean till — the previous order was never rung up.
+func _notice_customer(active: Dictionary) -> void:
+	var id := int((active.get("customer", {}) as Dictionary).get("id", -1)) if not active.is_empty() else -1
+	if id == _active_id:
+		return
+	_active_id = id
+	var panel := _serve()
+	if panel == null:
+		return
+	var t := panel.till()
+	if t != null:
+		t.clear()
+
+## The bust sits against the counter's real occlusion line (docs/02 "Night framing").
+func _seat_portrait() -> void:
+	var layers := _layers()
+	var portrait := _portrait()
+	if layers == null or portrait == null:
+		return
+	portrait.place_behind(layers.counter_edge())
 
 func apply_capture_preset(preset_name: String) -> void:
 	super.apply_capture_preset(preset_name)
@@ -154,26 +196,35 @@ func _place_bubble(serve_open: bool) -> void:
 		bubble.position = BUBBLE_LEFT if serve_open else BUBBLE_RIGHT
 	var box := _dialogue()
 	if box != null:
-		box.size = Vector2(188.0 if serve_open else 400.0, 66.0)
+		var r := Palette.DIALOGUE_RECT
+		box.size = Vector2(188.0 if serve_open else float(r.size.x), float(r.size.y))
 	var hud := get_node_or_null("%Hud") as Hud
 	if hud != null:
 		hud.set_compact(serve_open)
 
 ## The plain order a customer speaks when no story beat is pending. Presentation only — the engine
-## read-model carries `dialogue` just for beats and vignettes (docs/05 section 4).
+## read-model carries `dialogue` just for beats and vignettes (docs/05 §4).
 func _order_line(active: Dictionary) -> Dictionary:
 	var want: Dictionary = active.get("want", {})
-	var customer: Dictionary = active.get("customer", {})
-	var character_id := String(customer.get("character_id", ""))
-	var speaker := character_id.capitalize() if character_id != "" else String(active.get("archetype", {}).get("name", "Kunde"))
 	return {
-		"speaker": speaker,
+		"speaker": _speaker_name(active),
 		"portrait": String(active.get("portrait", "")),
 		"expression": String(active.get("expression", "neutral")),
-		"lines": ["%s, bitte." % String(want.get("name", "Eine Mate"))],
+		"lines": [Strings.ORDER_LINE % String(want.get("name", ""))],
 		"choices": [],
 		"kind": "order",
 	}
+
+## The name the cast registry gives them ("'Bottle' Jürgen"), else the archetype's ("Kiez regular").
+## A read of the content registry, never a rule — the engine still owns every word.
+func _speaker_name(active: Dictionary) -> String:
+	var character_id := String((active.get("customer", {}) as Dictionary).get("character_id", ""))
+	if character_id != "":
+		var c := Content.character(character_id)
+		if not c.is_empty():
+			return String(c.get("name", character_id))
+	var arch_name := String((active.get("archetype", {}) as Dictionary).get("name", ""))
+	return arch_name if arch_name != "" else Strings.SOMEONE
 
 func _on_choice(index: int) -> void:
 	var kind := String(view().get("dialogue", {}).get("kind", "beat"))
@@ -193,6 +244,9 @@ func _on_wave_off() -> void:
 	dispatch({"type": "skip_active"})
 	var panel := _serve()
 	if panel != null:
+		var t := panel.till()
+		if t != null:
+			t.clear()
 		panel.close()
 		_place_bubble(false)
 
@@ -207,3 +261,6 @@ func _dialogue() -> DialogueBox:
 
 func _serve() -> ServePanel:
 	return get_node_or_null("%ServePanel") as ServePanel
+
+func _fx() -> Fx:
+	return get_node_or_null("%Fx") as Fx

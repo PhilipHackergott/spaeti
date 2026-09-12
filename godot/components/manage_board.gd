@@ -9,20 +9,31 @@ signal open_night()
 
 const STEP := Vector2(15, 13)
 const PRICE_STEP := 0.10
+## One SKU row's height; the scroll window is a whole multiple of it (see ManageBoard.tscn).
+const ROW_H := 13
 
 ## Restock quantities the player has clicked up this session (UI intent, echoed as `restock` actions).
 var _pending: Dictionary = {}
 
 func _ready() -> void:
 	Palette.prepare()
+	_text("%Section", Strings.MANAGE_SECTION)
+	_text("%ModuleHead", Strings.MANAGE_MODULES)
 	var open := get_node_or_null("%OpenNight") as Button
-	if open != null and not open.pressed.is_connected(_on_open):
-		open.pressed.connect(_on_open)
+	if open != null:
+		open.text = Strings.OPEN_UP
+		if not open.pressed.is_connected(_on_open):
+			open.pressed.connect(_on_open)
+
+func _text(unique: String, value: String) -> void:
+	var l := get_node_or_null(unique) as Label
+	if l != null:
+		l.text = value
 
 func render(v: Dictionary) -> void:
 	var cash := get_node_or_null("%Cash") as Label
 	if cash != null:
-		cash.text = "Kasse " + Palette.money(float(v.get("cash", 0.0)))
+		cash.text = Strings.CASH % Palette.money(float(v.get("cash", 0.0)))
 	var manage: Dictionary = v.get("manage", {})
 	_build_rows(manage.get("restock_options", []))
 	_build_modules(manage.get("modules", []))
@@ -41,10 +52,13 @@ func _row(entry: Dictionary) -> HBoxContainer:
 	var sku_id := String(entry.get("sku_id", ""))
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 3)
-	row.add_child(_label(String(entry.get("name", "")), 52, Palette.TEXT))
+	# Rows are a whole number of pixels tall so the scroll boundary never slices one in half.
+	row.custom_minimum_size = Vector2(0, ROW_H)
+	row.add_child(_label(String(entry.get("name", "")), 62, Palette.TEXT))
 	row.add_child(_label("x%d" % int(entry.get("stock", 0)), 22, Palette.TEXT_DIM))
-	row.add_child(_label("EK " + Palette.money(float(entry.get("cost", 0.0))), 58, Palette.TEXT_DIM))
-	row.add_child(_button("-", _on_restock.bind(sku_id, -1)))
+	row.add_child(_label(Strings.WHOLESALE % Palette.money(float(entry.get("cost", 0.0))), 58, Palette.TEXT_DIM))
+	# Only "+": a restock is a purchase the reducer has already made. There is no un-buy action in
+	# docs/05 section 3, so a "-" here could only ever dispatch something illegal.
 	var qty := int(_pending.get(sku_id, 0))
 	var qty_label := _label("+%d" % qty, 22, Palette.AMBER_SOFT if qty > 0 else Palette.TEXT_DIM)
 	qty_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -76,7 +90,7 @@ func _build_modules(modules: Array) -> void:
 		row.add_child(_label(String(m.get("name", "")), 94, Palette.TEXT_DIM if owned else Palette.TEXT))
 		row.add_child(_label(String(m.get("desc", "")), 196, Palette.TEXT_DIM))
 		if owned:
-			row.add_child(_label("gekauft", 54, Palette.GOOD))
+			row.add_child(_label(Strings.MANAGE_OWNED, 54, Palette.GOOD))
 		else:
 			var buy := _button(Palette.money(float(m.get("cost", 0.0))), _on_buy.bind(String(m.get("id", ""))))
 			buy.custom_minimum_size = Vector2(54, 13)
@@ -101,11 +115,12 @@ func _button(text: String, cb: Callable) -> PixelButton:
 	b.pressed.connect(cb)
 	return b
 
+## `_pending` counts what you have actually bought tonight — the label is a receipt, not an intent.
 func _on_restock(sku_id: String, delta: int) -> void:
-	var qty := maxi(0, int(_pending.get(sku_id, 0)) + delta)
-	_pending[sku_id] = qty
-	if delta > 0 or qty > 0:
-		action.emit({"type": "restock", "sku": sku_id, "qty": delta})
+	if delta <= 0:
+		return
+	_pending[sku_id] = int(_pending.get(sku_id, 0)) + delta
+	action.emit({"type": "restock", "sku": sku_id, "qty": delta})
 
 func _on_price(sku_id: String, price: float, delta: float) -> void:
 	action.emit({"type": "set_price", "sku": sku_id, "price": snappedf(maxf(0.0, price + delta), 0.01)})

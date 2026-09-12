@@ -20,6 +20,11 @@ const MAX_ROWS := 2
 
 func _ready() -> void:
 	Palette.prepare()
+	_text("%Head", Strings.TILL)
+	_text("%TotalLabel", Strings.TOTAL)
+	_button_text("%RingUp", Strings.RING_UP)
+	_button_text("%PfandButton", Strings.PFAND)
+	_button_text("%WaveOff", Strings.WAVE_OFF)
 	var ring := get_node_or_null("%RingUp") as Button
 	if ring != null and not ring.pressed.is_connected(_on_ring):
 		ring.pressed.connect(_on_ring)
@@ -30,6 +35,16 @@ func _ready() -> void:
 	if wave != null and not wave.pressed.is_connected(_on_wave):
 		wave.pressed.connect(_on_wave)
 	_refresh()
+
+func _text(unique: String, value: String) -> void:
+	var l := get_node_or_null(unique) as Label
+	if l != null:
+		l.text = value
+
+func _button_text(unique: String, value: String) -> void:
+	var b := get_node_or_null(unique) as Button
+	if b != null:
+		b.text = value
 
 func set_lines(l: Array) -> void:
 	lines = l.duplicate(true)
@@ -99,7 +114,7 @@ func _refresh() -> void:
 		rows.remove_child(child)
 		child.queue_free()
 	if lines.is_empty() and pfand_bottles == 0:
-		rows.add_child(_row("nothing picked yet", "", Palette.TEXT_DIM))
+		rows.add_child(_row(Strings.TILL_EMPTY, "", Palette.TEXT_DIM))
 	else:
 		var shown := mini(lines.size(), MAX_ROWS)
 		for i in shown:
@@ -108,9 +123,9 @@ func _refresh() -> void:
 			var label := ("%dx %s" % [qty, String(line.get("name", ""))]) if qty > 1 else String(line.get("name", ""))
 			rows.add_child(_row(label, Palette.money(float(line.get("price", 0.0)) * float(qty)), Palette.TEXT))
 		if lines.size() > shown:
-			rows.add_child(_row("+%d more" % (lines.size() - shown), "", Palette.TEXT_DIM))
+			rows.add_child(_row(Strings.TILL_MORE % (lines.size() - shown), "", Palette.TEXT_DIM))
 		if pfand_bottles > 0:
-			rows.add_child(_row("Pfand %d x %s" % [pfand_bottles, _rate_text()], "-" + Palette.money(float(pfand_bottles) * pfand_rate), Palette.PFAND))
+			rows.add_child(_row(Strings.TILL_PFAND_ROW % [pfand_bottles, _rate_text()], "-" + Palette.money(float(pfand_bottles) * pfand_rate), Palette.PFAND))
 	var total_label := get_node_or_null("%Total") as Label
 	if total_label != null:
 		total_label.text = Palette.money(total() - float(pfand_bottles) * pfand_rate)

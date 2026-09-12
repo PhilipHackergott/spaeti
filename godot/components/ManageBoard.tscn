@@ -15,20 +15,21 @@ script = ExtResource("1_script")
 layout_mode = 2
 
 [node name="Section" type="Label" parent="Head"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_type_variation = &"SmallLabel"
-text = "NACHBESTELLEN · PREISE"
+text = "RESTOCK · PRICES"
 
 [node name="Cash" type="Label" parent="Head"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"SpeakerLabel"
-text = "Kasse 96,40 €"
+text = "Cash 96,40 €"
 horizontal_alignment = 2
 
 [node name="Scroll" type="ScrollContainer" parent="."]
-custom_minimum_size = Vector2(0, 92)
+custom_minimum_size = Vector2(0, 91)
 layout_mode = 2
 horizontal_scroll_mode = 0
 
@@ -36,7 +37,7 @@ horizontal_scroll_mode = 0
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 1
+theme_override_constants/separation = 0
 
 [node name="Rule" type="ColorRect" parent="."]
 custom_minimum_size = Vector2(0, 1)
@@ -44,9 +45,10 @@ layout_mode = 2
 color = Color(0.97, 0.92, 0.82, 0.22)
 
 [node name="ModuleHead" type="Label" parent="."]
+unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"SmallLabel"
-text = "MODULE"
+text = "MODULES"
 
 [node name="Modules" type="VBoxContainer" parent="."]
 unique_name_in_owner = true
@@ -61,4 +63,4 @@ alignment = 2
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"TitleButton"
-text = "Aufmachen"
+text = "Open up"

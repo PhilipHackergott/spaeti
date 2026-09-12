@@ -26,6 +26,11 @@ var _current: Dictionary = {}
 
 func _ready() -> void:
 	Palette.prepare()
+	# Coffee Talk's body is white against the coloured speaker name; the colour is a Palette token,
+	# never a Color() in the .tscn (docs/04 rule 1).
+	var body := _body()
+	if body != null:
+		body.add_theme_color_override("font_color", Palette.TEXT_WHITE)
 	var mark := get_node_or_null("%Continue") as Polygon2D
 	if mark != null:
 		mark.color = Palette.AMBER_SOFT

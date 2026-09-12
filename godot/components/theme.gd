@@ -42,6 +42,9 @@ const PROFIT := Color("6fd08c")
 const PFAND := Color("9fd4ff")
 
 # --- typography (VT323, sized to the 480x270 grid; crisp at x4) ------------------------
+## The HUD line only: 10 base px = 40 screen px at x4, the size the orchestrator's review asked for
+## ("text 4x(8-10 px)"). Nothing but the corner cluster may use it - it is too small for a sentence.
+const FONT_TINY := 12  # 10 was illegible at x4 (verify round 3 + orchestrator probe)
 const FONT_SMALL := 12
 const FONT_BODY := 16
 const FONT_LEAD := 24
@@ -51,9 +54,20 @@ const FONT_TITLE := 48
 const BASE := Vector2i(480, 270)
 const COUNTER_H := 100                       # the counter band hides the customer's lower body
 const COUNTER_TOP := BASE.y - COUNTER_H      # 170
-const DIALOGUE_RECT := Rect2i(40, 196, 400, 66)
-const HUD_MARGIN := 4
+## Coffee Talk proportions (concept-art/coffee talk references): the box is ~60% of the counter band
+## and one line of body text fills ~1/3 of it. 56 px tall, seated on the wood instead of filling it.
+const DIALOGUE_RECT := Rect2i(40, 206, 400, 56)
+const HUD_MARGIN := 2
+## One compact line per corner (18 px incl. the plate's 1-px padding), clear of the SPÄTI neon, which
+## the backdrop puts at y 21-37.
+const HUD_LINE_H := 18
+const ICON := 16
 const SERVE_RECT := Rect2i(236, 10, 240, 250)
+## How many base pixels of a customer's bust sit behind the counter layer (docs/02 framing table).
+## `Portrait.place_behind()` derives the bust's y from this and the counter art's real opaque edge;
+## the clamp keeps the hair inside the frame when the art is taller than the table assumes.
+const PORTRAIT_OVERLAP := 30
+const PORTRAIT_TOP_MIN := 24
 const PAD := 6
 const GAP := 4
 
@@ -103,7 +117,7 @@ static func _pixelate(f: Font) -> void:
 	if ff == null:
 		return
 	ff.antialiasing = TextServer.FONT_ANTIALIASING_NONE
-	ff.hinting = TextServer.HINTING_NONE
+	ff.hinting = TextServer.HINTING_NORMAL  # NONE dropped VT323's one-unit stems at 16 px ("Mate"→"Nate"); the hinter snaps them to the grid
 	ff.subpixel_positioning = TextServer.SUBPIXEL_POSITIONING_DISABLED
 	ff.force_autohinter = false
 

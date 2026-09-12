@@ -21,7 +21,7 @@ raining = false
 
 [node name="Modal" parent="." instance=ExtResource("4_modal")]
 unique_name_in_owner = true
-title = "Laden"
+title = "Späti"
 closable = false
 
 [node name="ManageBoard" parent="." instance=ExtResource("5_board")]

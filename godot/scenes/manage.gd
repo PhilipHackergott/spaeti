@@ -26,7 +26,7 @@ func render(v: Dictionary) -> void:
 		layers.set_time(0.0)
 	var modal := _modal()
 	if modal != null:
-		modal.title = "Laden — Tag %d, %s" % [int(v.get("day", 1)), String(v.get("weekday_name", ""))]
+		modal.title = Strings.MANAGE_TITLE % [int(v.get("day", 1)), String(v.get("weekday_name", ""))]
 	var board := _board()
 	if board != null:
 		board.render(v)

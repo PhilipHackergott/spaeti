@@ -20,7 +20,7 @@ extends HBoxContainer
 		value = clampf(v, 0.0, 1.0)
 		_refresh()
 
-@export var fill: Color = Color(0.357, 0.906, 1.0):
+@export var fill: Color = Palette.TRUST:
 	set(v):
 		fill = v
 		_refresh()
@@ -30,7 +30,14 @@ extends HBoxContainer
 		segments = maxi(1, v)
 		_rebuild()
 
+## HUD mode: 10-px label and a narrower bar, so two meters fit on one corner line (docs/04 Hud).
+@export var compact: bool = false:
+	set(v):
+		compact = v
+		_rebuild()
+
 const SEG_SIZE := Vector2(4, 6)
+const SEG_SIZE_COMPACT := Vector2(3, 6)
 
 func _ready() -> void:
 	Palette.prepare()
@@ -50,9 +57,10 @@ func _rebuild() -> void:
 		last.queue_free()
 	while bar.get_child_count() < segments:
 		var cell := ColorRect.new()
-		cell.custom_minimum_size = SEG_SIZE
 		cell.color = Palette.INK_DEEP
 		bar.add_child(cell)
+	for c in bar.get_children():
+		(c as ColorRect).custom_minimum_size = SEG_SIZE_COMPACT if compact else SEG_SIZE
 	_refresh()
 
 func _refresh() -> void:
@@ -63,6 +71,7 @@ func _refresh() -> void:
 	var lab := get_node_or_null("%Label") as Label
 	if lab != null:
 		lab.text = label_text
+		lab.theme_type_variation = &"TinyLabel" if compact else &"SmallLabel"
 	var bar := get_node_or_null("%Bar") as HBoxContainer
 	if bar == null:
 		return

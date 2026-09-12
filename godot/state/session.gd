@@ -65,6 +65,10 @@ func save() -> bool:
 	f.close()
 	return true
 
+## Is there something for the title's "Continue" to load?
+func has_save() -> bool:
+	return FileAccess.file_exists(SAVE_PATH)
+
 func load_save() -> bool:
 	if not FileAccess.file_exists(SAVE_PATH):
 		return false

@@ -40,6 +40,8 @@ const RAIN_SPEED := 90.0
 
 var _rng := RandomNumberGenerator.new()
 var _speeds: Array[float] = []
+## Cached result of counter_edge(); -1 = not measured yet (the art may still be a placeholder).
+var _edge: int = -1
 
 func _ready() -> void:
 	Palette.prepare()
@@ -76,6 +78,38 @@ func counter_top() -> int:
 		return Palette.COUNTER_TOP
 	return Palette.BASE.y - int(counter.texture.get_size().y)
 
+## The row where the counter art actually becomes OPAQUE across the frame — the real occlusion line,
+## which is lower than `counter_top()` because the crate, cup and register stand above the surface.
+## A bust is placed against this (`Portrait.place_behind`), so the framing survives a counter asset of
+## any height (docs/02 "Night framing"). Measured once from the texture's alpha and cached.
+func counter_edge() -> int:
+	var counter := get_node_or_null("%Counter") as TextureRect
+	if counter == null or counter.texture == null:
+		return Palette.COUNTER_TOP
+	if _edge < 0:
+		_edge = int(counter.position.y) + _opaque_row(counter.texture)
+	return _edge
+
+## First row that is opaque across (almost) the whole width. Sampled every 4th column — the art is
+## pixel clusters, not noise, so a 4-px stride cannot miss a solid band.
+static func _opaque_row(tex: Texture2D) -> int:
+	var img := tex.get_image()
+	if img == null:
+		return 0
+	if img.is_compressed():
+		img.decompress()
+	var w := img.get_width()
+	var h := img.get_height()
+	var samples := int(ceil(float(w) / 4.0))
+	for y in h:
+		var opaque := 0
+		for x in range(0, w, 4):
+			if img.get_pixel(x, y).a > 0.8:
+				opaque += 1
+		if opaque >= samples - 1:
+			return y
+	return 0
+
 func _refresh_art() -> void:
 	var back := get_node_or_null("%Backdrop") as TextureRect
 	if back == null:
@@ -85,6 +119,7 @@ func _refresh_art() -> void:
 	if counter != null:
 		var tex := Assets.texture(counter_id)
 		counter.texture = tex
+		_edge = -1  # a new counter asset re-measures its own occlusion line
 		if tex != null:
 			# The counter band is always flush with the bottom of the frame, whatever height the
 			# art turns out to be, so the customer's lower body is hidden exactly as in Coffee Talk.
