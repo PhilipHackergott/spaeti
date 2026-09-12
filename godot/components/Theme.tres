@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=20 format=3]
+[gd_resource type="Theme" load_steps=22 format=3]
 
 [ext_resource type="FontFile" path="res://assets/fonts/Jersey10-Regular.ttf" id="1_j10"]
 [ext_resource type="FontFile" path="res://assets/fonts/Jersey20-Regular.ttf" id="2_j20"]
@@ -229,6 +229,40 @@ corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 anti_aliasing = false
 
+[sub_resource type="StyleBoxFlat" id="SB_Step"]
+content_margin_left = 4.0
+content_margin_top = 0.0
+content_margin_right = 4.0
+content_margin_bottom = 0.0
+bg_color = Color(0.13, 0.09, 0.08, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.91, 0.635, 0.29, 0.35)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id="SB_StepHover"]
+content_margin_left = 4.0
+content_margin_top = 0.0
+content_margin_right = 4.0
+content_margin_bottom = 0.0
+bg_color = Color(0.24, 0.15, 0.09, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.949, 0.78, 0.478, 0.8)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+anti_aliasing = false
+
 [sub_resource type="StyleBoxFlat" id="SB_HudPlate"]
 content_margin_left = 3.0
 content_margin_top = 1.0
@@ -247,7 +281,7 @@ anti_aliasing = false
 
 [resource]
 default_font = ExtResource("1_j10")
-default_font_size = 10
+default_font_size = 16
 BubblePanel/base_type = &"PanelContainer"
 BubblePanel/styles/panel = SubResource("SB_Bubble")
 Button/colors/font_color = Color(0.957, 0.906, 0.824, 1)
@@ -256,17 +290,17 @@ Button/colors/font_focus_color = Color(1, 1, 1, 1)
 Button/colors/font_hover_color = Color(1, 1, 1, 1)
 Button/colors/font_pressed_color = Color(1, 1, 1, 1)
 Button/fonts/font = ExtResource("1_j10")
-Button/font_sizes/font_size = 10
+Button/font_sizes/font_size = 16
 Button/styles/disabled = SubResource("SB_BtnDisabled")
 Button/styles/focus = SubResource("SB_BtnFocus")
 Button/styles/hover = SubResource("SB_BtnHover")
 Button/styles/normal = SubResource("SB_BtnNormal")
 Button/styles/pressed = SubResource("SB_BtnPressed")
 CheckBox/fonts/font = ExtResource("1_j10")
-CheckBox/font_sizes/font_size = 10
+CheckBox/font_sizes/font_size = 16
 ChoiceButton/base_type = &"Button"
 ChoiceButton/fonts/font = ExtResource("1_j10")
-ChoiceButton/font_sizes/font_size = 10
+ChoiceButton/font_sizes/font_size = 16
 ChoiceButton/styles/focus = SubResource("SB_ChoiceHover")
 ChoiceButton/styles/hover = SubResource("SB_ChoiceHover")
 ChoiceButton/styles/normal = SubResource("SB_Choice")
@@ -279,9 +313,9 @@ HudPlate/base_type = &"PanelContainer"
 HudPlate/styles/panel = SubResource("SB_HudPlate")
 Label/colors/font_color = Color(0.957, 0.906, 0.824, 1)
 Label/fonts/font = ExtResource("1_j10")
-Label/font_sizes/font_size = 10
+Label/font_sizes/font_size = 16
 LeadLabel/base_type = &"Label"
-LeadLabel/fonts/font = ExtResource("2_j20")
+LeadLabel/fonts/font = ExtResource("1_j10")
 LeadLabel/font_sizes/font_size = 20
 Panel/styles/panel = SubResource("SB_Panel")
 PanelContainer/styles/panel = SubResource("SB_Panel")
@@ -292,19 +326,26 @@ SlotPanelPicked/styles/panel = SubResource("SB_SlotPicked")
 SmallLabel/base_type = &"Label"
 SmallLabel/colors/font_color = Color(0.612, 0.549, 0.49, 1)
 SmallLabel/fonts/font = ExtResource("1_j10")
-SmallLabel/font_sizes/font_size = 10
+SmallLabel/font_sizes/font_size = 12
 SpeakerLabel/base_type = &"Label"
 SpeakerLabel/colors/font_color = Color(0.949, 0.78, 0.478, 1)
 SpeakerLabel/fonts/font = ExtResource("1_j10")
-SpeakerLabel/font_sizes/font_size = 10
+SpeakerLabel/font_sizes/font_size = 12
+StepButton/base_type = &"Button"
+StepButton/fonts/font = ExtResource("1_j10")
+StepButton/font_sizes/font_size = 12
+StepButton/styles/focus = SubResource("SB_StepHover")
+StepButton/styles/hover = SubResource("SB_StepHover")
+StepButton/styles/normal = SubResource("SB_Step")
+StepButton/styles/pressed = SubResource("SB_StepHover")
 TinyLabel/base_type = &"Label"
 TinyLabel/colors/font_color = Color(0.957, 0.906, 0.824, 1)
 TinyLabel/fonts/font = ExtResource("1_j10")
-TinyLabel/font_sizes/font_size = 10
+TinyLabel/font_sizes/font_size = 12
 TitleButton/base_type = &"Button"
 TitleButton/colors/font_outline_color = Color(0.02, 0.016, 0.027, 1)
 TitleButton/constants/outline_size = 1
-TitleButton/fonts/font = ExtResource("2_j20")
+TitleButton/fonts/font = ExtResource("1_j10")
 TitleButton/font_sizes/font_size = 20
 TitleButton/styles/disabled = SubResource("SB_BtnDisabled")
 TitleButton/styles/focus = SubResource("SB_MenuHover")
@@ -322,4 +363,4 @@ TitleSubLabel/colors/font_color = Color(0.957, 0.906, 0.824, 1)
 TitleSubLabel/colors/font_outline_color = Color(0.02, 0.016, 0.027, 1)
 TitleSubLabel/constants/outline_size = 1
 TitleSubLabel/fonts/font = ExtResource("1_j10")
-TitleSubLabel/font_sizes/font_size = 10
+TitleSubLabel/font_sizes/font_size = 12

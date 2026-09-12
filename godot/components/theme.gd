@@ -57,16 +57,22 @@ const MODAL_DIM := Color(0.0, 0.0, 0.0, 0.55)
 ## A meter's unlit cell, so an empty bar still reads as a scale.
 const METER_EMPTY := Color(0.031, 0.027, 0.039, 0.94)
 
-# --- typography (Jersey, a bitmap-native pixel family; each face ONLY at its own native size) ------
+# --- typography (Jersey, a bitmap-native pixel family) ---------------------------------
 ## VT323 is an outline face: at 16 base px its one-unit middle stems fell between pixel centres and
-## simply vanished ("Mate"->"Nate", "MODULES"->"NODULES", "8"->"B"). The Jersey faces are drawn ON a
-## 10 / 20 / 25 px grid, so at those exact sizes every stem lands on a whole pixel and nothing drops.
-## Rule: a size here is either a face's native size or an INTEGER multiple of it. Nothing else.
-const FONT_TINY := 10    # Jersey 10 @10 -> 40 screen px at x4
-const FONT_SMALL := 10   # Jersey 10 @10
-const FONT_BODY := 10    # Jersey 10 @10 - Coffee Talk's body is this small; 16 was twice its size
-const FONT_LEAD := 20    # Jersey 20 @20
-const FONT_TITLE := 50   # Jersey 25 @50 (integer 2x, so the wordmark is a doubled pixel, not a blur)
+## simply vanished ("Mate"->"Nate", "MODULES"->"NODULES", "8"->"B"). Jersey is drawn ON a pixel grid,
+## but ONLY at the sizes where its grid divides evenly — measured, not assumed, with
+## `godot/tools/FontProbe.tscn` (shots/fontprobe*.png, build log 2026-09-12):
+##   Jersey 10 -> CLEAN at 12 / 16 / 20 / 25 / 50 · BROKEN at 10 ("KIEZ"->"HIEZ") and 14 ("Wasser"->"Wassor")
+##   Jersey 20 -> BROKEN at 20 ("8"->"0"); clean at 25/50, so it earns no slot here (kept for its licence)
+##   Jersey 25 -> caps-only display face, perfect at 50: the wordmark, nothing else
+## Rule: a size here is one of the measured-clean sizes. Anything else is re-probed before it ships.
+## The whole ladder is much smaller than VT323's was at the same numbers — Jersey 10 @16 has an 8-px
+## cap where VT323 @16 had 11 — which is the Coffee Talk body size the review asked for.
+const FONT_TINY := 12    # Jersey 10 @12 — the HUD corner line, badges, table cells
+const FONT_SMALL := 12   # Jersey 10 @12
+const FONT_BODY := 16    # Jersey 10 @16 — dialogue, buttons, item names
+const FONT_LEAD := 20    # Jersey 10 @20 — modal titles, the P&L bottom line
+const FONT_TITLE := 50   # Jersey 25 @50 — the wordmark only
 
 # --- layout of the base grid (every scene composes against these) ----------------------
 const BASE := Vector2i(480, 270)
@@ -74,8 +80,9 @@ const COUNTER_H := 100                       # the counter band hides the custom
 const COUNTER_TOP := BASE.y - COUNTER_H      # 170
 ## Coffee Talk proportions (concept-art/coffee talk references): the box is ~60% of the counter band
 ## and seats on the wood instead of filling it. At Jersey 10 a speaker line + two body lines need
-## 12 + 2x12 + 10 padding = 46 px, so the box is 48 and sits lower on the wood than it did at 16 px.
-const DIALOGUE_RECT := Rect2i(40, 210, 400, 48)
+## a 12-px speaker line + two 16-px body lines + the panel's 10 px of padding = 64, which is docs/02's
+## "over the counter band, y≈196–262" almost exactly.
+const DIALOGUE_RECT := Rect2i(40, 196, 400, 64)
 ## The box is also narrowed to this while the serve panel owns the right half.
 const DIALOGUE_W_SERVING := 188
 const HUD_MARGIN := 2
@@ -83,7 +90,9 @@ const HUD_MARGIN := 2
 ## the backdrop puts at y 21-37. The 16-px icons, not the 10-px text, set this height.
 const HUD_LINE_H := 18
 const ICON := 16
-const SERVE_RECT := Rect2i(236, 10, 240, 250)
+## The serve panel owns the right half from here; it is 8 px wider than it was so five 42-px slots and
+## the scrollbar fit side by side (the shelf is 17 SKUs and grows to 23 with the modules).
+const SERVE_RECT := Rect2i(228, 8, 248, 256)
 ## How many base pixels of a customer's bust sit behind the counter layer (docs/02 framing table).
 ## `Portrait.place_behind()` derives the bust's y from this and the counter art's real opaque edge;
 ## the clamp keeps the hair inside the frame when the art is taller than the table assumes.

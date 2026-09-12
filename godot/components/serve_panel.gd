@@ -8,7 +8,7 @@ signal serve(action: Dictionary)
 signal waved_off()
 signal closed()
 
-const SHOWN_X := 236
+const SHOWN_X := 228
 const HIDDEN_X := 482
 const SLIDE_MS := 220
 
@@ -49,6 +49,9 @@ func render(view: Dictionary) -> void:
 		t.set_pfand_rate(float(view.get("pfand_rate", 0.0)))
 	if shelf != null:
 		shelf.set_items(_shelf_items, t.counts() if t != null else {})
+		# The shelf is taller than its window (17 SKUs, 23 once the modules land), so the thing they
+		# actually asked for is scrolled into view instead of being hidden three rows down.
+		_reveal(String((view.get("active", {}) as Dictionary).get("want", {}).get("sku_id", "")))
 	var want := get_node_or_null("%Want") as Label
 	if want != null:
 		var active: Dictionary = view.get("active", {})
@@ -58,6 +61,18 @@ func render(view: Dictionary) -> void:
 			var who := String(active.get("archetype", {}).get("name", Strings.SOMEONE))
 			var w: Dictionary = active.get("want", {})
 			want.text = Strings.WANT_LINE % [who, String(w.get("name", ""))]
+
+## Scrolls the shelf so `sku_id`'s slot is inside the window. Safe outside the tree and for "".
+func _reveal(sku_id: String) -> void:
+	if sku_id == "":
+		return
+	var scroll := get_node_or_null("%ShelfScroll") as ScrollContainer
+	var shelf := get_node_or_null("%Shelf") as Shelf
+	if scroll == null or shelf == null:
+		return
+	var slot := shelf.slot_for(sku_id)
+	if slot != null:
+		scroll.ensure_control_visible(slot)
 
 func open(instant: bool = false) -> void:
 	is_open = true

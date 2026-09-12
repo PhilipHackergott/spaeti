@@ -41,8 +41,10 @@ export function runCodex({ prompt, images = [], schema, sandbox = 'read-only', c
       clearTimeout(killer);
       const last = fs.existsSync(lastFile) ? fs.readFileSync(lastFile, 'utf8').trim() : '';
       const m = log.match(/tokens used\s*\n\s*([\d.,]+)/);
-      // Account-level refusals: surface them by name so callers abort instead of retrying blind.
-      const blockLine = (log.match(/.*(spend cap|usage limit|rate limit|quota|too many requests|not logged in|login required).*/i) || [])[0];
+      // Account-level refusals: surface them by name so callers abort instead of retrying blind. Only Codex's own
+      // `ERROR ...` lines count — matching prose anywhere in the log once aborted a finished run because a doc it
+      // echoed contained the words "usage limits".
+      const blockLine = (log.match(/^(?:\S+\s+)?ERROR\b.*(spend cap|usage limit|rate limit|quota|too many requests|\b429\b|not logged in|login required).*$/im) || [])[0];
       const blocked = blockLine ? (/spend cap/i.test(blockLine) ? 'spend-cap' : /login|logged/i.test(blockLine) ? 'auth' : 'rate-limit') : null;
       // The session id scopes any look-up under ~/.codex/generated_images — never scan other lanes' sessions.
       const sessionId = (log.match(/session id:\s*([0-9a-f-]{8,})/i) || [])[1] || '';
