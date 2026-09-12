@@ -129,11 +129,31 @@ while (attempts <= retries) {
     result = { ...result, ok: true, raw: fwd(raw), out: isConcept ? fwd(out) : undefined, ...rawInfo, attempts, model };
     break;
   }
-  const snap = snapImage({ in: raw, out, w: entry.w, h: entry.h, mode: entry.mode || (entry.transparent ? 'fit' : 'cover'),
-    filter: entry.filter || 'lanczos', crop: entry.crop, 'alpha-threshold': entry.transparent ? (entry.alphaThreshold ?? 0.5) : undefined,
+  // Nearest is the default for everything but full-frame scene layers: at a 5–6× downscale Lanczos invents exactly
+  // the intermediate tones the judge calls "painterly" (measured: +3 to +15 points on five busts, zero Codex calls).
+  const filter = entry.filter || (entry.kind === 'scene' ? 'lanczos' : 'nearest');
+  const snapOpts = (keyTol) => ({ in: raw, out, w: entry.w, h: entry.h, mode: entry.mode || (entry.transparent ? 'fit' : 'cover'),
+    filter, crop: entry.crop, 'alpha-threshold': entry.transparent ? (entry.alphaThreshold ?? 0.5) : undefined,
     trim: entry.transparent && entry.trim !== false ? 1 : undefined,
-    key: entry.transparent ? keyColour : undefined, 'key-tol': entry.transparent ? (entry.keyTol ?? 0.18) : undefined, 'auto-key': entry.transparent ? 1 : undefined,
+    key: entry.transparent ? keyColour : undefined, 'key-tol': entry.transparent ? keyTol : undefined, 'auto-key': entry.transparent ? 1 : undefined,
     'auto-bg': entry.transparent ? 1 : undefined, 'bg-tol': entry.transparent ? (entry.bgTol ?? 0.16) : undefined });
+  let snap = snapImage(snapOpts(entry.keyTol ?? 0.18));
+  // Green fringe after keying is common (35–43 edge pixels seen); widen the key tolerance once and take the cleaner result.
+  if (entry.transparent && snap.fringe > 20) {
+    const wider = snapImage(snapOpts(0.45));
+    if (wider.fringe < snap.fringe) snap = { ...wider, fringeBefore: snap.fringe };
+  }
+  // Transparency trap: a painted checkerboard whose white squares connect through the subject's whites lets the
+  // border flood-fill erase half a face while still "passing" the 2% rule. A bust or prop is mostly opaque
+  // inside its trimmed box — reject when it is not.
+  const maxTransparent = entry.kind === 'portrait' ? 0.55 : entry.kind === 'prop' ? 0.75 : 1.0;
+  if (entry.transparent && snap.transparentFrac > maxTransparent) {
+    feedback = `The snapped sprite is ${Math.round(snap.transparentFrac * 100)}% transparent — the background removal ate into the subject (a painted checkerboard or a backdrop that touches the subject's light areas). Use image_gen's real alpha, or a flat solid #${keyColour} background that NO part of the subject shares.`;
+    result.error = feedback;
+    result.errors.push(`attempt ${attempts}: ${feedback} (kept as ${shelveRaw(raw, attempts)})`);
+    if (fs.existsSync(out)) fs.unlinkSync(out);
+    continue;
+  }
   // Transparency is judged on real pixels after Godot decoded (and possibly keyed) the file — not on the PNG header.
   if (entry.transparent && snap.transparentFrac < 0.02) {
     feedback = `The background was NOT transparent (under 2% transparent pixels after decoding, and neither the flat #${keyColour} key colour nor a flat/checker backdrop the border flood-fill could remove). Use image_gen's transparent-background option, or a single flat solid #${keyColour} background that no part of the subject touches.`;
@@ -143,7 +163,8 @@ while (attempts <= retries) {
     continue;
   }
   result = { id: entry.id, ok: true, raw: fwd(raw), out: fwd(out), rawSize: `${rawInfo.width}x${rawInfo.height}`,
-    width: snap.width, height: snap.height, transparentFrac: snap.transparentFrac, keyedPixels: snap.keyedPixels, attempts, model };
+    width: snap.width, height: snap.height, transparentFrac: snap.transparentFrac, keyedPixels: snap.keyedPixels,
+    fringe: snap.fringe, fringeBefore: snap.fringeBefore, filter, attempts, model };
   break;
 }
 result.seconds = Math.round((Date.now() - started) / 1000);

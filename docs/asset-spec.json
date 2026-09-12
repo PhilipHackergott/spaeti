@@ -29,10 +29,12 @@
       "allowText": "SPÄTI",
       "refs": [
         "concept-art/main character target state.png",
-        "concept-art/coffee talk references/{AE54C7E9-D717-4471-98C0-FA7E2F50E019}.png"
+        "concept-art/coffee talk references/{AE54C7E9-D717-4471-98C0-FA7E2F50E019}.png",
+        "art/raw/scene/title.png"
       ],
       "prompt": "CONCEPT ART for the game's core screen — the Berlin-Späti version of the attached interaction reference (image 1): the SAME framing, pixel density, rendering quality and warmth of shading, but the set is a REAL Berlin Späti (late-night kiosk), NOT a café and NOT a wooden tavern. Centred and facing the viewer, leaning on the counter, cut off by it at the hips: Lena, a broke Berlin art student in her early 20s — pale, freckled, reddish-auburn hair escaping a dark green beanie, a paint-flecked oversized denim jacket over a striped top, a silver hoop earring — holding an empty Mate-like bottle, a proud half-smile. THE SET, from the shopkeeper's side: behind her a dense wall of cigarette packs and tobacco pouches in tight colourful rows (red/gold/blue/white GENERIC packs, no brands) on white metal shelving with price-tag strips, a row of small spirits bottles, lighters and gum and phone-cable blister packs on hooks, hand-written paper price signs, a small wall TV, a clock; at the left a tall glass-door drinks fridge with a white interior and blue LED strip packed with generic beer / Mate-like / cola-like / water bottles; at the right the glass door with stickers and an 'OPEN' neon onto a rainy cold-blue Berlin street with a graffiti-tagged cream facade and a bench; cool-white fluorescent tube light inside (faint green-cyan cast) pooling out; the warmth comes from the packaging colours and the blue night, not from wood. The counter across the bottom ~22% is cheap laminate: stacks of newspapers on the front, open boxes of chocolate bars and sweets (generic), a WHITE cash register with a small display at the right, a card reader, a coffee cup and a phone at ~30% and ~50%, a Pfand crate of empty bottles at the far left. NO dialogue box, NO HUD, NO text except a small 'SPÄTI' sign. Within the middle 16:9 band Lena's beanie top sits at ~10–12% of the height and the counter's rear edge at ~77–78%; she occupies about one third of the width. Cluttered, bright, cheap and alive — Coffee Talk's rendering on a Späti's furniture. INSTANT-FAILURE SET LIST (the previous attempt failed on exactly this — do not draw any of it): dark wood panelling or wooden plank walls, a wooden bar counter, exposed beams, hanging pendant lamps with cone shades, warm tungsten as the main light source, hanging ivy or pot plants, framed pictures, ceramic mugs on shelves, a jukebox, a vintage telephone, wicker baskets, bar stools, anything that reads as a café, pub, coffee house or tavern. The room is a cheap bright modern kiosk: painted cream/white plaster, WHITE and grey METAL shelving, cool-white fluorescent tubes in the ceiling, glass-door fridges, plastic and laminate. HOW THE PIXELS MUST BE DRAWN — this is the ONE axis that keeps failing (44/100), so obey it over everything else: the image is a HAND-AUTHORED 480x270 pixel-art painting enlarged 4x with nearest-neighbour. Every art pixel is a hard 4x4 block of ONE flat colour; NOTHING in the image is finer than that block. Deliberately draw at a LOW level of detail: half as many objects as a photo would have, each one bigger and simpler. A cigarette pack is a flat rectangle of 2-3 colours with one band, NOT a miniature illustration; a bottle is a flat silhouette with one highlight column and one label block; a face is flat skin, one shadow cluster, two eye pixels-groups, a 2-px mouth. Every object gets a hard 1-art-pixel dark contour. Every material is 4-6 FLAT tones in big contiguous stair-stepped clusters; light, glow and reflection are 2-3 hard-edged bands. Total palette at most 40 colours. ABSOLUTELY NO: airbrush, blur, smooth gradients, anti-aliased or feathered edges, glow halos or bloom, grain/speckle/scattered stray intermediate pixels, hairline sub-pixel strokes, strand-by-strand hair, painterly brush texture, photographic texture, or a high-resolution illustration that has merely been downscaled — that last one is exactly what the previous attempt did and it is a hard failure. Squint test: at one quarter size every shape must still read as a clean flat block. CROP-SAFETY: the canvas is 3:2 but the game frame is 16:9 — treat the top and bottom ~12% as expendable margin and compose everything important inside the middle band. LIGHT ON THE CHARACTER: keep a cool-white fluorescent key on Lena, add a narrow stepped cyan rim on her fridge-facing (left) edge and a restrained magenta rim on her door-facing (right) shoulder, and drop the stock wall directly behind her head one value step so her silhouette reads. Her face is the focal point: warm skin, clean economical features, hair in a few big angular locks with one shadow and one highlight family. The only text in the image is one small sign reading SPÄTI, spelled with the umlaut; if you cannot draw the umlaut cleanly, draw no text at all.",
-      "$status": "round 3: real-Späti set + hard pixel-construction clause; stale wooden backdrop ref removed"
+      "$status": "round 3: real-Späti set + hard pixel-construction clause; stale wooden backdrop ref removed",
+      "$styleRefNote": "art/raw/scene/title.png (the title key art the user approved as a style reference) is attached: match its rendering, palette and Späti materials."
     },
     {
       "id": "scene/backdrop",
@@ -50,10 +52,12 @@
       "refs": [
         "concept-art/main character target state.png",
         "concept-art/generated/night_interaction.png",
-        "concept-art/coffee talk references/{AE54C7E9-D717-4471-98C0-FA7E2F50E019}.png"
+        "concept-art/coffee talk references/{AE54C7E9-D717-4471-98C0-FA7E2F50E019}.png",
+        "art/raw/scene/title.png"
       ],
       "$conceptNote": "Image 2 (concept-art/generated/night_interaction.png) is the composed target frame — match its set dressing, lighting and pixel grid exactly.",
-      "$status": "round 3: real-Späti set + hard pixel-construction clause"
+      "$status": "round 3: real-Späti set + hard pixel-construction clause",
+      "$styleRefNote": "art/raw/scene/title.png (the title key art the user approved as a style reference) is attached: match its rendering, palette and Späti materials."
     },
     {
       "id": "scene/counter",
@@ -72,10 +76,12 @@
       "refs": [
         "concept-art/main character target state.png",
         "concept-art/generated/night_interaction.png",
-        "concept-art/coffee talk references/{AE54C7E9-D717-4471-98C0-FA7E2F50E019}.png"
+        "concept-art/coffee talk references/{AE54C7E9-D717-4471-98C0-FA7E2F50E019}.png",
+        "art/raw/scene/title.png"
       ],
       "$conceptNote": "Image 2 (concept-art/generated/night_interaction.png) is the composed target frame — match its set dressing, lighting and pixel grid exactly.",
-      "$status": "round 3: real-Späti set + hard pixel-construction clause"
+      "$status": "round 3: real-Späti set + hard pixel-construction clause",
+      "$styleRefNote": "art/raw/scene/title.png (the title key art the user approved as a style reference) is attached: match its rendering, palette and Späti materials."
     },
     {
       "id": "scene/title",

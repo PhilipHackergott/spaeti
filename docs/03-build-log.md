@@ -1115,3 +1115,14 @@ conversation is open — and the log rows now carry `queue` and `talking`.
 - The stats strip is 136 px wide because "Constitution" is 12 characters at the pool's one text size. It fits, but
   it is the widest thing on the left edge; a three-letter ladder (STR/DEX/…) would free 60 px if the left column
   ever needs them.
+
+## 2026-09-12 late — the line, the Späti names, wrapper guards (orchestrator, inline while subagents were throttled)
+- **Queue rule:** `Rules._tick` no longer promotes the head of the queue; guests wait for `talk_next` and their patience runs in
+  line (`_age_queue`; story guests wait forever). `config.auto_take_next=true` keeps the old behaviour for serve-loop tests/sims
+  (test_night, test_story, one rails test use it). AutoPlayer now takes the head itself. 99/99 tests.
+- **Stats renamed (display only):** Muscle · Hands · Stamina · Brains · Kiez Sense · Schnauze; ids unchanged; both tables + labels.
+- **Wrapper:** nearest snap is the default for busts/props (portrait lane measured +3…+15); >55 %-transparent busts rejected (the
+  checkerboard-through-the-whites trap); `fringe` counted and auto-widened key pass. Five untouched portraits re-snapped with nearest.
+- **Art:** title r4 **86 pass** (the user's style reference; composition 94 / palette 92 / Berlin 91). Concept r3 (real-Späti set)
+  74 with Lanczos — "the set correction succeeds", pixel 52 — promoted as the canonical set reference; nearest re-judge pending.
+  Backdrop r5 / counter r5 generating on the corrected brief with the title + concept attached.

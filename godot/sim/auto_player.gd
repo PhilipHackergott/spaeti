@@ -77,12 +77,16 @@ static func talk_turn(s0: Dictionary) -> Dictionary:
 	var s := s0
 	if Talk.is_open(s):
 		return play_talk(s)
-	if (s["active"] as Dictionary).is_empty():
+	# The line waits for the shopkeeper (docs/06 §5 — nobody steps up on their own unless
+	# `config.auto_take_next`), so the policy takes the head of the queue itself.
+	if (s["active"] as Dictionary).is_empty() and (s["queue"] as Array).is_empty():
 		return s
 	var opened := Rules.apply(s, {"type": "talk_next"})
 	if is_same(opened, s):
-		return s  # no graph for this guest — the caller falls back to the plain serve
-	return play_talk(opened)
+		return s  # nothing to take, or no graph for this guest — the caller falls back to the plain serve
+	if Talk.is_open(opened):
+		return play_talk(opened)
+	return opened  # a guest stepped up without a conversation — the caller serves their want
 
 ## Open → tick the whole night, talking to whoever talks and serving the want if stocked → close.
 static func play_night(s0: Dictionary, dt_ms: int = DEFAULT_DT_MS) -> Dictionary:

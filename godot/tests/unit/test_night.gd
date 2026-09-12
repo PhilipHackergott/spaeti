@@ -2,7 +2,7 @@ extends "res://tests/TestCase.gd"
 ## The night loop: open → tick → serve/skip → close, and the P&L identity on the closed night.
 
 func _fresh() -> Dictionary:
-	return SpatiState.new_game({"seed": 7})
+	return SpatiState.new_game({"seed": 7, "auto_take_next": true})  # counter-loop tests: the head steps up on tick
 
 func test_new_game_shape() -> void:
 	var s := _fresh()
@@ -111,7 +111,7 @@ func test_legal_actions_track_the_phase() -> void:
 func test_session_dispatches_and_streams_events() -> void:
 	# The autoload is a Node, but nothing in it needs the tree — instantiate it bare and drive it.
 	var session: Node = load("res://state/session.gd").new()
-	session.new_game({"seed": 7})
+	session.new_game({"seed": 7, "auto_take_next": true})
 	var seen: Array = []
 	session.event.connect(func(entry: Dictionary): seen.append(entry["kind"]))
 	assert_true(session.dispatch({"type": "open_night"}), "legal action dispatches")

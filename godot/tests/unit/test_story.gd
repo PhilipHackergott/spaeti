@@ -3,7 +3,7 @@ extends "res://tests/TestCase.gd"
 ## arrivals, gate correctly, block the serve while pending, apply their choice, and compose a finale.
 
 func _fresh(seed_value: int = 3) -> Dictionary:
-	return SpatiState.new_game({"seed": seed_value})
+	return SpatiState.new_game({"seed": seed_value, "auto_take_next": true})  # beat tests: the cast steps up on tick
 
 ## Tick until someone is mid-conversation (or the night ends).
 func _tick_to_dialogue(s0: Dictionary, dt_ms: int = 500) -> Dictionary:

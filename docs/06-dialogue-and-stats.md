@@ -77,3 +77,16 @@ While `state.talk` is open, `legal_actions` offers only `talk_advance` / `talk_c
 `test_dialogue.gd`: checks are deterministic per seed; a gate locks below min; effects apply; `next:""` ends and the
 guest leaves (auto-serve applied); `talk_next` is illegal with an empty queue; the queue view is FIFO and shows
 portraits; a full night's playthrough with the AutoPlayer choosing choice 0 never throws.
+
+## 7. Decisions after the first build (2026-09-12 late)
+
+- **Stat display names are Späti-flavoured** (ids unchanged): Muscle (str) · Hands (dex) · Stamina (con) · Brains (int) ·
+  Kiez Sense (wis) · **Schnauze** (cha — the Berliner Schnauze). Choice tags read "[Schnauze 12] …". Both name tables
+  (`Rules.STAT_NAMES`, `Strings.STAT_*`) carry the same words; `test_scenes.gd::test_the_two_stat_tables_agree` guards it.
+- **The line is real:** the reducer no longer promotes the head of the queue on `tick`. Guests wait at the register until
+  `talk_next` takes them; while they wait their patience runs (`Rules._age_queue`) and they may give up on the line
+  (a smaller Kiez-Trust hit than a balk at the counter). Story guests never give up (their beat is tonight's
+  conversation). `config.auto_take_next = true` restores the old behaviour for serve-loop sims.
+- A beat/vignette opens as a one-node talk (`engine/talk.gd`); `view.dialogue` is a projection of `view.talk`; the legacy
+  `resolve_beat/resolve_vignette` are aliases of `talk_choose`. Ending a **graph** talk dismisses the guest and auto-serves
+  their want (refusing an underage restricted sale); ending a **beat** talk leaves them at the counter for the ordinary serve.

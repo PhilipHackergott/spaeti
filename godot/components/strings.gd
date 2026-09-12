@@ -51,12 +51,15 @@ const MODIFIER := "%+d"                         # D&D 5e: floor((stat - 10) / 2)
 ## too (`Rules.STAT_NAMES`, for the reason it writes into a locked choice) — `test_scenes.gd::
 ## test_the_two_stat_tables_agree` is what stops the two from drifting apart.
 const STAT_ORDER := ["str", "dex", "con", "int", "wis", "cha"]
-const STAT_STRENGTH := "Strength"
-const STAT_DEXTERITY := "Dexterity"
-const STAT_CONSTITUTION := "Constitution"
-const STAT_INTELLIGENCE := "Intelligence"
-const STAT_WISDOM := "Wisdom"
-const STAT_CHARISMA := "Charisma"
+## Späti-flavoured stat names (user decision, 2026-09-12): the ids stay D&D (str/dex/con/int/wis/cha), the
+## words are the Kiez's — Muscle hauls crates, Hands work the till, Stamina is the 3-am shift, Brains reads
+## the rent letter, Kiez Sense notices people, Schnauze (the Berliner Schnauze) talks them round.
+const STAT_STRENGTH := "Muscle"
+const STAT_DEXTERITY := "Hands"
+const STAT_CONSTITUTION := "Stamina"
+const STAT_INTELLIGENCE := "Brains"
+const STAT_WISDOM := "Kiez Sense"
+const STAT_CHARISMA := "Schnauze"
 const STAT_NAMES := {
 	"str": STAT_STRENGTH, "dex": STAT_DEXTERITY, "con": STAT_CONSTITUTION,
 	"int": STAT_INTELLIGENCE, "wis": STAT_WISDOM, "cha": STAT_CHARISMA,

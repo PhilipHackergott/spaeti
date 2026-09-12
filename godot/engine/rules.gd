@@ -12,9 +12,11 @@ const NIGHT_MINUTES := 10 * 60
 
 ## The six stats, in the order the strip prints them (docs/06 §1). Names are what a player reads.
 const STAT_IDS := ["str", "dex", "con", "int", "wis", "cha"]
+## Späti-flavoured names for the six D&D-style stats (user decision): the ids stay str/dex/con/int/wis/cha so the
+## mechanics read as 5e; the words are the Kiez's. "Schnauze" = Berliner Schnauze, the gift of the gab (CHA).
 const STAT_NAMES := {
-	"str": "Strength", "dex": "Dexterity", "con": "Constitution",
-	"int": "Intelligence", "wis": "Wisdom", "cha": "Charisma",
+	"str": "Muscle", "dex": "Hands", "con": "Stamina",
+	"int": "Brains", "wis": "Kiez Sense", "cha": "Schnauze",
 }
 ## Every check is one d20 against a DC, the 5e way (docs/06 §2).
 const DIE_FACES := 20
@@ -173,8 +175,36 @@ static func _tick(n: Dictionary, dt_ms: int) -> void:
 			n["reputation"]["kiez"] = Economy.clamp_meter(float(n["reputation"]["kiez"]) + Economy.kiez_delta(arch, "fair", true))
 			_log(n, "balk", "%s got tired of waiting and left." % arch["name"])
 			n["active"] = {}
-	if (n["active"] as Dictionary).is_empty() and not (n["queue"] as Array).is_empty():
-		_take_next(n)
+	# The LINE is the slice (docs/06 §5): guests wait at the register until you take the next one (`talk_next`),
+	# and while they wait their patience runs — ignore the line and it thins out. `config.auto_take_next`
+	# restores the old behaviour (the head of the queue steps up by itself) for the serve-loop sims and tests.
+	if _auto_take_next(n):
+		if (n["active"] as Dictionary).is_empty() and not (n["queue"] as Array).is_empty():
+			_take_next(n)
+	else:
+		_age_queue(n, dt_ms)
+
+static func _auto_take_next(n: Dictionary) -> bool:
+	return bool((n["config"] as Dictionary).get("auto_take_next", false))
+
+## Waiting guests lose patience too (story guests wait forever — their beat is tonight's conversation).
+static func _age_queue(n: Dictionary, dt_ms: int) -> void:
+	var queue: Array = n["queue"]
+	var i := 0
+	while i < queue.size():
+		var c: Dictionary = queue[i]
+		if String(c.get("character_id", "")) != "" or String(c.get("beat_id", "")) != "" or String(c.get("vignette_id", "")) != "":
+			i += 1
+			continue
+		c["patience_left_ms"] = int(c["patience_left_ms"]) - dt_ms
+		if int(c["patience_left_ms"]) <= 0:
+			var arch := Content.archetype(c["archetype_id"])
+			n["tally"]["lost"] = int(n["tally"]["lost"]) + 1
+			n["reputation"]["kiez"] = Economy.clamp_meter(float(n["reputation"]["kiez"]) + Economy.kiez_delta(arch, "fair", true) * 0.5)
+			_log(n, "balk", "%s gave up on the line and left." % arch["name"])
+			queue.remove_at(i)
+		else:
+			i += 1
 
 ## Move the head of the queue to the counter and let the story notice (§4).
 static func _take_next(n: Dictionary) -> void:
@@ -184,10 +214,11 @@ static func _take_next(n: Dictionary) -> void:
 	StoryFlow.on_customer_active(n)
 	_open_story_talk(n)  # a beat/vignette IS a conversation now (docs/06 §4) — one box, one source
 
-## Clear the counter and pull the next person up (nobody is left standing there).
+## Clear the counter. With `auto_take_next` the next person steps up by themselves; otherwise the line waits
+## for `talk_next` (the slice's "one guest at a time").
 static func _next_customer(n: Dictionary) -> void:
 	n["active"] = {}
-	if not (n["queue"] as Array).is_empty():
+	if _auto_take_next(n) and not (n["queue"] as Array).is_empty():
 		_take_next(n)
 
 static func _serve(n: Dictionary, give: Array, pfand_bottles: int) -> void:

@@ -99,3 +99,11 @@ run `art.mjs`, judge it, reference it from a component. Never leave an asset onl
 palette) and `--despeckle=K` (orphan-pixel cleanup) are opt-in when a judge verdict names speckle or gradient noise.
 The remaining gap to "authored clusters" is a generation problem: keep the TRUE-PIXEL-ART / 4–6-tone / stepped-contour
 clauses in every scene and portrait prompt and let astra iterate against the judge.
+
+**Snap filter, measured (portrait lane, astra judging):** re-snapping the same raws with `nearest` instead of Lanczos moved
+five busts by +3 to +15 (Jürgen's pixel_rendering 39 → 72) with zero Codex calls — at a 5–6× downscale Lanczos invents the
+intermediate tones the judge calls painterly. **Default is now `nearest` for everything except full-frame scene layers**
+(`art.mjs`); set `"filter"` per entry to override. Two more guards from the same round: a bust that comes out more than
+55 % transparent (prop: 75 %) is rejected — that is the signature of a painted checkerboard whose white squares connected
+through the subject and let the flood-fill eat it; and every keyed sprite reports a `fringe` count (opaque pixels still near
+the key colour) — above 20 the wrapper re-snaps once with a wider key tolerance and keeps the cleaner result.

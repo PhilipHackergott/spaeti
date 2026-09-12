@@ -9,7 +9,7 @@ extends RefCounted
 ## NODE   { speaker:String  (a character id, or "" = derive from whoever is at the counter),
 ##          expression:String ("neutral"|"warm"|"wary"|"upset" — drives the Portrait),
 ##          lines:Array[String], choices:Array[CHOICE] }
-## CHOICE { label:String            — the stat tag is written INTO the label ("[Charisma 12] …"),
+## CHOICE { label:String            — the stat tag is written INTO the label ("[Schnauze 12] …"),
 ##                                    so the box needs no formatting rules of its own,
 ##          check:{stat,dc}         — a d20 + modifier roll on the state's seeded Rng (§2),
 ##          requires:{stat,min}     — a GATE: shown, but locked below `min`; no roll,
@@ -33,7 +33,7 @@ const DATA: Dictionary = {
 				"lines": ["Mate, bitte. …And, ähm. I'm fifty cents short. Again."],
 				"choices": [
 					{"label": "\"On the house. Pay me Tuesday.\"", "effects": {"kiez": 1.0, "cash": -1.8}, "next": "thanks"},
-					{"label": "[Charisma 12] \"Pay me in a sketch instead.\"", "check": {"stat": "cha", "dc": 12}, "next": "sketch", "next_fail": "no_sketch"},
+					{"label": "[Schnauze 12] \"Pay me in a sketch instead.\"", "check": {"stat": "cha", "dc": 12}, "next": "sketch", "next_fail": "no_sketch"},
 					{"label": "\"Cash only, Lena. Even for you.\"", "effects": {"kiez": -1.0}, "next": "", "serve": false},
 				],
 			},
@@ -66,7 +66,7 @@ const DATA: Dictionary = {
 				"lines": ["\"Third night in the studio this week. The radiators in there died in 1994.\"", "She says it lightly, both hands around the cold can as if it were a Kaffee."],
 				"choices": [
 					{"label": "\"Berlin in November. Wear a coat.\"", "next": "smalltalk"},
-					{"label": "[Wisdom 12] Actually look at her.", "check": {"stat": "wis", "dc": 12}, "next": "notice", "next_fail": "smalltalk"},
+					{"label": "[Kiez Sense 12] Actually look at her.", "check": {"stat": "wis", "dc": 12}, "next": "notice", "next_fail": "smalltalk"},
 				],
 			},
 			"notice": {
@@ -95,7 +95,7 @@ const DATA: Dictionary = {
 				"lines": ["A crate of Flaschen lands on the laminate, clinking like a small church.", "\"Automat has eaten them again. Forty-one bottles. I counted twice, Chef.\""],
 				"choices": [
 					{"label": "Count them out with him, one by one.", "effects": {"kiez": 1.0}, "next": "counted"},
-					{"label": "[Strength 12] Carry the crate out back yourself.", "requires": {"stat": "str", "min": 12}, "effects": {"kiez": 1.5, "flags": ["juergen_crate"]}, "next": "lifted"},
+					{"label": "[Muscle 12] Carry the crate out back yourself.", "requires": {"stat": "str", "min": 12}, "effects": {"kiez": 1.5, "flags": ["juergen_crate"]}, "next": "lifted"},
 					{"label": "\"The Automat is the Automat, Jürgen. Monday.\"", "effects": {"kiez": -1.0}, "next": ""},
 				],
 			},
@@ -119,7 +119,7 @@ const DATA: Dictionary = {
 				"lines": ["He rubs his hands down the front of his jacket. It is not a winter jacket.", "\"Nah. Pfand round, bench at the Spätkauf, bench at the kiosk, then home.\""],
 				"choices": [
 					{"label": "\"Feierabend, Jürgen. Go on.\"", "next": "feierabend"},
-					{"label": "[Wisdom 13] Notice how he said 'then home'.", "check": {"stat": "wis", "dc": 13}, "next": "cold_read", "next_fail": "feierabend"},
+					{"label": "[Kiez Sense 13] Notice how he said 'then home'.", "check": {"stat": "wis", "dc": 13}, "next": "cold_read", "next_fail": "feierabend"},
 				],
 			},
 			"cold_read": {
@@ -156,7 +156,7 @@ const DATA: Dictionary = {
 				"lines": ["Two pages. Modernisierung. Umlage. A date in bold that is six weeks from Friday.", "\"The number at the bottom. That is the new one, ja?\""],
 				"choices": [
 					{"label": "\"It is a rent increase. That is as far as I can honestly go.\"", "next": "advice"},
-					{"label": "[Intelligence 13] Work out what the numbers actually do.", "check": {"stat": "int", "dc": 13}, "next": "parsed", "next_fail": "lost"},
+					{"label": "[Brains 13] Work out what the numbers actually do.", "check": {"stat": "int", "dc": 13}, "next": "parsed", "next_fail": "lost"},
 				],
 			},
 			"parsed": {
@@ -188,7 +188,7 @@ const DATA: Dictionary = {
 				"lines": ["\"Half the Haus got the same envelope. Nobody wants to be the first one making noise.\"", "He looks at the Späti door as though it owed him something."],
 				"choices": [
 					{"label": "\"Then don't be first. Be second — I will be first.\"", "effects": {"kiez": 1.0}, "next": "quiet"},
-					{"label": "[Charisma 13] Talk him into knocking on every door tonight.", "check": {"stat": "cha", "dc": 13}, "next": "rally", "next_fail": "quiet"},
+					{"label": "[Schnauze 13] Talk him into knocking on every door tonight.", "check": {"stat": "cha", "dc": 13}, "next": "rally", "next_fail": "quiet"},
 				],
 			},
 			"rally": {

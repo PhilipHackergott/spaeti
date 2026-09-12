@@ -25,7 +25,8 @@ export function snapImage(opts) {
   if (r.status !== 0 || !fs.existsSync(out)) throw new Error(`img.gd failed (exit ${r.status}): ${all.slice(-800)}`);
   const m = line.match(/alpha0=([\d.]+)/);
   const k = line.match(/keyed=(\d+)/);
-  return { line: line.trim(), out, transparentFrac: m ? Number(m[1]) : 0, keyedPixels: k ? Number(k[1]) : 0, ...pngInfo(out) };
+  const fr = line.match(/fringe=(\d+)/);
+  return { line: line.trim(), out, transparentFrac: m ? Number(m[1]) : 0, keyedPixels: k ? Number(k[1]) : 0, fringe: fr ? Number(fr[1]) : 0, ...pngInfo(out) };
 }
 
 if (isMain(import.meta.url)) {

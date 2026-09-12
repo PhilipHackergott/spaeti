@@ -32,7 +32,7 @@ func test_a_new_game_rolls_up_the_shopkeeper() -> void:
 		assert_true(int(stats[stat]) >= 8 and int(stats[stat]) <= 18, "%s is in 8..18" % stat)
 	assert_eq(int(stats["str"]), 10, "STR default")
 	assert_eq(int(stats["cha"]), 14, "CHA default")
-	assert_eq(String(Rules.stat_name("cha")), "Charisma", "the strip prints the long name")
+	assert_eq(String(Rules.stat_name("cha")), "Schnauze", "the strip prints the Späti name")
 
 func test_the_modifier_is_the_5e_one() -> void:
 	# floor, not truncation: a 9 is -1, not 0. That is the bug integer division would hand you.
@@ -91,7 +91,7 @@ func test_a_gate_locks_below_its_minimum() -> void:
 	var s := _talking("juergen", 5, "beer")  # "crate": choice 1 needs STR 12, the default is 10
 	var choices: Array = Rules.view(s)["talk"]["choices"]
 	assert_true(bool(choices[1]["locked"]), "the STR line is locked at STR 10")
-	assert_true(String(choices[1]["reason"]).contains("Strength"), "and says why: " + String(choices[1]["reason"]))
+	assert_true(String(choices[1]["reason"]).contains("Muscle"), "and says why: " + String(choices[1]["reason"]))
 	assert_false(bool(choices[0]["locked"]), "choice 0 is never gated (the authoring rule)")
 	assert_true(is_same(Rules.apply(s, {"type": "talk_choose", "choice": 1}), s), "a locked choice is illegal")
 	assert_false(_types(Rules.legal_actions(s)).has("talk_choose") and _legal_choices(s).has(1), "and is not offered")
@@ -243,7 +243,8 @@ func test_the_dialogue_view_is_a_projection_of_the_talk() -> void:
 	assert_eq(String(dialogue["kind"]), "talk", "and it says which kind of content it is")
 
 func test_a_story_beat_is_a_one_node_dialogue_on_the_same_rails() -> void:
-	var s := Rules.apply(_fresh(3), {"type": "open_night"})
+	# This test is about the beat rails, not the line: let the head of the queue step up on tick as before.
+	var s := Rules.apply(SpatiState.new_game({"seed": 3, "auto_take_next": true}), {"type": "open_night"})
 	var guard := 0
 	while s["phase"] == "night" and guard < 2000:
 		guard += 1

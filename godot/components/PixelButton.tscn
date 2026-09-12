@@ -1,12 +1,11 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3 uid="uid://de34nbjvs4wkh"]
 
-[ext_resource type="Script" path="res://components/pixel_button.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://dsv8jcn4o44w" path="res://components/pixel_button.gd" id="1_script"]
 [ext_resource type="Theme" path="res://components/Theme.tres" id="2_theme"]
 
-[node name="PixelButton" type="Button"]
+[node name="PixelButton" type="Button" unique_id=2099394605]
 offset_right = 72.0
 offset_bottom = 20.0
-focus_mode = 2
 theme = ExtResource("2_theme")
 text = "Button"
 script = ExtResource("1_script")
