@@ -17,9 +17,13 @@ signal closed()
 
 func _ready() -> void:
 	Palette.prepare()
+	# docs/04 rule 1 reaches components too: both surfaces are Palette tokens, not hexes.
 	var dim := get_node_or_null("%Dim") as ColorRect
 	if dim != null:
-		dim.color = Color(0, 0, 0, 0.55)
+		dim.color = Palette.MODAL_DIM
+	var rule := get_node_or_null("Frame/Box/Rule") as ColorRect
+	if rule != null:
+		rule.color = Palette.RULE
 	var close := get_node_or_null("%Close") as Button
 	if close != null and not close.pressed.is_connected(close_modal):
 		close.pressed.connect(close_modal)

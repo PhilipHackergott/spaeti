@@ -70,6 +70,7 @@ const TALLY_PURCHASES := "Purchases"
 const TALLY_BILLS := "Rent + power"
 const TALLY_PFAND := "Pfand paid out"
 const TALLY_PROFIT := "Profit"
+const NEXT_DAY := "Next day"
 
 # ── the season's end ─────────────────────────────────────────────────────────────────────────
 const ENDING_TITLE := "The season is over"

@@ -6,7 +6,7 @@ This repo is built by a small fleet, not one hand. Roles are fixed so the work s
 |---|---|---|
 | **Orchestrator** | Claude *Fable 5.1* | Plans, splits work into lanes, runs the loops, judges when to stop, keeps the docs honest. |
 | **Operators** | Claude *Opus* subagents | Write the Godot code (engine, components, scenes), wire assets, run tests/captures, write docs. |
-| **Art + art director** | **Codex** (`gpt-5.6-sol`, effort `max`) | Generates every bitmap asset (built-in `image_gen`) and scores every capture against the concept art. Codex never edits game code. |
+| **Art + art director** | **Codex** — `gpt-6-astra` (effort `max`) for concept art, scene layers, portraits and every judgement; `gpt-5.6-sol` for props, icons, textures | Generates every bitmap asset (built-in `image_gen`) and scores every capture against the concept art. Codex never edits game code. |
 | **Engine** | **Godot 4.7.2** (standard build, GDScript) | The game. Open `godot/` in the editor — every screen is a real `.tscn` you can inspect. |
 | **3D** | Blender 5.2 | On standby only: pre-rendering props to pixel sprites if a category needs it. Not used for the slice. |
 

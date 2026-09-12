@@ -37,13 +37,13 @@ theme_override_constants/separation = 3
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"LeadLabel"
-text = "Nacht 3 abgerechnet"
+text = "Night 3 settled"
 
 [node name="Sub" type="Label" parent="Card/Box"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"SmallLabel"
-text = "Mittwoch · 23 verkauft"
+text = "Mittwoch · 23 sold · 2 missed · Kiez +3"
 
 [node name="Rule" type="ColorRect" parent="Card/Box"]
 custom_minimum_size = Vector2(0, 1)
@@ -60,7 +60,7 @@ layout_mode = 2
 [node name="Cash" type="Label" parent="Card/Box"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Kasse 134,70 €"
+text = "Cash 134,70 €"
 
 [node name="Foot" type="HBoxContainer" parent="Card/Box"]
 layout_mode = 2
@@ -71,4 +71,4 @@ alignment = 2
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"TitleButton"
-text = "Weiter"
+text = "Next day"

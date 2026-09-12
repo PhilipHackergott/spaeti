@@ -20,8 +20,12 @@ export const GODOT_BIN = GODOT_CANDIDATES.find((p) => fs.existsSync(p));
 
 export const BLENDER_BIN = process.env.BLENDER_BIN || 'C:/Program Files/Blender Foundation/Blender 5.2/blender.exe';
 
-// Codex defaults — "max settings" as asked. gpt-5.6-sol also offers `ultra` above `max` (CODEX_EFFORT=ultra).
-export const CODEX_MODEL = process.env.CODEX_MODEL || 'gpt-5.6-sol';
+// Codex model tiers (user decision 2026-09-12): gpt-6-astra — the strongest image model — designs the concept art,
+// the scene layers and the portraits and judges every result; gpt-5.6-sol does the small image work (props, icons,
+// textures). "max settings" = effort max (both models also expose `ultra`; CODEX_EFFORT=ultra).
+export const CODEX_MODEL_HERO = process.env.CODEX_MODEL_HERO || 'gpt-6-astra';
+export const CODEX_MODEL_SMALL = process.env.CODEX_MODEL_SMALL || 'gpt-5.6-sol';
+export const CODEX_MODEL = process.env.CODEX_MODEL || CODEX_MODEL_HERO;
 export const CODEX_EFFORT = process.env.CODEX_EFFORT || 'max';
 export const CODEX_HOME = process.env.CODEX_HOME || path.join(process.env.USERPROFILE || '', '.codex');
 export const CODEX_GENERATED = path.join(CODEX_HOME, 'generated_images');

@@ -18,6 +18,12 @@ var is_open: bool = false
 
 func _ready() -> void:
 	Palette.prepare()
+	var divider := get_node_or_null("Box/Divider") as ColorRect
+	if divider != null:
+		divider.color = Palette.RULE
+	var head := get_node_or_null("Box/Head/Title") as Label
+	if head != null:
+		head.text = Strings.SERVE_PANEL
 	position = Vector2(HIDDEN_X, position.y)
 	var shelf := get_node_or_null("%Shelf") as Shelf
 	if shelf != null and not shelf.picked.is_connected(_on_picked):
@@ -38,18 +44,20 @@ func render(view: Dictionary) -> void:
 	var shelf := get_node_or_null("%Shelf") as Shelf
 	var t := till()
 	if t != null:
-		t.set_pfand_rate(float(view.get("pfand_rate", Rules.PFAND_PER_BOTTLE)))
+		# The view always carries the rate (docs/05 §5); 0 would be a bug worth seeing, not a silent
+		# fallback into the engine's constant from a component.
+		t.set_pfand_rate(float(view.get("pfand_rate", 0.0)))
 	if shelf != null:
 		shelf.set_items(_shelf_items, t.counts() if t != null else {})
 	var want := get_node_or_null("%Want") as Label
 	if want != null:
 		var active: Dictionary = view.get("active", {})
 		if active.is_empty():
-			want.text = "no one waiting"
+			want.text = Strings.NOBODY_WAITING
 		else:
-			var who := String(active.get("archetype", {}).get("name", "Kunde"))
+			var who := String(active.get("archetype", {}).get("name", Strings.SOMEONE))
 			var w: Dictionary = active.get("want", {})
-			want.text = "%s: %s" % [who, String(w.get("name", "?"))]
+			want.text = Strings.WANT_LINE % [who, String(w.get("name", ""))]
 
 func open(instant: bool = false) -> void:
 	is_open = true

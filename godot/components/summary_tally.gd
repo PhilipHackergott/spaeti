@@ -18,16 +18,16 @@ func set_summary(s: Dictionary) -> void:
 	_rows.clear()
 	if s.is_empty():
 		return
-	_add("Umsatz", float(s.get("revenue", 0.0)), "in")
-	_add("Trinkgeld", float(s.get("tips", 0.0)), "in")
-	_add("Einkauf", float(s.get("cogs", 0.0)), "out")
-	_add("Miete + Strom", float(s.get("bills_due", 0.0)), "out")
-	_add("Pfand ausgezahlt", float(s.get("pfand_paid", 0.0)), "out")
+	_add(Strings.TALLY_REVENUE, float(s.get("revenue", 0.0)), "in")
+	_add(Strings.TALLY_TIPS, float(s.get("tips", 0.0)), "in")
+	_add(Strings.TALLY_PURCHASES, float(s.get("cogs", 0.0)), "out")
+	_add(Strings.TALLY_BILLS, float(s.get("bills_due", 0.0)), "out")
+	_add(Strings.TALLY_PFAND, float(s.get("pfand_paid", 0.0)), "out")
 	var rule := ColorRect.new()
 	rule.custom_minimum_size = Vector2(0, 1)
 	rule.color = Palette.EDGE
 	add_child(rule)
-	_add("Gewinn", float(s.get("profit", 0.0)), "total")
+	_add(Strings.TALLY_PROFIT, float(s.get("profit", 0.0)), "total")
 
 func play() -> void:
 	for i in _rows.size():

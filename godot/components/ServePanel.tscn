@@ -41,7 +41,6 @@ layout_mode = 2
 [node name="Divider" type="ColorRect" parent="Box"]
 custom_minimum_size = Vector2(0, 1)
 layout_mode = 2
-color = Color(0.97, 0.92, 0.82, 0.22)
 
 [node name="Till" parent="Box" instance=ExtResource("4_till")]
 unique_name_in_owner = true

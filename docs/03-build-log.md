@@ -642,3 +642,12 @@ literals, Till Pfand rate, manage tier thresholds, close_night never dispatched,
 - Shipped art is smaller than its spec box (you_neutral 155×230, counter 480×123); placeholders use the spec size, so
   layout must anchor busts by bottom-centre and the counter by bottom edge, not by the spec rectangle.
 - Language is mixed (German chrome, English dialogue/modules) → string table + English base per GDD (see integration brief).
+
+## 2026-09-12 evening — new Codex account + model tiers (orchestrator)
+- Codex switched to the user's personal account (`scarxful@gmail.com`, plan prolite) after the WK workspace spend cap; calls work again.
+- **`gpt-6-astra` is available** and is now the design + judging model (concept art, scene layers, portraits, every verdict);
+  `gpt-5.6-sol` keeps the small image work. Wired into `tools/paths.mjs` (`CODEX_MODEL_HERO/SMALL`), `art.mjs` (per-kind
+  tier), `judge.mjs` (astra + the generated concept as reference 3), `docs/asset-spec.json` (`modelByKind`, new kind
+  `concept`, entry `concept/night_interaction`).
+- Art round 2 (sol, six lanes) was already running when astra arrived; its SKU/icon lanes stay valid (sol is the right tier),
+  its portrait/scene results are provisional until astra re-does the hero assets against the generated concept.

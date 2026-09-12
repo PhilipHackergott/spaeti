@@ -81,4 +81,4 @@ func _refresh() -> void:
 		if cell == null:
 			continue
 		# Empty cells keep a visible dark body so the bar reads as a scale, not as floating blocks.
-		cell.color = fill if i < lit else Palette.INK_DEEP
+		cell.color = fill if i < lit else Palette.METER_EMPTY

@@ -25,10 +25,8 @@ func _ready() -> void:
 	# authored as a child of this scene (inspectable) and mounted into the set's character slot here.
 	var layers := _layers()
 	var portrait := _portrait()
-	if layers != null and portrait != null and portrait.get_parent() != layers.get_node_or_null("%Characters"):
-		var pos := portrait.position
-		layers.mount(portrait)
-		portrait.position = pos
+	if layers != null and portrait != null:
+		layers.mount(portrait)   # position is re-derived from the counter edge, so it need not survive
 	_seat_portrait()
 	var box := _dialogue()
 	if box != null:
@@ -133,13 +131,17 @@ func _notice_customer(active: Dictionary) -> void:
 	if t != null:
 		t.clear()
 
-## The bust sits against the counter's real occlusion line (docs/02 "Night framing").
+## The bust sits bottom-centred against the counter's real occlusion line (docs/02 "Night framing").
+## With the serve panel open it steps left, or the panel would cover it (verify round 3: Jürgen was
+## ~55 % hidden in the `pfand` capture).
 func _seat_portrait() -> void:
 	var layers := _layers()
 	var portrait := _portrait()
 	if layers == null or portrait == null:
 		return
-	portrait.place_behind(layers.counter_edge())
+	var panel := _serve()
+	var serving := panel != null and panel.is_open
+	portrait.place_behind(layers.counter_edge(), Palette.PORTRAIT_CENTRE_X_SERVING if serving else Palette.PORTRAIT_CENTRE_X)
 
 func apply_capture_preset(preset_name: String) -> void:
 	super.apply_capture_preset(preset_name)
@@ -197,10 +199,11 @@ func _place_bubble(serve_open: bool) -> void:
 	var box := _dialogue()
 	if box != null:
 		var r := Palette.DIALOGUE_RECT
-		box.size = Vector2(188.0 if serve_open else float(r.size.x), float(r.size.y))
+		box.size = Vector2(float(Palette.DIALOGUE_W_SERVING if serve_open else r.size.x), float(r.size.y))
 	var hud := get_node_or_null("%Hud") as Hud
 	if hud != null:
 		hud.set_compact(serve_open)
+	_seat_portrait()
 
 ## The plain order a customer speaks when no story beat is pending. Presentation only — the engine
 ## read-model carries `dialogue` just for beats and vignettes (docs/05 §4).

@@ -13,8 +13,9 @@ signal line_removed(sku_id: String)
 var lines: Array = []
 var pfand_bottles: int = 0
 ## Paid per returned bottle. Set from `view.pfand_rate` (docs/05 section 5) so the tray never quotes a
-## deposit the reducer will not pay; the engine constant is only the standalone default.
-var pfand_rate: float = Rules.PFAND_PER_BOTTLE
+## deposit the reducer will not pay. It starts at 0: a component may not reach into the engine for a
+## default, and a tray that shows 0,00 is a wiring bug you can see instead of one you cannot.
+var pfand_rate: float = 0.0
 
 const MAX_ROWS := 2
 

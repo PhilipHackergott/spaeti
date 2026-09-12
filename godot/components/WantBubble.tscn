@@ -64,5 +64,4 @@ theme_type_variation = &"SmallLabel"
 [node name="Tail" type="Polygon2D" parent="."]
 unique_name_in_owner = true
 position = Vector2(12, 45)
-color = Color(0.165, 0.102, 0.071, 1)
 polygon = PackedVector2Array(0, 0, 10, 0, 2, 7)

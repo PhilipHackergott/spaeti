@@ -17,6 +17,9 @@ var _pending: Dictionary = {}
 
 func _ready() -> void:
 	Palette.prepare()
+	var rule := get_node_or_null("Rule") as ColorRect
+	if rule != null:
+		rule.color = Palette.RULE
 	_text("%Section", Strings.MANAGE_SECTION)
 	_text("%ModuleHead", Strings.MANAGE_MODULES)
 	var open := get_node_or_null("%OpenNight") as Button

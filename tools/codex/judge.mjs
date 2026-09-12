@@ -8,18 +8,23 @@
 // Default references = the four concept-art images (protagonist target state + three Coffee Talk frames).
 import fs from 'node:fs';
 import path from 'node:path';
-import { REPO, parseArgs, asList } from '../paths.mjs';
+import { REPO, CODEX_MODEL_HERO, parseArgs, asList } from '../paths.mjs';
 import { runCodex } from './run.mjs';
 
 const a = parseArgs(process.argv.slice(2));
 if (!a.candidate) { console.error('need --candidate image'); process.exit(2); }
+// The generated Berlin-Späti interaction concept (astra) becomes reference 2 as soon as it exists; the user's OG
+// interaction image stays reference 1 — the judge is told which is which.
+const GENERATED_CONCEPT = 'concept-art/generated/night_interaction.png';
 export const DEFAULT_REFS = [
   'concept-art/main character target state.png',
+  ...(fs.existsSync(path.resolve(REPO, GENERATED_CONCEPT)) ? [GENERATED_CONCEPT] : []),
   'concept-art/coffee talk references/{AE54C7E9-D717-4471-98C0-FA7E2F50E019}.png',
   'concept-art/coffee talk references/{4CDFA375-6F38-4B90-AEF3-ECDFC2454419}.png',
   'concept-art/coffee talk references/{351D15A9-2F56-4AAC-9DEE-F76504500AB7}.png',
 ];
 const refs = asList(a.reference).length ? asList(a.reference) : DEFAULT_REFS;
+const hasConcept = refs.includes(GENERATED_CONCEPT);
 const rubric = fs.readFileSync(path.resolve(REPO, a.rubric || 'docs/judge-rubric.md'), 'utf8');
 const threshold = Number(a.threshold || 80);
 const context = a.context || 'A screenshot of the game as rendered by Godot.';
@@ -32,7 +37,7 @@ that target and give concrete, actionable fixes. Be strict and specific — a va
 along the front edge" is useful.
 
 IMAGE ORDER: image 1 is the CANDIDATE. Images 2..${refs.length + 1} are REFERENCES (image 2 = the protagonist
-"target state" — the canonical style + character; the rest = Coffee Talk frames for framing, UI and palette).
+"target state" — the canonical style + character;${hasConcept ? ' image 3 = the generated Berlin-Späti interaction concept — the canonical composed target for the Night screen (set dressing, framing, palette);' : ''} the rest = Coffee Talk frames for framing, UI and palette).
 
 CANDIDATE CONTEXT: ${context}
 
@@ -45,7 +50,7 @@ ship it), revise (fixable — list the fixes in priority order), reject (wrong m
 List up to 8 fixes, most impactful first, each with what/where/how. Reply ONLY with the JSON object.`;
 
 const r = await runCodex({ prompt, images: [a.candidate, ...refs], schema: 'tools/codex/verdict.schema.json',
-  sandbox: 'read-only', effort: a.effort, timeout: a.timeout ? Number(a.timeout) : 600, quiet: true });
+  sandbox: 'read-only', model: a.model || CODEX_MODEL_HERO, effort: a.effort, timeout: a.timeout ? Number(a.timeout) : 600, quiet: true });
 let verdict = null;
 try { verdict = JSON.parse(r.last); } catch { /* handled below */ }
 if (r.blocked) {
@@ -56,7 +61,7 @@ if (!verdict) {
   console.error(`judge: no JSON verdict (exit ${r.code}, ${r.seconds}s)\n${r.log.slice(-1500)}`);
   process.exit(3);
 }
-verdict._meta = { candidate: a.candidate, references: refs, context, threshold, seconds: r.seconds, tokens: r.tokens };
+verdict._meta = { candidate: a.candidate, references: refs, context, threshold, model: a.model || CODEX_MODEL_HERO, seconds: r.seconds, tokens: r.tokens };
 fs.mkdirSync(path.dirname(path.resolve(REPO, outFile)), { recursive: true });
 fs.writeFileSync(path.resolve(REPO, outFile), JSON.stringify(verdict, null, 2));
 console.log(JSON.stringify({ overall: verdict.overall, verdict: verdict.verdict, axes: verdict.axes,

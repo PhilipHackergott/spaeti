@@ -1,9 +1,10 @@
 class_name SceneLayers
 extends Control
-## The set: backdrop, neon glow, the customer slot, the counter band, rain on the glass and the
-## time-of-night tint — in that order, so a bust mounted in `Characters` stands behind the counter
-## exactly like Coffee Talk. Everything here is either a generated asset (Assets) or code-drawn FX;
-## no scene ever draws its own backdrop.
+## The set, in draw order: backdrop, neon glow, RAIN ON THE GLASS, the customer slot, the counter
+## band, the time-of-night tint — so a bust mounted in `Characters` stands behind the counter exactly
+## like Coffee Talk, and the rain runs down the door/window *behind* everyone instead of falling
+## inside the shop (verify round 3: it was drawn over the whole frame at α 0.1 and was invisible).
+## Everything here is either a generated asset (Assets) or code-drawn FX; no scene draws its own set.
 
 @export var backdrop_id: String = "scene/backdrop":
 	set(v):
@@ -33,9 +34,6 @@ extends Control
 
 @export var neon: bool = true
 
-const DUSK := Color(0.95, 0.62, 0.30, 0.12)
-const DEEP := Color(0.10, 0.16, 0.32, 0.20)
-const DAWN := Color(0.18, 0.42, 0.66, 0.30)
 const RAIN_SPEED := 90.0
 
 var _rng := RandomNumberGenerator.new()
@@ -45,6 +43,10 @@ var _edge: int = -1
 
 func _ready() -> void:
 	Palette.prepare()
+	# Every colour on the set is a Palette token — a component may not write a hex either (docs/04 rule 1).
+	var glow := get_node_or_null("%NeonGlow") as ColorRect
+	if glow != null:
+		glow.color = Palette.NEON_GLOW
 	_refresh_art()
 	_refresh_tint()
 	_rebuild_rain()
@@ -132,13 +134,10 @@ func _refresh_tint() -> void:
 		return
 	var c: Color
 	if night_progress < 0.5:
-		c = DUSK.lerp(DEEP, night_progress / 0.5)
+		c = Palette.TINT_DUSK.lerp(Palette.TINT_DEEP, night_progress / 0.5)
 	else:
-		c = DEEP.lerp(DAWN, (night_progress - 0.5) / 0.5)
+		c = Palette.TINT_DEEP.lerp(Palette.TINT_DAWN, (night_progress - 0.5) / 0.5)
 	tint.color = c
-	var glow := get_node_or_null("%NeonGlow") as ColorRect
-	if glow != null:
-		glow.color = Color(Palette.NEON_MAGENTA.r, Palette.NEON_MAGENTA.g, Palette.NEON_MAGENTA.b, 0.10)
 
 func _rebuild_rain() -> void:
 	var rain := get_node_or_null("%Rain") as Node2D
@@ -150,15 +149,17 @@ func _rebuild_rain() -> void:
 	_speeds.clear()
 	if not raining:
 		return
-	# Seeded so a capture of the same preset always has the same streaks.
+	# Seeded so a capture of the same preset always has the same streaks. They fall inside
+	# `Palette.RAIN_RECT` — the door/window opening on the right of the backdrop — and nowhere else.
 	_rng.seed = 1337
+	var r := Palette.RAIN_RECT
 	for i in rain_drops:
 		var streak := Line2D.new()
 		streak.width = 1.0
-		streak.default_color = Color(Palette.NEON_CYAN.r, Palette.NEON_CYAN.g, Palette.NEON_CYAN.b, _rng.randf_range(0.10, 0.26))
+		streak.default_color = Palette.RAIN
 		streak.add_point(Vector2.ZERO)
-		streak.add_point(Vector2(-1, _rng.randf_range(5.0, 11.0)))
-		streak.position = Vector2(float(_rng.randi_range(0, Palette.BASE.x)), float(_rng.randi_range(-40, Palette.COUNTER_TOP)))
+		streak.add_point(Vector2(-1, _rng.randf_range(4.0, 9.0)))
+		streak.position = Vector2(float(_rng.randi_range(r.position.x, r.end.x - 1)), float(_rng.randi_range(r.position.y - 40, r.end.y)))
 		rain.add_child(streak)
 		_speeds.append(_rng.randf_range(0.7, 1.4))
 	set_process(not Palette.reduce_motion)
@@ -173,8 +174,8 @@ func _process(delta: float) -> void:
 			continue
 		var speed: float = _speeds[i] if i < _speeds.size() else 1.0
 		var y := streak.position.y + RAIN_SPEED * speed * delta
-		if y > float(Palette.COUNTER_TOP):
-			y = -12.0
+		if y > float(Palette.RAIN_RECT.end.y):
+			y = float(Palette.RAIN_RECT.position.y - 12)
 		streak.position = Vector2(streak.position.x, roundf(y))
 
 func _flicker() -> void:

@@ -42,7 +42,6 @@ theme_override_constants/separation = 0
 [node name="Rule" type="ColorRect" parent="."]
 custom_minimum_size = Vector2(0, 1)
 layout_mode = 2
-color = Color(0.97, 0.92, 0.82, 0.22)
 
 [node name="ModuleHead" type="Label" parent="."]
 unique_name_in_owner = true

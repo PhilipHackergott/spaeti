@@ -10,8 +10,10 @@ func _ready() -> void:
 	_paint("Card/Box/Rule", Palette.RULE)
 	_paint("Card/Box/Rule2", Palette.RULE)
 	var cont := get_node_or_null("%Continue") as Button
-	if cont != null and not cont.pressed.is_connected(_on_continue):
-		cont.pressed.connect(_on_continue)
+	if cont != null:
+		cont.text = Strings.NEXT_DAY
+		if not cont.pressed.is_connected(_on_continue):
+			cont.pressed.connect(_on_continue)
 	var tally := _tally()
 	if tally != null and not _capture_mode:
 		tally.play()
@@ -25,15 +27,14 @@ func render(v: Dictionary) -> void:
 	var s: Dictionary = v.get("summary", {})
 	var title := get_node_or_null("%Title") as Label
 	if title != null:
-		title.text = "Nacht %d abgerechnet" % int(s.get("day", v.get("day", 1)))
+		title.text = Strings.SUMMARY_TITLE % int(s.get("day", v.get("day", 1)))
 	var sub := get_node_or_null("%Sub") as Label
 	if sub != null:
-		sub.text = "%s · %d verkauft · %d verpasst · Kiez %+d" % [
+		sub.text = Strings.summary_sub(
 			String(v.get("weekday_name", "")),
 			int(s.get("sales", 0)),
 			int(s.get("lost", 0)),
-			int(s.get("kiez_delta", 0)),
-		]
+			int(s.get("kiez_delta", 0)))
 	var tally := _tally()
 	if tally != null:
 		tally.set_summary(s)
@@ -44,7 +45,7 @@ func render(v: Dictionary) -> void:
 			tally.play()
 	var cash := get_node_or_null("%Cash") as Label
 	if cash != null:
-		cash.text = "Kasse " + Palette.money(float(s.get("cash_after", v.get("cash", 0.0))))
+		cash.text = Strings.CASH % Palette.money(float(s.get("cash_after", v.get("cash", 0.0))))
 
 func _on_continue() -> void:
 	dispatch({"type": "advance_day"})

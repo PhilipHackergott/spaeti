@@ -9,7 +9,7 @@
 // Prints ONE json line: {id, ok, raw, out, width, height, hasAlpha, seconds, tokens, attempts, error?}. Exit 0 on ok.
 import fs from 'node:fs';
 import path from 'node:path';
-import { REPO, RAW_ART_DIR, CODEX_GENERATED, parseArgs, pngInfo, fwd } from '../paths.mjs';
+import { REPO, RAW_ART_DIR, CODEX_GENERATED, CODEX_MODEL_HERO, CODEX_MODEL_SMALL, parseArgs, pngInfo, fwd } from '../paths.mjs';
 import { runCodex } from './run.mjs';
 import { snapImage } from '../godot/img.mjs';
 
@@ -21,7 +21,14 @@ if (!entry) { console.error(`unknown asset id ${a.id}`); process.exit(2); }
 const brief = fs.readFileSync(path.resolve(REPO, spec.styleBrief || 'docs/art-style-brief.md'), 'utf8');
 const suffix = a.variant ? `-${a.variant}` : '';
 const raw = path.join(RAW_ART_DIR, `${entry.id}${suffix}.png`);
-const out = path.join(REPO, 'godot', 'assets', `${entry.id}${suffix}.png`);
+// `concept` assets are target paintings, not game sprites: kept at native size under concept-art/generated/.
+const isConcept = entry.kind === 'concept';
+const out = isConcept
+  ? path.join(REPO, 'concept-art', 'generated', `${path.basename(entry.id)}${suffix}.png`)
+  : path.join(REPO, 'godot', 'assets', `${entry.id}${suffix}.png`);
+// Model tier: per-asset override → per-kind table in the spec → hero (astra) for scenes/portraits/concepts, small (sol) otherwise.
+const model = a.model || entry.model || (spec.modelByKind && spec.modelByKind[entry.kind])
+  || (['prop', 'icon', 'texture'].includes(entry.kind) ? CODEX_MODEL_SMALL : CODEX_MODEL_HERO);
 fs.mkdirSync(path.dirname(raw), { recursive: true });
 fs.mkdirSync(path.dirname(out), { recursive: true });
 const refs = (entry.refs && entry.refs.length ? entry.refs : spec.defaultRefs) || [];
@@ -89,7 +96,7 @@ while (attempts <= retries) {
     if (fs.existsSync(raw)) shelveRaw(raw, attempts - 1);
     const t0 = Date.now();
     r = await runCodex({ prompt: buildPrompt(feedback), images: refs, sandbox: 'danger-full-access', cwd: REPO,
-      effort: a.effort, timeout: a.timeout ? Number(a.timeout) : 600, quiet: true });
+      model, effort: a.effort, timeout: a.timeout ? Number(a.timeout) : 900, quiet: true });
     totalTokens += Number(String(r.tokens).replace(/[.,]/g, '')) || 0;
     if (r.blocked) {
       // Spend cap / auth / rate limit: retrying cannot help — report the real reason and stop.
@@ -111,8 +118,9 @@ while (attempts <= retries) {
     continue;
   }
   const rawInfo = pngInfo(raw);
-  if (a['no-snap']) {
-    result = { ...result, ok: true, raw: fwd(raw), ...rawInfo, attempts };
+  if (a['no-snap'] || isConcept) {
+    if (isConcept) fs.copyFileSync(raw, out);
+    result = { ...result, ok: true, raw: fwd(raw), out: isConcept ? fwd(out) : undefined, ...rawInfo, attempts, model };
     break;
   }
   const snap = snapImage({ in: raw, out, w: entry.w, h: entry.h, mode: entry.mode || (entry.transparent ? 'fit' : 'cover'),
@@ -129,7 +137,7 @@ while (attempts <= retries) {
     continue;
   }
   result = { id: entry.id, ok: true, raw: fwd(raw), out: fwd(out), rawSize: `${rawInfo.width}x${rawInfo.height}`,
-    width: snap.width, height: snap.height, transparentFrac: snap.transparentFrac, keyedPixels: snap.keyedPixels, attempts };
+    width: snap.width, height: snap.height, transparentFrac: snap.transparentFrac, keyedPixels: snap.keyedPixels, attempts, model };
   break;
 }
 result.seconds = Math.round((Date.now() - started) / 1000);

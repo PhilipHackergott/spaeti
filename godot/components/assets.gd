@@ -241,10 +241,15 @@ static func _stamp_id(img: Image, id: String) -> void:
 		return
 	# On a bust the label goes on the chest: the bottom of the image is behind the counter.
 	var baseline := h - 9 if not id.begins_with("char/") else int(h * 0.68)
-	var text := id.to_upper()
+	# The CATEGORY is already obvious from the silhouette (bust / bottle / room / disc), so the stamp
+	# carries the leaf name and keeps its HEAD when it still will not fit. Keeping the tail is what
+	# printed "FFEE", "COLATE" and "TTES" on the narrow props (verify round 3).
+	var text := id.substr(id.rfind("/") + 1).to_upper()
 	var max_chars := int((w - 4) / 4)
+	if max_chars <= 0:
+		return
 	if text.length() > max_chars:
-		text = text.substr(text.length() - max_chars, max_chars)
+		text = text.substr(0, max_chars)
 	var tw := text.length() * 4
 	var x0 := maxi(1, (w - tw) / 2)
 	var y0 := baseline
