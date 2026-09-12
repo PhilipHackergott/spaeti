@@ -2,6 +2,8 @@
   "$comment": "Vertical-slice art assets. Sizes are BASE-GRID pixels (480x270 canvas, shown x4 at 1080p). tools/codex/art.mjs generates each at native gpt-image size into art/raw/<id>.png and snaps it into godot/assets/<id>.png. Add an asset = add an entry here; the id is the file path under godot/assets/.",
   "baseGrid": { "width": 480, "height": 270, "scale": 4 },
   "styleBrief": "docs/art-style-brief.md",
+  "defaultKey": "00ff00",
+  "$keyComment": "Transparent assets: Codex is told to use image_gen's real alpha; if it paints a backdrop instead, it must be this flat colour, which img.gd keys out automatically (auto-key only fires when the image has no real alpha). Override per asset with \"key\" when the subject contains that colour (e.g. the magenta lighter uses the default green; a plant would use \"ff00ff\").",
   "defaultRefs": [
     "concept-art/main character target state.png",
     "concept-art/coffee talk references/{AE54C7E9-D717-4471-98C0-FA7E2F50E019}.png"

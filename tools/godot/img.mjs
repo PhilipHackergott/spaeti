@@ -14,7 +14,7 @@ export function snapImage(opts) {
   const out = fwd(path.resolve(REPO, opts.out));
   fs.mkdirSync(path.dirname(out), { recursive: true });
   const extra = [`--in=${inp}`, `--out=${out}`];
-  for (const k of ['w', 'h', 'mode', 'filter', 'crop', 'alpha-threshold', 'trim']) {
+  for (const k of ['w', 'h', 'mode', 'filter', 'crop', 'alpha-threshold', 'trim', 'key', 'key-tol', 'auto-key']) {
     if (opts[k] !== undefined && opts[k] !== null && opts[k] !== '') extra.push(`--${k}=${opts[k]}`);
   }
   const r = spawnSync(godot, ['--headless', '--path', '.', '--script', 'res://tools/img.gd', '--', ...extra],
@@ -23,12 +23,14 @@ export function snapImage(opts) {
   const all = (r.stdout || '') + (r.stderr || '');
   const line = all.split('\n').find((l) => l.startsWith('IMG ')) || '';
   if (r.status !== 0 || !fs.existsSync(out)) throw new Error(`img.gd failed (exit ${r.status}): ${all.slice(-800)}`);
-  return { line: line.trim(), out, ...pngInfo(out) };
+  const m = line.match(/alpha0=([\d.]+)/);
+  const k = line.match(/keyed=(\d+)/);
+  return { line: line.trim(), out, transparentFrac: m ? Number(m[1]) : 0, keyedPixels: k ? Number(k[1]) : 0, ...pngInfo(out) };
 }
 
 if (isMain(import.meta.url)) {
   const a = parseArgs(process.argv.slice(2));
   if (!a.in || !a.out) { console.error('need --in and --out'); process.exit(2); }
   const r = snapImage(a);
-  console.log(`${r.line}\nOK ${r.out} ${r.width}x${r.height} alpha=${r.hasAlpha}`);
+  console.log(`${r.line}\nOK ${r.out} ${r.width}x${r.height} transparent=${Math.round(r.transparentFrac * 100)}%`);
 }

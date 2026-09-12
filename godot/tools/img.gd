@@ -2,9 +2,13 @@ extends SceneTree
 ## Headless image ops (no rendering needed) — tools/codex/art.mjs uses this to snap generated art to the pixel grid.
 ##   godot --headless --path godot --script res://tools/img.gd -- --in=C:/abs/raw.png --out=C:/abs/out.png --w=160 --h=200
 ##        [--mode=fit|exact|cover] [--filter=lanczos|bilinear|cubic|nearest] [--crop=16:9] [--alpha-threshold=0.5] [--trim=1]
+##        [--key=00ff00 --key-tol=0.18 --auto-key=1]
+## Order: load → chroma key (on the raw pixels) → crop → trim → resize → alpha threshold → save.
 ## mode fit   = scale to fit inside w×h keeping aspect (sprites)   mode cover = fill w×h and crop the overflow (scene layers)
 ## mode exact = force w×h.   --crop=W:H first centre-crops the source to that aspect.   --trim=1 trims transparent margins.
-## --alpha-threshold binarises alpha (hard pixel edges): a < t → 0 else 1.   Prints an "IMG ..." line; exit 0 on success.
+## --key removes every pixel within key-tol (RGB distance, 0..1) of that colour; --auto-key=1 only keys when the
+## image has (almost) no real alpha — the safety net for models that paint a flat backdrop instead of using alpha.
+## Prints "IMG ... alpha0=<fraction of transparent pixels>"; exit 0 on success.
 
 func _init() -> void:
 	var a := _args()
@@ -23,6 +27,15 @@ func _init() -> void:
 	if img.is_compressed():
 		img.decompress()
 	img.convert(Image.FORMAT_RGBA8)
+	var keyed := 0
+	if a.has("key"):
+		var raw_alpha0 := _transparent_fraction(img)
+		var auto_key := int(a.get("auto-key", "0")) == 1
+		if not auto_key or raw_alpha0 < 0.02:
+			keyed = _chroma_key(img, Color.html("#" + String(a["key"]).trim_prefix("#")), float(a.get("key-tol", "0.18")))
+	# Binarise alpha on the raw image first so faint halos do not inflate the trim box or bleed into the resize.
+	if a.has("alpha-threshold"):
+		_threshold_alpha(img, float(a["alpha-threshold"]))
 	var sw := img.get_width()
 	var sh := img.get_height()
 	if a.has("crop"):
@@ -66,15 +79,41 @@ func _init() -> void:
 	else:
 		img.resize(tw, th, interp)
 	if a.has("alpha-threshold"):
-		var t := float(a["alpha-threshold"])
-		for y in img.get_height():
-			for x in img.get_width():
-				var c := img.get_pixel(x, y)
-				c.a = 0.0 if c.a < t else 1.0
-				img.set_pixel(x, y, c)
+		_threshold_alpha(img, float(a["alpha-threshold"]))
+	var alpha0 := _transparent_fraction(img)
 	err = img.save_png(dst)
-	print("IMG err=%d in=%dx%d out=%dx%d mode=%s file=%s" % [err, sw, sh, img.get_width(), img.get_height(), mode, dst])
+	print("IMG err=%d in=%dx%d out=%dx%d mode=%s alpha0=%.4f keyed=%d file=%s" % [err, sw, sh, img.get_width(), img.get_height(), mode, alpha0, keyed, dst])
 	quit(0 if err == OK else 5)
+
+func _threshold_alpha(img: Image, t: float) -> void:
+	for y in img.get_height():
+		for x in img.get_width():
+			var c := img.get_pixel(x, y)
+			var a := 0.0 if c.a < t else 1.0
+			if a != c.a:
+				c.a = a
+				img.set_pixel(x, y, c)
+
+func _transparent_fraction(img: Image) -> float:
+	var n := 0
+	for y in img.get_height():
+		for x in img.get_width():
+			if img.get_pixel(x, y).a < 0.5:
+				n += 1
+	return float(n) / float(maxi(1, img.get_width() * img.get_height()))
+
+## Removes pixels near the key colour. Distance is Euclidean in RGB (0..1), normalised by sqrt(3).
+func _chroma_key(img: Image, key: Color, tol: float) -> int:
+	var n := 0
+	var kv := Vector3(key.r, key.g, key.b)
+	for y in img.get_height():
+		for x in img.get_width():
+			var c := img.get_pixel(x, y)
+			var d := (Vector3(c.r, c.g, c.b) - kv).length() / 1.7320508
+			if d < tol:
+				img.set_pixel(x, y, Color(0, 0, 0, 0))
+				n += 1
+	return n
 
 func _args() -> Dictionary:
 	var d := {}

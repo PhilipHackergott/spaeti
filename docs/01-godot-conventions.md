@@ -1,5 +1,7 @@
 # 01 — Godot conventions (read before touching `godot/`)
 
+The engine↔UI contract (state keys, actions, the read-model, the Session autoload) is **`docs/05-engine-api.md`** — both lanes build against it.
+
 **Godot 4.7.2 standard build, GDScript only.** No C#, no addons, no asset-store downloads. Everything must
 run from the CLI (`tools/godot/*.mjs`) *and* open cleanly in the editor.
 

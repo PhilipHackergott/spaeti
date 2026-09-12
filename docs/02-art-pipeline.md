@@ -25,6 +25,11 @@ model's uneven "fake pixels" into one clean grid. If a result looks mushy, the f
    log the best score and stop — never loop blind).
 5. Record every asset's final score + rounds in `docs/03-build-log.md`.
 
+**Transparency reality (found on the first portrait):** the model may paint a *checkerboard* instead of using alpha —
+the PNG comes back RGB (colour type 2) and looks transparent to a human. The wrapper measures real transparent pixels
+after Godot decodes the file and rejects <2%. The prompt now demands image_gen's transparent-background option and,
+failing that, a flat `#00ff00` backdrop which `img.gd --auto-key` removes. A checkerboard is unrecoverable → regenerate.
+
 Sequencing that matters: generate **`char/you_neutral` first** and judge it against the target image — it
 calibrates the pipeline. Then Lena/Jürgen neutral (they anchor the cast style), *then* their expressions
 (same design, different face — attach the neutral portrait as an extra `refs` image so it stays on-model).
