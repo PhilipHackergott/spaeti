@@ -40,7 +40,12 @@ custom_minimum_size = Vector2(0, 118)
 layout_mode = 2
 horizontal_scroll_mode = 0
 
-[node name="Shelf" parent="Box/ShelfScroll" instance=ExtResource("3_shelf")]
+[node name="ShelfInset" type="MarginContainer" parent="Box/ShelfScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_right = 12
+
+[node name="Shelf" parent="Box/ShelfScroll/ShelfInset" instance=ExtResource("3_shelf")]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3

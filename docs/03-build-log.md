@@ -653,3 +653,5 @@ literals, Till Pfand rate, manage tier thresholds, close_night never dispatched,
   its portrait/scene results are provisional until astra re-does the hero assets against the generated concept.
 
 - **Concept painting landed** (`concept-art/generated/night_interaction.png`, astra, 1536×1024, 187 s / 28k tokens): Lena at the counter in the Späti set, on one grid — by eye the composed target we wanted. Wired as reference 2 for scene/backdrop, scene/counter and char/lena_* and auto-added to every judge call. A false positive in the block detector (matched "usage limits" in echoed doc text) had aborted the run after the image existed — detector now only reads Codex `ERROR` lines.
+
+- **Concept r2 promoted** (astra **79**: composition 82, palette 85, pixel 65, Lena 87, Berlin 93; r1 = 76). Canonical: `concept-art/generated/night_interaction.png` (raw 1536×1024) + `night_interaction-grid.png` (16:9 centre crop snapped to 480×270 and shown ×4 — the judge prefers this one; it is the Night screen at real density). The judge's remaining fixes target the raw painting's microtexture, which the snap removes; stop iterating the concept here.

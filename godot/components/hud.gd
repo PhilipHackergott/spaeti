@@ -34,11 +34,16 @@ func render(view: Dictionary) -> void:
 	_meter("%Trust", "ui/icon_trust", Palette.TRUST, float(rep.get("kiez", 0.0)), String(hud.get("kiez_label", "")))
 	_meter("%Profit", "ui/icon_profit", Palette.PROFIT, float(rep.get("profit", 0.0)), String(hud.get("profit_label", "")))
 
-## While the serve panel owns the right half, the meters step aside instead of being covered.
+## While the serve panel owns the right half, the meters step aside instead of being covered — and so
+## does the night/queue tail of the left line, which at 16 px runs under the panel's edge. The clock,
+## the cash and the Pfand count stay: those are what you check while ringing someone up.
 func set_compact(on: bool) -> void:
 	var plate := get_node_or_null("%RightPlate") as Control
 	if plate != null:
 		plate.visible = not on
+	var meta := get_node_or_null("%Meta") as Label
+	if meta != null:
+		meta.visible = not on
 
 func _meter(unique: String, icon_id: String, fill: Color, value: float, label: String) -> void:
 	var m := get_node_or_null(unique) as Meter

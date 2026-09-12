@@ -4,9 +4,9 @@
 [ext_resource type="Theme" path="res://components/Theme.tres" id="2_theme"]
 
 [node name="ItemSlot" type="PanelContainer"]
-custom_minimum_size = Vector2(218, 22)
+custom_minimum_size = Vector2(0, 28)
 offset_right = 218.0
-offset_bottom = 22.0
+offset_bottom = 28.0
 focus_mode = 2
 theme = ExtResource("2_theme")
 theme_type_variation = &"SlotPanel"
@@ -18,18 +18,21 @@ mouse_filter = 2
 theme_override_constants/separation = 3
 
 [node name="IconWrap" type="CenterContainer" parent="Box"]
-custom_minimum_size = Vector2(18, 20)
+custom_minimum_size = Vector2(18, 26)
 layout_mode = 2
 mouse_filter = 2
+clip_contents = true
 
 [node name="Icon" type="TextureRect" parent="Box/IconWrap"]
 unique_name_in_owner = true
 layout_mode = 2
 mouse_filter = 2
+expand_mode = 1
 stretch_mode = 3
 
 [node name="Name" type="Label" parent="Box"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(86, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4

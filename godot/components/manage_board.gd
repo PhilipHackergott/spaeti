@@ -9,11 +9,12 @@ signal open_night()
 
 const STEP := Vector2(15, 15)
 const PRICE_STEP := 0.10
-## One SKU row's height at Jersey 10 @12 (a 12-px label plus the StepButton's 1-px border, top and
-## bottom). The scroll window in ManageBoard.tscn is a WHOLE MULTIPLE of it, so the list can never
-## slice a row in half at the boundary the way verify round 3 caught it doing.
+## The floor for a SKU row. The REAL height is whatever the theme's label and StepButton come out at,
+## so it is measured from the first built row and the scroll window is sized to a whole multiple of
+## that — the list can then never slice a row in half at its boundary (verify round 3 caught it doing
+## exactly that, and a hand-tuned constant went stale again the moment the font changed).
 const ROW_H := 15
-const ROWS_VISIBLE := 6
+const ROWS_VISIBLE := 5
 
 ## Restock quantities the player has clicked up this session (UI intent, echoed as `restock` actions).
 var _pending: Dictionary = {}
@@ -23,9 +24,6 @@ func _ready() -> void:
 	var rule := get_node_or_null("Rule") as ColorRect
 	if rule != null:
 		rule.color = Palette.RULE
-	var scroll := get_node_or_null("Scroll") as ScrollContainer
-	if scroll != null:
-		scroll.custom_minimum_size = Vector2(0, ROW_H * ROWS_VISIBLE)
 	_text("%Section", Strings.MANAGE_SECTION)
 	_text("%ModuleHead", Strings.MANAGE_MODULES)
 	var open := get_node_or_null("%OpenNight") as Button
@@ -56,14 +54,30 @@ func _build_rows(options: Array) -> void:
 		c.queue_free()
 	for entry in options:
 		box.add_child(_row(entry))
+	_fit_scroll_to_whole_rows(box)
+
+## Sizes the scroll window to ROWS_VISIBLE whole rows, measured off a real row rather than guessed.
+func _fit_scroll_to_whole_rows(box: VBoxContainer) -> void:
+	var scroll := get_node_or_null("Scroll") as ScrollContainer
+	if scroll == null or box.get_child_count() == 0:
+		return
+	var first := box.get_child(0) as Control
+	if first == null:
+		return
+	var h := maxi(ROW_H, int(ceilf(first.get_combined_minimum_size().y)))
+	var sep := box.get_theme_constant("separation")
+	scroll.custom_minimum_size = Vector2(0, h * ROWS_VISIBLE + sep * (ROWS_VISIBLE - 1))
 
 func _row(entry: Dictionary) -> HBoxContainer:
 	var sku_id := String(entry.get("sku_id", ""))
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 3)
+	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	# Rows are a whole number of pixels tall so the scroll boundary never slices one in half.
 	row.custom_minimum_size = Vector2(0, ROW_H)
-	row.add_child(_label(String(entry.get("name", "")), 78, Palette.TEXT))
+	var name_label := _label(String(entry.get("name", "")), 78, Palette.TEXT)
+	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(name_label)
 	row.add_child(_label("x%d" % int(entry.get("stock", 0)), 22, Palette.TEXT_DIM))
 	row.add_child(_label(Strings.WHOLESALE % Palette.money(float(entry.get("cost", 0.0))), 56, Palette.TEXT_DIM))
 	# Only "+": a restock is a purchase the reducer has already made. There is no un-buy action in
@@ -96,13 +110,18 @@ func _build_modules(modules: Array) -> void:
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", 4)
 		var owned := bool(m.get("owned", false))
-		row.add_child(_label(String(m.get("name", "")), 94, Palette.TEXT_DIM if owned else Palette.TEXT))
-		row.add_child(_label(String(m.get("desc", "")), 196, Palette.TEXT_DIM))
+		row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(_label(String(m.get("name", "")), 96, Palette.TEXT_DIM if owned else Palette.TEXT))
+		# The description takes whatever the board has left over: the module strings are the engine's
+		# and any fixed width clipped "...fewer warm-beer balks" mid-word.
+		var desc := _label(String(m.get("desc", "")), 180, Palette.TEXT_DIM)
+		desc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(desc)
 		if owned:
 			row.add_child(_label(Strings.MANAGE_OWNED, 54, Palette.GOOD))
 		else:
 			var buy := _button(Palette.money(float(m.get("cost", 0.0))), _on_buy.bind(String(m.get("id", ""))))
-			buy.custom_minimum_size = Vector2(54, 13)
+			buy.custom_minimum_size = Vector2(58, ROW_H)
 			row.add_child(buy)
 		box.add_child(row)
 

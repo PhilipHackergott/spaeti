@@ -21,10 +21,10 @@ grow_vertical = 2
 
 [node name="Frame" type="PanelContainer" parent="."]
 unique_name_in_owner = true
-offset_left = 24.0
-offset_top = 10.0
-offset_right = 456.0
-offset_bottom = 260.0
+offset_left = 12.0
+offset_top = 8.0
+offset_right = 468.0
+offset_bottom = 262.0
 
 [node name="Box" type="VBoxContainer" parent="Frame"]
 layout_mode = 2

@@ -10,7 +10,6 @@ extends Screen
 ## would otherwise dispatch a `close_night` into a screenshot.
 
 const BUBBLE_RIGHT := Vector2(340, 74)
-const BUBBLE_LEFT := Vector2(44, 62)
 
 ## The night ends itself. Session ticks every frame, so `render` is the place both transitions are
 ## noticed — these two latches keep each one firing exactly once per night.
@@ -82,11 +81,12 @@ func render(v: Dictionary) -> void:
 			box.show_dialogue(_order_line(active), true)
 		else:
 			box.clear()
+	var panel := _serve()
+	var serving := panel != null and panel.is_open
 	var bubble := get_node_or_null("%WantBubble") as WantBubble
 	if bubble != null:
 		bubble.set_want(active.get("want", {}) if not active.is_empty() else {})
-		bubble.visible = not active.is_empty()
-	var panel := _serve()
+		bubble.visible = not active.is_empty() and not serving
 	if panel != null:
 		panel.render(v)
 		_place_bubble(panel.is_open)
@@ -193,9 +193,12 @@ func toggle_serve() -> void:
 
 ## With the serve panel open the counter chrome moves left so nothing is hidden behind it.
 func _place_bubble(serve_open: bool) -> void:
+	# The panel's own header already says "Clubber: Sterni", and the bust steps left into the space the
+	# bubble used to occupy — so the bubble simply stands down while the shelf is open.
 	var bubble := get_node_or_null("%WantBubble") as WantBubble
 	if bubble != null:
-		bubble.position = BUBBLE_LEFT if serve_open else BUBBLE_RIGHT
+		bubble.position = BUBBLE_RIGHT
+		bubble.visible = not serve_open and not view().get("active", {}).is_empty()
 	var box := _dialogue()
 	if box != null:
 		var r := Palette.DIALOGUE_RECT

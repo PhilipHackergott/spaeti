@@ -108,7 +108,10 @@ func test_portrait_falls_back_to_neutral_at_full_size() -> void:
 	if warm == null or neutral == null:
 		return
 	assert_eq(Vector2i(warm.get_size()), Vector2i(neutral.get_size()), "a missing expression keeps the bust size")
-	assert_eq(Vector2i(warm.get_size()), Assets.size_of("char/oneoff_clubber_neutral"), "and that is the spec size")
+	# Only a PLACEHOLDER owes the spec its exact footprint; once the art lane ships the real bust its
+	# own size is the truth (docs/04 rule 3), so the spec comparison is placeholder-only.
+	if not Assets.is_real("char/oneoff_clubber_neutral"):
+		assert_eq(Vector2i(warm.get_size()), Assets.size_of("char/oneoff_clubber_neutral"), "and that is the spec size")
 
 ## Assets.SIZES is a hand-written mirror of docs/asset-spec.json. This is what keeps it honest: a
 ## drifted entry renders a placeholder at the wrong footprint and the composition moves when art lands.
