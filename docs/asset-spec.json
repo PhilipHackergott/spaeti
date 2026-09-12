@@ -70,7 +70,7 @@
       "transparent": true,
       "gen": "1024x1536",
       "aspect": "portrait",
-      "prompt": "The protagonist 'You' (Onkel Cem's nephew) — EXACTLY the man in the target-state reference: mid-20s, messy wavy brown hair, light stubble, tired-but-earnest brown eyes, red hoodie under a brown/black layered jacket with a red band across the sleeves. Neutral, slightly guarded expression, hands out of frame. Head-and-shoulders bust for a dialogue portrait."
+      "prompt": "The protagonist 'You' (Onkel Cem's nephew) — EXACTLY the man in the target-state reference, same age, same face, same hair, same clothes: mid-20s and boyish, a short compact tousled crop of brown hair with irregular chunky tufts, a low crown and the ears exposed (NOT a long wavy mane, no locks reaching the jaw), a shortish soft face with a rounded jaw, pale peach skin, small brown eyes with a single highlight, thin brows, a small nose, a small closed mouth, only a faint hint of stubble. Red hoodie (drawstrings, a small white chest mark) under the layered jacket exactly as in the reference: taupe-brown front body, charcoal-black shoulders and sleeves, a compact dark collar, one clean red band across each upper sleeve. Neutral expression: relaxed brows, eyes open, quietly tired and uncertain rather than stern. Head-and-shoulders bust with both upper arms visible, cut off at chest height, hands out of frame. Lighting: soft, mostly even; a narrow warm amber rim on the left, a faint cool-blue edge on the right."
     },
     {
       "id": "char/lena_neutral",
