@@ -2,3 +2,4 @@
 .godot/
 # local export output
 export/
+.godot-lock

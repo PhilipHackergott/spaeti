@@ -12,6 +12,8 @@ godot/
     content/           the data registries (SKUs, customers, vignettes/arcs, events, upgrades) — data, not logic
   components/          THE central pool of reusable scenes (+ their scripts). Every visible thing is built from these.
   scenes/              composed screens (Main, Title, Manage, Night, Summary). They arrange components; they do not restyle them.
+  state/               the Session autoload — the only mutable game object (docs/05-engine-api.md §7)
+  sim/                 AutoPlayer — the headless shopkeeper policy used by tests
   assets/              grid-snapped art (from tools/codex/art.mjs); fonts/ holds the pixel font + its licence
   audio/               synthesized or generated sound (later)
   tools/               shot.gd / img.gd — pipeline helpers, not game code

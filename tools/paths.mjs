@@ -39,6 +39,31 @@ export function requireGodot() {
   return GODOT_BIN;
 }
 
+/**
+ * Cross-process mutex around anything that runs Godot on the project dir: parallel agents importing /
+ * capturing / snapping at once would race on `.godot/`. Sync acquire with retry; stale locks (>10 min) are broken.
+ */
+const GODOT_LOCK = path.join(GODOT_DIR, '.godot-lock');
+const sleepSync = (ms) => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+export function acquireGodotLock(waitMs = 10 * 60_000) {
+  const start = Date.now();
+  for (;;) {
+    try {
+      const fd = fs.openSync(GODOT_LOCK, 'wx');
+      fs.writeSync(fd, `${process.pid} ${new Date().toISOString()}`);
+      fs.closeSync(fd);
+      const release = () => { try { if (fs.readFileSync(GODOT_LOCK, 'utf8').startsWith(`${process.pid} `)) fs.unlinkSync(GODOT_LOCK); } catch { /* gone */ } };
+      process.once('exit', release);
+      return release;
+    } catch (e) {
+      if (e.code !== 'EEXIST') throw e;
+      try { if (Date.now() - fs.statSync(GODOT_LOCK).mtimeMs > 10 * 60_000) { fs.unlinkSync(GODOT_LOCK); continue; } } catch { continue; }
+      if (Date.now() - start > waitMs) throw new Error('timed out waiting for the Godot lock');
+      sleepSync(1500);
+    }
+  }
+}
+
 /** Kill a process tree on Windows. */
 export function killTree(pid) {
   try { spawnSync('taskkill', ['/PID', String(pid), '/T', '/F'], { stdio: 'ignore' }); } catch { /* already gone */ }
