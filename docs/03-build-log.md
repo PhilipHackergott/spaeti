@@ -722,3 +722,144 @@ subject for exactly this reason.
 - **Incident 20:52–20:58:** adding `--despeckle` to `img.gd` introduced a GDScript parse error (`var p := o + d` with an untyped loop var) that broke EVERY snap for ~4 min — the art lanes logged 11 `img.gd failed` results (raws are kept; re-snap with `art.mjs --reuse-raw`). Fixed (typed loop), verified, committed. `judge.mjs` now refuses a missing candidate instead of returning a zero-filled verdict.
 
 - Ladder completed: +quantise 64 → **81** (pixel 76); +quantise 96 + 2× despeckle → **82** (pixel 77, Lena judged as NPC: fidelity 85). Astra: "further progress needs targeted cluster redraws". **Decision: the standard chain is snap-only; `--quantize` / `--despeckle` are opt-in polish** (≈ +1 each, some banding risk). The lever for ≥ 85 is the generation prompt (TRUE-PIXEL-ART clauses) + astra as generator + the judge loop.
+
+## 2026-09-12 — INTEGRATION lane (resumed): the Jersey font, a real playthrough, the verify leftovers
+
+`node tools/godot/test.mjs` -> **66 run, 0 failed**. `node tools/godot/play.mjs` -> **PLAY ok steps=15**,
+zero engine error lines, night 1 finished and night 2 open.
+
+### 1. The font: VT323 is gone, Jersey is in — and the sizes were MEASURED, not assumed
+
+VT323 is an outline face. At 16 base px its one-unit middle stems fall between pixel centres and simply
+vanish: "Mate"->"Nate", "MODULES"->"NODULES", "Mittwoch"->"Nittwoch", "1,80"->"1,B0", "x18"->"x1B"
+(`shots/probe3-night.png`, `shots/probe3-manage.png`). Hinting NORMAL, the previous lane's patch, kept the
+stems but at the cost of a smeared, un-pixel look — and 16 px of VT323 is about twice Coffee Talk's body.
+
+Jersey (OFL, `godot/assets/fonts/OFL-Jersey.txt`) replaced it. The brief said "each face only at its native
+size (10/20/25)"; **that turned out to be wrong on this family**, and the way we found out is a new tool:
+
+- `godot/tools/FontProbe.tscn` + `font_probe.gd` prints one sample in every face at every candidate size.
+  Captured with `shot.mjs` and read at x2/x3: `shots/fontprobe.png`, `fontprobe2.png`, `fontprobe3.png`.
+- **Jersey 10 @10 is BROKEN** — "KIEZ" renders "HIEZ" (the K loses its diagonal). @14 is broken too
+  ("Wasser"->"Wassor"). It is clean at **12 / 16 / 20 / 25 / 50**.
+- **@12 draws every letter but not every NUMBER**: "22:41"->"ZZ41", "84,50"->"84.50" (2 reads as Z, the
+  comma flattens to a dot). Unusable for a clock and for money, which is most of this game's text.
+- **Jersey 20 @20 loses the middle bar of an `8`** ("1,80"->"1,00"). It is clean at 25/50, so it earns no
+  slot in the ladder; the file and its licence stay.
+- **Jersey 25 @50** is a caps-only display face and is perfect — the wordmark, nothing else.
+
+So the ladder is **one text size**, like Coffee Talk: `FONT_TINY = FONT_SMALL = FONT_BODY = 16`,
+`FONT_LEAD = 20`, `FONT_TITLE = 50`. Jersey 10 @16 has an 8-px cap where VT323 @16 had 11, so this is
+*smaller* on screen than what the review complained about, not bigger. Antialiasing NONE, hinting NONE,
+subpixel DISABLED — set in the three `.import` files **and** forced in `Palette.theme()`, which now walks
+`get_font_type_list()` instead of only `default_font`, so neither half can rot alone.
+
+Everything that assumed 16-px VT323 was re-laid out and re-read at 1080p:
+`DIALOGUE_RECT` 40,196,400x64 (a 12-px speaker line + two 16-px body lines + padding; docs/02 asks for
+y 196-262) with the choices stacked 60 px above it; the HUD's `Meta` line dropped the weekday (at one text
+size the corner cannot hold clock + cash + Pfand + weekday AND leave the other corner to the meters — the
+weekday is on the Manage title and the Summary sub-line); a new `StepButton` theme variation with zero
+vertical padding so a Manage row is one row tall; the Modal frame widened to 12..468 so a module
+description stops clipping mid-word; `ManageBoard` now **measures** a built row and sizes its scroll window
+to `ROWS_VISIBLE` whole rows (`_fit_scroll_to_whole_rows`) instead of trusting a constant that went stale
+the moment the font changed — which is also the fix for "row 6 sliced at the boundary".
+
+**The Shelf became a list.** At one text size a 42-px grid tile can print a name OR a price, never both, and
+the shelf is 17 SKUs (23 with the modules). It is now one full-width `ItemSlot` row per SKU (icon well 18x26,
+clipped so a 36-px bottle cannot stretch the row; name / price / stock / badge as columns) inside a scroll
+window in the ServePanel — and `ServePanel.render()` **scrolls to the SKU the customer asked for**, so what
+you need is never three rows down. The panel grew to x 228..476 to fit it.
+
+Read at 1080p, word by word: `shots/f6-title.png`, `f6-summary.png`, `f9-manage.png`, `f2-dialogue_choice.png`,
+`f4-pfand.png`, `play-06-first-customer.png`, `play-08-picked.png`, `play-11-beat-choice.png`. No dropped
+stems, no 8->B, no 2->Z; the P&L reads 142,80 + 8,40 - 61,20 - 35,00 - 4,80 = +50,20.
+
+### 2. The playthrough tool — the proof the loop is playable
+
+`godot/tools/playthrough.gd` + `Playthrough.tscn` + `tools/godot/play.mjs` (the spawn/lock/watchdog pattern
+copied from `shot.mjs`, WINDOWED, `--timeout 240`). It boots the real `scenes/Main.tscn` into the same
+480x270 SubViewport `shot.gd` uses and plays it through the screens' **own** handlers — `MockView` is never
+touched, every number logged comes from `Session.view()`:
+
+New game -> Manage -> a real `restock` off the board (asserted against the engine's stock) -> Open up ->
+wait for the first customer -> Serve -> pick the wanted SKU through `ItemSlot._gui_input` -> Ring up
+(asserted against `tally.sales`) -> answer the story beat on the real DialogueBox, having first checked that
+`legal_actions` offers no `serve_active` while it is pending (docs/05 §4) -> Wave off -> let the night run
+itself to 06:00 (`night.gd` dispatches `close_night`; the tool only answers beats) -> Summary -> Next day
+(asserted: the day advanced) -> Open up -> night 2.
+
+15 steps, a 1920x1080 PNG after each (`shots/play-NN-<step>.png`) and a row per step in
+`shots/play-log.json` ({step, name, screen, phase, day, clock, cash, active, pending}).
+
+Two things it taught us immediately:
+- **`SceneTreeTimer` runs on SCALED time.** The first run's watchdog was a `create_timer(225)` and fired
+  after ~56 real seconds the moment `Engine.time_scale` went to 4. The budget is a wall clock now
+  (`Time.get_ticks_msec()`), checked by every wait in the tool.
+- **A capture must wait for the screen to stop moving.** With a 6-frame settle, the Summary shot caught
+  the tally mid-count and printed "Profit -36,73" and "Rent 47,80" for a night whose real numbers are
+  -47,14 and 48,00. A half-animated number in a proof shot is indistinguishable from an arithmetic bug,
+  so `_shot()` settles 28 frames; the summary now reconciles on the face of it
+  (1,30 + 0,06 - 0,50 - 48,00 = -47,14, cash 420,91 - 48,00 = 372,91).
+- Speeding the night up is `Engine.time_scale` and **nothing in the game**: Session still ticks itself,
+  arrivals still ride their curve, patience still runs, `night.gd` still closes the books.
+
+No flow bug was left standing: the previous lane's `close_night` / screen-handover wiring held up under a
+real run, and the one thing the tool could not do at first — reach a Manage restock button — was a real
+finding (the board's runtime rows did not fill the board's width, so every column sat left-packed and the
+module description clipped). Fixed.
+
+### 3. The verify-round-3 leftovers
+
+- **Portrait vs. the ServePanel.** `Portrait.place_behind(counter_edge_y, centre_x)` now anchors the bust by
+  its **bottom-centre** (shipped art is narrower than its spec box — `you_neutral` is 155 against a 190 spec
+  — so a left-anchored bust drifts), and `night.gd` seats it at `PORTRAIT_CENTRE_X_SERVING` (118) while the
+  panel is open. Jürgen is fully visible in `shots/f4-pfand.png`; the want bubble stands down while the
+  panel names the order in its own header.
+- **Rain.** The `Rain` node moved *before* `Counter` in `SceneLayers.tscn` and the streaks are now drawn
+  inside `Palette.RAIN_RECT` (372,4 106x200 — the door/window opening) at alpha 0.55 instead of 26 cyan
+  hairlines at 0.10 sprayed over the whole frame. Visible in `f6-summary.png` and every night capture.
+- **`Assets._stamp_id`** keeps the leaf name and its HEAD: "COFFEE", not "FFEE"; "CIGA", not "TTES".
+- **Manage restock list** sized to whole rows (above).
+- **Speaker names** already came from the registry ("'Bottle' Jürgen"); verified live in `f4-pfand.png`.
+- **`project.godot`** gained `rendering/2d/snap/snap_2d_transforms_to_pixel=true`, which docs/01 always
+  claimed was on.
+- **Raw colours are gone from the pool as well as the screens.** `SceneLayers` (DUSK/DEEP/DAWN -> `TINT_*`,
+  the neon bloom, the rain), `Modal` (the dimmer and its hairline), `Meter` (the unlit cell), `ServePanel`
+  (the divider), `ManageBoard` (the rule), `Transition`, `WantBubble` — every one is a `Palette` token
+  assigned in `_ready()`, and not one `.tscn` in `components/` contains the word `Color(` any more.
+- **Busts and the counter** are both bottom-anchored, so the shipped art being smaller than its spec box
+  moves nothing.
+
+### 4. Strings, and what the tests now hold
+
+`tests/unit/test_strings.gd` (new, 4 tests) is what `strings.gd` always claimed existed: no `.gd` under
+`scenes/` or `components/` may set a label to a literal, the stray German chrome words may not come back,
+the format strings must keep their `%s`/`%d` slots, and the composed lines (`hud_line`, `summary_sub`) must
+read as sentences. `.tscn` placeholders stay exempt — docs/01 wants the editor tree to show reality, and
+`render()` overwrites them. It found three real leftovers: the Summary screen and `SummaryTally` were still
+German ("Umsatz/Gewinn/Kasse/Weiter"), and `ItemSlot`/`DialogueBox` were formatting `"x%d"` and `"%d. %s"`
+in place. All four now come from the table.
+
+`test_scenes.gd` gained `test_the_pool_list_is_complete`, which reads `components/` off disk and fails if a
+`.tscn` is missing from `COMPONENTS` — the hand-written list the last two verify rounds flagged. `Fx.tscn` was
+the first thing it caught.
+
+### Not done / for other lanes
+
+- **`MockView` still invents vocabulary the engine cannot produce** — archetypes "Pfandsammler", "Clubber",
+  "Studentin" and German SKU names — so the nine capture presets show words a live run never will (the live
+  ones read "Broke student", "Kiez regular", "Sterni (beer)"). `test_mock_view_speaks_the_engines_language`
+  only checks the two HUD labels, the weekday, the Pfand rate and the tiers. The playthrough captures are
+  now the honest reference; someone should either fix the mock against `Content.ARCHETYPES` or retire the
+  mock presets in favour of `play-*.png`.
+- **13 SKUs had no `Assets.SIZES` entry** until this pass (energy, schrippe, tobacco, papers, tp, condoms,
+  batteries, painkillers, currywurst, icecream, milk, eggs, vape); the art lane added the spec rows during
+  this lane and the mirror now matches. None of them has a PNG yet, so the shelf shows stamped placeholders
+  below the fold.
+- `docs/05 §5`'s read-model block still lists the pre-`pfand_rate` key set (17 keys; the code and the tests
+  carry 18, plus `tier` on each `restock_options` entry).
+- `content/skus.gd` still carries a per-SKU `deposit` that nothing reads.
+- The `Serve` toggle sits under the serve panel when the panel is open — harmless (it is behind it), but it
+  should probably become a close affordance.
+- A neglected night piles up a long queue ("18 waiting" in `play-11-beat-choice.png`) and Kiez-Trust drops
+  fast; that is the balance lane's read, not a bug, but the number is worth a look.

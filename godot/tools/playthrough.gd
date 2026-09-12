@@ -174,7 +174,11 @@ func _play() -> void:
 ## Renders and saves the frame, then appends the read-model row. Both, always, in this order.
 func _shot(step_name: String) -> void:
 	_step += 1
-	await _settle(6)
+	# Long enough for the screen to have FINISHED moving: the Summary's tally counts its rows up over
+	# ~0.9 s and a 6-frame settle caught it mid-count, so the capture showed "-36,73" for a profit that
+	# is actually -47,14 and "47,80" for a rent that is 48,00. A half-animated number in a proof shot is
+	# indistinguishable from an arithmetic bug — ask any reader of the last one.
+	await _settle(28)
 	var img := _vp.get_texture().get_image()
 	if img.get_width() != OUT_W or img.get_height() != OUT_H:
 		img.resize(OUT_W, OUT_H, Image.INTERPOLATE_NEAREST)

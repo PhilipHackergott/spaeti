@@ -82,20 +82,19 @@ const FONT_TITLE := 50   # Jersey 25 @50 — the wordmark only
 const BASE := Vector2i(480, 270)
 const COUNTER_H := 100                       # the counter band hides the customer's lower body
 const COUNTER_TOP := BASE.y - COUNTER_H      # 170
-## Coffee Talk proportions (concept-art/coffee talk references): the box is ~60% of the counter band
-## and seats on the wood instead of filling it. At Jersey 10 a speaker line + two body lines need
-## a 12-px speaker line + two 16-px body lines + the panel's 10 px of padding = 64, which is docs/02's
-## "over the counter band, y≈196–262" almost exactly.
+## Coffee Talk proportions (concept-art/coffee talk references): the box sits ON the counter band
+## instead of filling it. A speaker line + two body lines + the panel's own padding come to 64 px,
+## which lands on docs/02's "over the counter band, y≈196–262" almost exactly.
 const DIALOGUE_RECT := Rect2i(40, 196, 400, 64)
 ## The box is also narrowed to this while the serve panel owns the right half.
 const DIALOGUE_W_SERVING := 188
 const HUD_MARGIN := 2
 ## One compact line per corner (18 px incl. the plate's 1-px padding), clear of the SPÄTI neon, which
-## the backdrop puts at y 21-37. The 16-px icons, not the 10-px text, set this height.
+## the backdrop puts at y 21-37. The 16-px icons, not the text, are what set this height.
 const HUD_LINE_H := 18
 const ICON := 16
-## The serve panel owns the right half from here; it is 8 px wider than it was so five 42-px slots and
-## the scrollbar fit side by side (the shelf is 17 SKUs and grows to 23 with the modules).
+## The serve panel owns the right half from here; it is 8 px wider than it was so a full shelf ROW and
+## the scroll bar fit side by side (the shelf is 17 SKUs and grows to 23 with the modules).
 const SERVE_RECT := Rect2i(228, 8, 248, 256)
 ## How many base pixels of a customer's bust sit behind the counter layer (docs/02 framing table).
 ## `Portrait.place_behind()` derives the bust's y from this and the counter art's real opaque edge;
