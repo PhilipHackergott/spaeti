@@ -42,6 +42,7 @@ shop behind. Proportions in base pixels (480×270), read straight off the refere
 | Element | Reference | Base-grid target |
 |---|---|---|
 | Counter top edge | 78–79 % of height | **y ≈ 210–213**; the band below it is plain wood, so a taller counter asset is simply anchored to the bottom and clipped |
+| *(2026-09-13)* | | The counter layer hangs `Palette.COUNTER_LIFT` (20 px) above the bottom of the frame: the r6 strip carries 37 rows of wall above its laminate edge, and flush-with-the-bottom hid the countertop under the dialogue panel. Its lowest rows are under the panel anyway. |
 | Counter objects | cup at 30 % x, phone at 50 % x, sitting *on* the edge | cup x≈145, phone x≈240, both just below the edge |
 | Character bust | centred at 52 % x; hair top at ~10 %; shoulders ~30 % wide; cut by the counter at the chest/hip line | centre **x≈250**, hair top **y≈24–30**, ~145 px wide; the portrait's bottom 25–35 px sit *behind* the counter layer |
 | *(2026-09-13)* | | **Busts are snapped to 144×174** (the ~145 px above). They were 190×230 until the judge scored the composed frame: "an enlarged portrait behind a narrow ledge" — the head was 36 % of the frame height against Coffee Talk's ~25 %. Same raws, re-snapped with `art.mjs --reuse-raw`; the head is now ~27 % and the bottle hand shows above the counter. |
