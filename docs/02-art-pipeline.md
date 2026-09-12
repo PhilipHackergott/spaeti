@@ -34,6 +34,24 @@ Sequencing that matters: generate **`char/you_neutral` first** and judge it agai
 calibrates the pipeline. Then Lena/Jürgen neutral (they anchor the cast style), *then* their expressions
 (same design, different face — attach the neutral portrait as an extra `refs` image so it stays on-model).
 
+## The Night framing — measured off the OG interaction concept (`concept-art/main character target state.png`)
+
+The user confirmed this image is the target for **character interaction**: a bust behind a counter band, the
+shop behind. Proportions in base pixels (480×270), read straight off the reference:
+
+| Element | Reference | Base-grid target |
+|---|---|---|
+| Counter top edge | 78–79 % of height | **y ≈ 210–213**; the band below it is plain wood, so a taller counter asset is simply anchored to the bottom and clipped |
+| Counter objects | cup at 30 % x, phone at 50 % x, sitting *on* the edge | cup x≈145, phone x≈240, both just below the edge |
+| Character bust | centred at 52 % x; hair top at ~10 %; shoulders ~30 % wide; cut by the counter at the chest/hip line | centre **x≈250**, hair top **y≈24–30**, ~145 px wide; the portrait's bottom 25–35 px sit *behind* the counter layer |
+| Hanging lamps | three across the top, pooling warm light | in the backdrop, top 15 % |
+| Wall of stuff | eye-level shelves/pictures either side of the head, calmer directly behind the face | backdrop composition rule (§asset-spec) |
+| Dialogue box | not in this image — take it from the Coffee Talk frames | over the counter band, y≈196–262, x≈40–440 |
+
+Who stands there: **the customer** (Lena, Jürgen, …) — per `art-direction.md` the player is the shopkeeper looking
+across the counter. "You" appears on the title art and as the small speaker avatar when the player's lines show.
+The set dressing is the Berlin kiosk (fridges, Pfand crate, SPÄTI neon, rainy door), not the café's jukebox/mugs.
+
 ## Per-scene loop (`tools/godot/shot.mjs` + `judge.mjs`)
 
 Every screenshot goes through the same judge with the full four-image reference set. Presets each scene must
