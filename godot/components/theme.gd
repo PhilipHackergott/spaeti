@@ -141,7 +141,7 @@ const QUEUE_SLOTS := 4
 const STATS_RECT := Rect2i(2, 64, 136, 98)
 ## The serve panel is a secondary affordance now (docs/06 section 5: "reachable, not the demo path"),
 ## so its toggle is a small plate tucked under the HUD instead of a button in the middle of the set.
-const SERVE_TOGGLE_RECT := Rect2i(2, 21, 62, 18)
+const SERVE_TOGGLE_RECT := Rect2i(5, 25, 62, 18)   # under the inset HUD (which now ends at y 22)
 ## The dialogue box hands the right column back to the queue whenever the line is on screen.
 const DIALOGUE_W_QUEUE := 300
 
@@ -212,7 +212,7 @@ static func tier_colour(tier: String) -> Color:
 
 ## A Coffee-Talk chrome box: dark translucent fill, 1-px light edge, small radius.
 ## A choice ROW inside the dialogue panel (docs/06 §2, 2026-09-13): no box of its own — a faint fill, a
-## hairline under it, 1-px vertical padding — so two choices cost 2 x 18 px, not a stack of bordered chips
+## hairline under it, no vertical padding — so two choices cost 2 x 17 px, not a stack of bordered chips
 ## that covered the counter (the judge: "the dialogue stack consumes ~42 % of the frame").
 static func flat_row(fill: Color = CHOICE_FILL, rule: Color = RULE) -> StyleBoxFlat:
 	var sb := StyleBoxFlat.new()
@@ -221,8 +221,8 @@ static func flat_row(fill: Color = CHOICE_FILL, rule: Color = RULE) -> StyleBoxF
 	sb.border_width_bottom = 1
 	sb.content_margin_left = PAD
 	sb.content_margin_right = PAD
-	sb.content_margin_top = 1
-	sb.content_margin_bottom = 1
+	sb.content_margin_top = 0
+	sb.content_margin_bottom = 0
 	sb.anti_aliasing = false
 	return sb
 

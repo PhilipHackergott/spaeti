@@ -37,6 +37,7 @@ func _refresh() -> void:
 	var price := get_node_or_null("%Price") as Label
 	if price != null:
 		price.text = Palette.money(float(_want.get("price", 0.0)))
+		price.add_theme_color_override("font_color", Palette.TEXT)   # the price is the answer, not a caption
 	var said := get_node_or_null("%Line") as Label
 	if said != null:
 		said.text = line

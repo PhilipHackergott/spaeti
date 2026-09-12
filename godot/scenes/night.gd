@@ -132,7 +132,11 @@ func render(v: Dictionary) -> void:
 	if toggle != null:
 		# `legal_actions` offers no serve at all while the story (or a conversation) holds the counter,
 		# docs/05 §4 + docs/06 §4 — the button says so instead of dispatching something illegal.
-		toggle.disabled = active.is_empty() or not dialogue.is_empty() or not talk.is_empty()
+		var can_serve := not active.is_empty() and dialogue.is_empty() and talk.is_empty()
+		toggle.disabled = not can_serve
+		# The judge (2026-09-13): a greyed "Serve" in the corner read as a leftover control. It is shown only
+		# when serving is actually on offer — or while the panel is open, since it doubles as its close.
+		toggle.visible = can_serve or (panel != null and panel.is_open)
 
 ## Closes the night when the clock has run out and nobody is left waiting, and hands over to the
 ## summary screen once the reducer has moved on. Returns true when the screen is in transition and
