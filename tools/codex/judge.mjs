@@ -3,6 +3,7 @@
 //
 //   node tools/codex/judge.mjs --candidate shots/night.png [--reference img ...] [--context "what this is"]
 //        [--rubric docs/judge-rubric.md] [--out judge/night.json] [--threshold 80] [--effort high] [--full] [--refs=full]
+//        [--timeout 420 (per attempt)] [--attempts 3]
 //
 // Writes a strict JSON verdict (tools/codex/verdict.schema.json). Exit 0 if overall >= threshold else 1.
 //
@@ -80,20 +81,30 @@ character_fidelity for a bottle sprite). "overall" is your holistic call, not an
 ship it), revise (fixable — list the fixes in priority order), reject (wrong medium/style, start over).
 List up to 8 fixes, most impactful first, each with what/where/how. Reply ONLY with the JSON object.`;
 
-const r = await runCodex({ prompt, images: [candidate, ...refs], schema: 'tools/codex/verdict.schema.json',
-  sandbox: 'read-only', model: a.model || CODEX_MODEL_HERO, effort, timeout: a.timeout ? Number(a.timeout) : 900, quiet: true });
+// STALLS: an astra request sometimes emits one reasoning item and then nothing for 15+ minutes (rollout
+// 00:24, 2026-09-13) while an identical request finished in 45 s. A stalled request is killed and retried,
+// not waited on: `--timeout` is per attempt, `--attempts` bounds the retries.
+const attempts = Number(a.attempts || 3);
+const perAttempt = a.timeout ? Number(a.timeout) : 420;
+let r = null;
 let verdict = null;
-try { verdict = JSON.parse(r.last); } catch { /* handled below */ }
-if (r.blocked) {
-  console.error(`judge: BLOCKED (${r.blocked}): ${r.blockLine}`);
-  process.exit(75);
+for (let i = 1; i <= attempts; i++) {
+  r = await runCodex({ prompt, images: [candidate, ...refs], schema: 'tools/codex/verdict.schema.json',
+    sandbox: 'read-only', model: a.model || CODEX_MODEL_HERO, effort, timeout: perAttempt, quiet: true });
+  if (r.blocked) {
+    console.error(`judge: BLOCKED (${r.blocked}): ${r.blockLine}`);
+    process.exit(75);
+  }
+  try { verdict = JSON.parse(r.last); } catch { verdict = null; }
+  if (verdict) break;
+  console.error(`judge: attempt ${i}/${attempts} returned no verdict (exit ${r.code}, ${r.seconds}s)${i < attempts ? ' — retrying' : ''}`);
 }
 if (!verdict) {
   console.error(`judge: no JSON verdict (exit ${r.code}, ${r.seconds}s)\n${r.log.slice(-1500)}`);
   process.exit(3);
 }
 verdict._meta = { candidate: a.candidate, judged: candidate, lean, references: refs, context, threshold,
-  model: a.model || CODEX_MODEL_HERO, effort, seconds: r.seconds, tokens: r.tokens };
+  model: a.model || CODEX_MODEL_HERO, effort, seconds: r.seconds, tokens: r.tokens, attempts };
 fs.mkdirSync(path.dirname(path.resolve(REPO, outFile)), { recursive: true });
 fs.writeFileSync(path.resolve(REPO, outFile), JSON.stringify(verdict, null, 2));
 console.log(JSON.stringify({ overall: verdict.overall, verdict: verdict.verdict, axes: verdict.axes,
