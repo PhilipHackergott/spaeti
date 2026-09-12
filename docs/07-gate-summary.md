@@ -25,12 +25,12 @@ Godot 4.7.2; every screen is a real `.tscn` you can open in the editor.
 | Title key art (r4) | **86 pass** | the user's chosen style reference |
 | Concept painting r3 (real-Späti set) at game density | 77 | set fidelity 86–94; rendering is the gap |
 | Backdrop (r5, promoted) | 74 | Berlin 91, composition 85, pixel 64 |
-| Counter (r6, edge-to-edge, flat key) | pending | r5 scored 72 |
+| Counter (r6, edge-to-edge, flat key) | not scored | two judges timed out (600 s, 1500 s) under concurrency; r5, the same construction, scored 72 |
 | Jürgen neutral | **84 pass** | |
 | Lena / Mehmet neutral | 79 / 79 | one point short, both after 3 rounds |
 | One-offs (clubber, tourist) | 78 / 78 | |
 | You / Brandt / Tobias / Schulz / Nadia | 73 / 76 / 75 / 74 / 68 | outside the demo path; nearest re-snap only |
-| **Hero screen (`dialogue_choice`, composed)** | pending | first run timed out under load; rerun in flight |
+| **Hero screen (`dialogue_choice`, composed)** | pending | three 1080p runs timed out (600/1500/1500 s, 3 sessions open); lean solo rerun (half-size lossless, 3 refs, effort high) in flight |
 
 Pattern across every verdict: set, palette and character fidelity score 85–95; **pixel rendering scores 60–79** —
 astra paints "softly modelled" shading where the target has authored clusters. Measured levers: nearest-neighbour
