@@ -15,6 +15,14 @@ and hair. It should read as a skilled pixel artist's work, **not** blocky 8-bit/
 neon magenta + cyan accents (signs, fridge glow); soft grain. Bittersweet, cozy, a little melancholy.
 Night-time always.
 
+**Portrait rendering, learned from the first calibration pass (the judge scored a painterly attempt 66/100):**
+skin is pale peach-pink with lifted shadows — never orange, never half-buried in black; amber lives only in a
+narrow warm rim on one side, with a restrained cool-blue edge on the other. Faces are simple and clean like the
+target: small readable eyes with a single highlight, thin brows, a small mouth, minimal stubble, compact short
+tousled hair with the ears exposed. Surfaces are deliberate flat clusters (4–6 tones per material) with clean
+one-pixel contour accents — no painterly strand-by-strand hair, no speckled noise, no soft gradient modelling.
+Younger and softer beats older and brooding; neutral means "quietly present", not stern.
+
 **Framing:** fixed side-on view from behind the counter (the player is the shopkeeper). Characters are
 head-and-shoulders busts, centred, facing the viewer at the counter, slightly below eye level, like Coffee
 Talk's customers. Nothing is drawn from above or in isometric.

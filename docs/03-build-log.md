@@ -19,3 +19,6 @@ Operators append here as they go: decisions, scores, what worked, what did not. 
   one-offs; grab → ring up → pay → change/Pfand; dialogue with choices) → close → nightly P&L → Manage (restock +
   prices) → next night. Engine ported and tested; the component pool built; every hero screen judged ≥ 85 against
   the concept art. Out of scope this round: audio, the full 22-step arc, all 14 strands, save/history, Cozy/Tight.
+
+## 2026-09-12 — art calibration: char/you_neutral (orchestrator)
+- Round 1 (checkerboard, rejected): style/identity very close to the target but no real alpha. Round 2 (real alpha, 7 min, 66k tokens): judge **66/100** — composition 82, palette 70, pixel_rendering 67, character_fidelity 59: older/longer-haired/more stubble than the target, painterly hair noise, too orange. The judge's fixes were folded into `docs/art-style-brief.md` (portrait rendering paragraph) and the `you_neutral` prompt; the character fleet re-runs it with that feedback. Lesson: run-to-run identity drift is the main risk for portraits — 3 rounds + keep-best is the right loop.

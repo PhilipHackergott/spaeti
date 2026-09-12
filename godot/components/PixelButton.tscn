@@ -1,0 +1,12 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://components/pixel_button.gd" id="1_script"]
+[ext_resource type="Theme" path="res://components/Theme.tres" id="2_theme"]
+
+[node name="PixelButton" type="Button"]
+offset_right = 72.0
+offset_bottom = 20.0
+focus_mode = 2
+theme = ExtResource("2_theme")
+text = "Button"
+script = ExtResource("1_script")

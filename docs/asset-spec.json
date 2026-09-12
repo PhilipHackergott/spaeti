@@ -1,6 +1,10 @@
 {
   "$comment": "Vertical-slice art assets. Sizes are BASE-GRID pixels (480x270 canvas, shown x4 at 1080p). tools/codex/art.mjs generates each at native gpt-image size into art/raw/<id>.png and snaps it into godot/assets/<id>.png. Add an asset = add an entry here; the id is the file path under godot/assets/.",
-  "baseGrid": { "width": 480, "height": 270, "scale": 4 },
+  "baseGrid": {
+    "width": 480,
+    "height": 270,
+    "scale": 4
+  },
   "styleBrief": "docs/art-style-brief.md",
   "defaultKey": "00ff00",
   "$keyComment": "Transparent assets: Codex is told to use image_gen's real alpha; if it paints a backdrop instead, it must be this flat colour, which img.gd keys out automatically (auto-key only fires when the image has no real alpha). Override per asset with \"key\" when the subject contains that colour (e.g. the magenta lighter uses the default green; a plant would use \"ff00ff\").",
@@ -16,74 +20,316 @@
   },
   "assets": [
     {
-      "id": "scene/backdrop", "kind": "scene", "w": 480, "h": 270, "mode": "cover", "crop": "16:9", "filter": "lanczos", "transparent": false,
-      "gen": "1536x1024", "aspect": "landscape", "allowText": "SPÄTI",
-      "prompt": "The interior of a Berlin Späti at night, seen from behind the counter (the shopkeeper's fixed side-on view), with NO people and NO counter in frame — this is the back layer behind the customer. Left third: a tall wall of glowing drinks fridges with cyan-white interior light and rows of generic bottles (green beer bottles with plain labels, yellow-label Mate-like bottles, water, cola-like). Middle: wooden shelves of stand-in snacks (chips bags, chocolate bars, gum) and tobacco pouches, a hand-painted warm neon 'SPÄTI' sign glowing above, a techno flyer and a small U-Bahn-style sign pinned to dark wood panelling, a hanging plant, a football scarf (no real club) draped on a hook. Right third: the glass door and window onto the street — cold blue rainy Berlin night outside, wet reflections, a magenta neon glow from across the street, stickers on the inside of the glass. Warm amber pendant lamps overhead; the floor is not visible. Dense but readable 'wall of cozy stuff' like the Coffee Talk café, re-skinned as a kiosk."
+      "id": "scene/backdrop",
+      "kind": "scene",
+      "w": 480,
+      "h": 270,
+      "mode": "cover",
+      "crop": "16:9",
+      "filter": "lanczos",
+      "transparent": false,
+      "gen": "1536x1024",
+      "aspect": "landscape",
+      "allowText": "SPÄTI",
+      "prompt": "TRUE PIXEL ART, NOT A SMOOTH ILLUSTRATION. Draw this as if a pixel artist placed every pixel on ONE locked grid at about 480x270 art pixels: chunky uniform square pixels, hard nearest-neighbour edges everywhere, 4-6 flat tones per material with stepped cluster shading, ordered dithering only for soft light falloff, clean 1-px dark outlines on every fixture. NO airbrushed glows, NO gaussian blur, NO anti-aliased or feathered edges, NO photographic glass reflections or sub-pixel glints, NO fine painterly noise, NO gradients. Every bottle, leaf and raindrop must be a deliberate cluster of a few pixels, not a rendered object.\n\nSUBJECT: the interior of a Berlin Späti at night, seen from behind the counter (the shopkeeper's fixed side-on view: straight-on, at eye level, absolutely no isometric and no high angle), with NO people, NO counter and NO foreground objects — this is the flat back-wall layer that sits BEHIND a character bust.\n\nFRAMING — the canvas is centre-cropped to 16:9 before use, so compose everything important inside the middle 16:9 band and treat the top ~15% and bottom ~15% of the canvas as expendable margin (ceiling darkness above, floor/plinth shadow below). Nothing readable may touch the top or bottom edge.\n\nLEFT THIRD: a wall of drinks fridges seen through glass doors, cyan-white interior light, rows of generic bottles (green beer bottles with plain paper labels, yellow-label Mate-like bottles, water, cola-like). Keep the outer fridge casing dark and simple; simplify each shelf to a few repeated bottle silhouettes with low-contrast labels; reserve the brightest cyan-white for thin door-edge highlights only, so the fridges never out-shout the character.\n\nMIDDLE THIRD: dark warm-brown vertical wood panelling, dressed but organised. The exact centre of the frame at head-and-chest height must stay CALM — plain panelling, no bright lamp, no poster, no glowing sign there. Around that calm pocket, to its left and right and above, hang flat kiosk fixtures in low contrast: a rack of abstract cigarette packs, small handwritten price cards, a row of key hooks, a little old radio, a taped-up notice, one narrow shelf of stand-in snacks and tobacco pouches. The hand-painted warm neon 'SPÄTI' sign glows HIGH in the LEFT of this middle band, sitting fully inside the 16:9 band with dark wood all around it and both umlaut dots drawn as two bright square pixel clusters so the word reads instantly.\n\nRIGHT THIRD: the glass door and window onto the street — cold blue rainy Berlin night outside, wet pavement reflections in stepped bands, a distant magenta neon glow across the street, a bicycle silhouette, a small U-Bahn-style corner sign, a layered techno flyer and a few stickers taped to the inside of the glass (abstract shapes only, no readable text, no real logos), a hanging plant and a green-and-white football scarf (no real club) on a hook.\n\nLIGHTING: two warm amber pendant lamps hang complete (whole shade visible, breathing room above) near the far left and far right; each pools a broad amber light shape with stepped cluster boundaries down its side of the room, leaving the middle dimmer. Warm highlight bands along shelf fronts and wood seams; a restrained cold blue rim on the edges facing the window. Compress the dark browns into two or three clear shadow families, not many near-blacks.\n\nDense but readable \"wall of cozy stuff\" like the Coffee Talk café, re-skinned as a Berlin kiosk; unified night lighting, warm amber interior against the cold blue window."
     },
     {
-      "id": "scene/counter", "kind": "scene", "w": 480, "h": 100, "mode": "cover", "crop": "24:5", "filter": "lanczos", "transparent": true, "trim": false, "alphaThreshold": 0.5,
-      "gen": "1536x1024", "aspect": "landscape",
-      "prompt": "The foreground counter band of a Berlin Späti seen from the shopkeeper's side, as a wide horizontal strip: a worn warm-brown wooden counter top with 4-5 tone wood grain and a bright amber highlight band along its front edge, filling the bottom ~40% of the canvas edge to edge. On it, from left to right: a plastic Pfand crate holding a few empty green bottles, a small ceramic coffee cup on a saucer, a mobile phone lying face-up, and at the right a compact cash register with a tiny glowing display. EVERYTHING above the counter surface and the objects on it must be transparent (real alpha) — no wall, no background, no people."
+      "id": "scene/counter",
+      "kind": "scene",
+      "w": 480,
+      "h": 130,
+      "mode": "fit",
+      "filter": "lanczos",
+      "transparent": true,
+      "trim": true,
+      "alphaThreshold": 0.5,
+      "gen": "1536x1024",
+      "aspect": "landscape",
+      "$note": "Transparent foreground strip. After keying/trimming it is fitted to 480 px wide (height ≈ 90–130) and the SceneLayers component bottom-aligns it, so the exact band height does not matter.",
+      "prompt": "The foreground counter band of a Berlin Späti seen from the shopkeeper's side, drawn as ONE wide horizontal strip that spans the FULL width of the canvas, edge to edge, and occupies only the BOTTOM 35% of the canvas. Straight-on eye-level view from just above the counter top, so a shallow band of the wooden surface is visible and the counter's front edge is perfectly horizontal and runs the whole width. A worn warm-brown wooden counter top with 4-5 tone wood grain running left to right and a bright amber lamp highlight along its front edge, and a darker wood front face below it falling off into shadow at the bottom of the canvas. Low, flat objects resting ON the counter, from left to right: a low plastic Pfand crate of stubby empty green bottles at the far left, a small ceramic coffee cup on a saucer left of centre, a mobile phone lying flat face-up near the centre, and a compact cash register at the far right. Keep every object low-profile: nothing may rise more than about one third of the strip height above the counter top, and nothing at all may be drawn in the top half of the canvas. The entire upper 65% of the canvas, everything above the counter and its objects, is empty background: transparent (real alpha), or one flat unshaded key colour if alpha is unavailable. Every edge where the counter or an object meets that background must be a hard, un-antialiased pixel edge with no glow, no soft fade and no coloured halo. No wall, no shelves, no people, no floor, no stools, no shadow cast onto the background."
     },
     {
-      "id": "scene/title", "kind": "scene", "w": 480, "h": 270, "mode": "cover", "crop": "16:9", "filter": "lanczos", "transparent": false,
-      "gen": "1536x1024", "aspect": "landscape", "allowText": "SPÄTI",
-      "prompt": "Title-screen key art: the exterior of a small Berlin Späti (corner kiosk) at night from across a rainy street, in the same pixel-art style. The shopfront glows warm amber through its window, drinks fridges visible inside, a hand-painted neon 'SPÄTI' sign above the door, stickers and posters on the glass, a crate of empty bottles by the door, wet cobblestones reflecting magenta and cyan neon, a U-Bahn-style sign on the corner, an old Berlin Altbau facade above with a few lit windows. A lone young man (the protagonist: messy wavy brown hair, red hoodie under a brown/black jacket with a red band) stands at the door holding a set of keys, seen from behind at three-quarter, small in frame. Leave the upper-middle sky/facade area calm enough for a title to be overlaid later. No text other than the SPÄTI sign."
+      "id": "scene/title",
+      "kind": "scene",
+      "w": 480,
+      "h": 270,
+      "mode": "cover",
+      "crop": "16:9",
+      "filter": "lanczos",
+      "transparent": false,
+      "gen": "1536x1024",
+      "aspect": "landscape",
+      "allowText": "SPÄTI",
+      "prompt": "Title-screen key art for the game: the exterior of a small Berlin Spaeti (corner kiosk) on a rainy night, seen straight on from across the street.\n\nRENDER IT AS TRUE PIXEL ART, NOT A PAINTING. Draw a 480x270 pixel-art illustration and present it upscaled with nearest-neighbour so that every art pixel is a SOLID UNIFORM SQUARE BLOCK roughly 3 canvas pixels wide. Hard blocky edges everywhere, stepped diagonals, 1-pixel dark outlines on every shape. Absolutely no anti-aliasing, no blur, no soft airbrush glow, no smooth gradients, no speckle/noise/grain/film texture, no photographic reflections. Shade with hand-placed clusters of 4-6 flat tones per material and a limited palette, dithering only for soft light falloff, exactly like the attached Coffee Talk references.\n\nKEEP IT SIMPLE ENOUGH TO READ AT 480x270: few big shapes, a handful of hero props, generous dark masses. No crowd of tiny posters, no scattered micro-detail, no busy foliage. Puddles are broad flat horizontal bands of magenta and cyan reflection with a few stepped highlight steps, not wet photo-realism.\n\nCOMPOSITION (important): the shopfront occupies the LOWER TWO THIRDS of the frame. The UPPER-MIDDLE THIRD is deliberately calm and low-contrast - plain dark Berlin Altbau brick/stucco facade and rainy blue-black night sky, at most two small dim windows far to the sides - because a game title will be overlaid there. Nothing bright, no sign and no strong detail in that upper-middle area. The hand-painted warm neon SPAETI sign sits low, on the fascia directly above the shop window, small and wide. Keep all essential content inside the middle 84% of the canvas height (the top and bottom 8% will be cropped away). No large cropped objects at the left or right edges.\n\nCONTENT: a lit shop window on each side of a central glass door, warm amber light spilling out onto wet cobblestones; inside, simple glowing drinks-fridge shelves with rows of plain bottle silhouettes (green beer bottles, yellow-label Mate-like bottles) in 2-4 flat tones; a plastic crate of empty bottles beside the door; a few stickers as flat coloured rectangles on the glass; a magenta and a cyan neon glow reflected in the street; rain as sparse straight light streaks. No real brands, no logos, no readable lettering anywhere except the single word on the sign.\n\nTHE PROTAGONIST: a lone young man standing on the pavement at the door, facing it, seen from behind at three-quarter with a sliver of his face visible. He must be clearly readable - about one third of the image height, a strong dark silhouette against the warm doorway light, with a warm amber rim light down his back and hair. He is exactly the man in reference image 1: messy wavy brown hair, a BRIGHT RED hoodie with the hood bunched at his neck, worn under an open brown-and-black jacket with a RED BAND across the sleeves, dark jeans. He holds a set of keys. Draw him with bold, clean shapes and a 1-pixel dark outline so the design reads at native resolution."
     },
-
-    { "id": "char/you_neutral", "kind": "portrait", "w": 190, "h": 230, "transparent": true, "gen": "1024x1536", "aspect": "portrait",
-      "prompt": "The protagonist 'You' (Onkel Cem's nephew) — EXACTLY the man in the target-state reference: mid-20s, messy wavy brown hair, light stubble, tired-but-earnest brown eyes, red hoodie under a brown/black layered jacket with a red band across the sleeves. Neutral, slightly guarded expression, hands out of frame. Head-and-shoulders bust for a dialogue portrait." },
-
-    { "id": "char/lena_neutral", "kind": "portrait", "w": 190, "h": 230, "transparent": true, "gen": "1024x1536", "aspect": "portrait",
-      "prompt": "Lena, a broke Berlin art student in her early 20s: pale, freckled, reddish-auburn hair escaping from a dark green beanie, a paint-flecked oversized denim jacket over a striped top, a silver hoop earring, an empty Mate-like bottle held up near her shoulder as her signature prop. Neutral expression with a proud, slightly evasive set to the mouth. Head-and-shoulders bust for a dialogue portrait, Coffee Talk proportions and outline weight." },
-    { "id": "char/lena_warm", "kind": "portrait", "w": 190, "h": 230, "transparent": true, "gen": "1024x1536", "aspect": "portrait", "refs": ["concept-art/main character target state.png"],
-      "prompt": "Lena, a broke Berlin art student in her early 20s: pale, freckled, reddish-auburn hair escaping from a dark green beanie, a paint-flecked oversized denim jacket over a striped top, a silver hoop earring. SAME character design, same framing, same colours as her neutral portrait — this is the WARM expression: a genuine, slightly embarrassed smile, eyes softened, head tilted a touch. Head-and-shoulders bust for a dialogue portrait." },
-    { "id": "char/lena_upset", "kind": "portrait", "w": 190, "h": 230, "transparent": true, "gen": "1024x1536", "aspect": "portrait", "refs": ["concept-art/main character target state.png"],
-      "prompt": "Lena, a broke Berlin art student in her early 20s: pale, freckled, reddish-auburn hair escaping from a dark green beanie, a paint-flecked oversized denim jacket over a striped top, a silver hoop earring. SAME character design, same framing, same colours as her neutral portrait — this is the UPSET expression: jaw set, brows drawn, looking away to the side, arms crossed at the bottom of frame. Head-and-shoulders bust for a dialogue portrait." },
-
-    { "id": "char/juergen_neutral", "kind": "portrait", "w": 190, "h": 230, "transparent": true, "gen": "1024x1536", "aspect": "portrait",
-      "prompt": "'Bottle' Jürgen, a Flaschensammler (bottle collector) in his 60s: weathered, kind, deeply lined face, grey stubble, a dark knit cap, a worn olive parka with a frayed collar, fingerless gloves, a clear bag of empty bottles slung over his shoulder as his signature prop. Neutral, guarded, eyes that avoid contact. Head-and-shoulders bust for a dialogue portrait, Coffee Talk proportions and outline weight." },
-    { "id": "char/juergen_warm", "kind": "portrait", "w": 190, "h": 230, "transparent": true, "gen": "1024x1536", "aspect": "portrait", "refs": ["concept-art/main character target state.png"],
-      "prompt": "'Bottle' Jürgen, a Flaschensammler in his 60s: weathered kind lined face, grey stubble, dark knit cap, worn olive parka with frayed collar, fingerless gloves, a clear bag of empty bottles over his shoulder. SAME character design, same framing, same colours as his neutral portrait — this is the WARM expression: a small, surprised, crinkled smile, meeting the viewer's eyes for once. Head-and-shoulders bust for a dialogue portrait." },
-
-    { "id": "char/mehmet_neutral", "kind": "portrait", "w": 190, "h": 230, "transparent": true, "gen": "1024x1536", "aspect": "portrait",
-      "prompt": "Mehmet, who runs the döner place next door, in his 50s: broad, warm face, a big grey-black moustache, short greying hair, a white paper hat, a dark apron over a rolled-sleeve shirt, a tea glass (tulip-shaped Turkish çay glass) held in one hand as his signature prop. Calm, watchful, faintly amused. Head-and-shoulders bust for a dialogue portrait, Coffee Talk proportions and outline weight." },
-
-    { "id": "char/oneoff_clubber_neutral", "kind": "portrait", "w": 190, "h": 230, "transparent": true, "gen": "1024x1536", "aspect": "portrait",
-      "prompt": "A one-off customer: a Berlin techno clubber at 6am, late 20s, any gender, still glowing — glitter on the cheekbones, smudged eyeliner, sunglasses pushed up into short bleached hair, a black mesh top under an open bomber jacket, a tiny bag on a chain. Blissed-out, tired, smiling. Head-and-shoulders bust for a dialogue portrait, Coffee Talk proportions and outline weight." },
-    { "id": "char/oneoff_tourist_neutral", "kind": "portrait", "w": 190, "h": 230, "transparent": true, "gen": "1024x1536", "aspect": "portrait",
-      "prompt": "A one-off customer: a lost tourist, 30s, rain-damp, a bright rain jacket with the hood half down, a big backpack strap over one shoulder, holding a phone with a map up near the chest, polite confused smile, slightly raised eyebrows. Head-and-shoulders bust for a dialogue portrait, Coffee Talk proportions and outline weight." },
-
-    { "id": "sku/beer", "kind": "prop", "w": 14, "h": 36, "transparent": true, "gen": "1024x1536", "aspect": "portrait", "filter": "lanczos",
-      "prompt": "A single green glass beer bottle with a plain cream paper label (no text) and a gold cap, standing upright, seen from the front, Coffee Talk material shading with a warm rim light." },
-    { "id": "sku/mate", "kind": "prop", "w": 14, "h": 36, "transparent": true, "gen": "1024x1536", "aspect": "portrait", "filter": "lanczos",
-      "prompt": "A single clear glass bottle of a yellow-brown Mate-like soft drink with a plain yellow label (no text) and a yellow cap, standing upright, seen from the front, Coffee Talk material shading with a warm rim light." },
-    { "id": "sku/cola", "kind": "prop", "w": 14, "h": 36, "transparent": true, "gen": "1024x1536", "aspect": "portrait", "filter": "lanczos",
-      "prompt": "A single generic dark cola-like soft drink bottle, plain red label with no text, standing upright, front view, Coffee Talk material shading." },
-    { "id": "sku/water", "kind": "prop", "w": 14, "h": 36, "transparent": true, "gen": "1024x1536", "aspect": "portrait", "filter": "lanczos",
-      "prompt": "A single generic clear plastic water bottle with a plain pale blue label and no text, standing upright, front view, Coffee Talk material shading." },
-    { "id": "sku/chips", "kind": "prop", "w": 26, "h": 32, "transparent": true, "gen": "1024x1024", "aspect": "square", "filter": "lanczos",
-      "prompt": "A single generic bag of paprika crisps, plain warm orange-red foil bag with a simple potato-chip illustration and no text, front view, Coffee Talk material shading." },
-    { "id": "sku/chocolate", "kind": "prop", "w": 30, "h": 14, "transparent": true, "gen": "1024x1024", "aspect": "square", "filter": "lanczos",
-      "prompt": "A single generic milk chocolate bar in a plain purple wrapper with no text, lying flat at a slight angle, front-above view, Coffee Talk material shading." },
-    { "id": "sku/gummi", "kind": "prop", "w": 24, "h": 28, "transparent": true, "gen": "1024x1024", "aspect": "square", "filter": "lanczos",
-      "prompt": "A single generic bag of gummy bears, plain gold-yellow bag with a transparent window showing colourful gummies, no text, front view, Coffee Talk material shading." },
-    { "id": "sku/cigarettes", "kind": "prop", "w": 22, "h": 30, "transparent": true, "gen": "1024x1024", "aspect": "square", "filter": "lanczos",
-      "prompt": "A single generic pack of cigarettes, plain dark-blue box with a simple white stripe and no text or warnings, front view, Coffee Talk material shading." },
-    { "id": "sku/lighter", "kind": "prop", "w": 10, "h": 24, "transparent": true, "gen": "1024x1536", "aspect": "portrait", "filter": "lanczos",
-      "prompt": "A single generic disposable lighter, translucent magenta plastic body with a metal top, standing upright, front view, Coffee Talk material shading." },
-    { "id": "sku/coffee", "kind": "prop", "w": 22, "h": 22, "transparent": true, "gen": "1024x1024", "aspect": "square", "filter": "lanczos",
-      "prompt": "A single small paper to-go coffee cup with a brown sleeve and a white lid, no text, front/slightly-above view, a wisp of steam, Coffee Talk material shading." },
-
-    { "id": "ui/icon_clock", "kind": "icon", "w": 16, "h": 16, "mode": "exact", "filter": "lanczos", "transparent": true, "gen": "1024x1024", "aspect": "square",
-      "prompt": "A 16x16 pixel-art icon of a round wall clock, cream face, dark outline, two dark hands, one tiny warm highlight." },
-    { "id": "ui/icon_cash", "kind": "icon", "w": 16, "h": 16, "mode": "exact", "filter": "lanczos", "transparent": true, "gen": "1024x1024", "aspect": "square",
-      "prompt": "A 16x16 pixel-art icon of a small stack of euro coins (gold and silver) with a folded green banknote behind, dark outline." },
-    { "id": "ui/icon_pfand", "kind": "icon", "w": 16, "h": 16, "mode": "exact", "filter": "lanczos", "transparent": true, "gen": "1024x1024", "aspect": "square",
-      "prompt": "A 16x16 pixel-art icon of a small plastic crate holding three green empty bottles, dark outline." },
-    { "id": "ui/icon_trust", "kind": "icon", "w": 16, "h": 16, "mode": "exact", "filter": "lanczos", "transparent": true, "gen": "1024x1024", "aspect": "square",
-      "prompt": "A 16x16 pixel-art icon of two small hands clasped in a handshake, warm skin tones, dark outline." },
-    { "id": "ui/icon_profit", "kind": "icon", "w": 16, "h": 16, "mode": "exact", "filter": "lanczos", "transparent": true, "gen": "1024x1024", "aspect": "square",
-      "prompt": "A 16x16 pixel-art icon of a small cash register with a glowing green display, dark outline." }
+    {
+      "id": "char/you_neutral",
+      "kind": "portrait",
+      "w": 190,
+      "h": 230,
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "prompt": "The protagonist 'You' (Onkel Cem's nephew) — EXACTLY the man in the target-state reference: mid-20s, messy wavy brown hair, light stubble, tired-but-earnest brown eyes, red hoodie under a brown/black layered jacket with a red band across the sleeves. Neutral, slightly guarded expression, hands out of frame. Head-and-shoulders bust for a dialogue portrait."
+    },
+    {
+      "id": "char/lena_neutral",
+      "kind": "portrait",
+      "w": 190,
+      "h": 230,
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "prompt": "Lena, a broke Berlin art student in her early 20s: pale, freckled, reddish-auburn hair escaping from a dark green beanie, a paint-flecked oversized denim jacket over a striped top, a silver hoop earring, an empty Mate-like bottle held up near her shoulder as her signature prop. Neutral expression with a proud, slightly evasive set to the mouth. Head-and-shoulders bust for a dialogue portrait, Coffee Talk proportions and outline weight."
+    },
+    {
+      "id": "char/lena_warm",
+      "kind": "portrait",
+      "w": 190,
+      "h": 230,
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "concept-art/main character target state.png"
+      ],
+      "prompt": "Lena, a broke Berlin art student in her early 20s: pale, freckled, reddish-auburn hair escaping from a dark green beanie, a paint-flecked oversized denim jacket over a striped top, a silver hoop earring. SAME character design, same framing, same colours as her neutral portrait — this is the WARM expression: a genuine, slightly embarrassed smile, eyes softened, head tilted a touch. Head-and-shoulders bust for a dialogue portrait."
+    },
+    {
+      "id": "char/lena_upset",
+      "kind": "portrait",
+      "w": 190,
+      "h": 230,
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "concept-art/main character target state.png"
+      ],
+      "prompt": "Lena, a broke Berlin art student in her early 20s: pale, freckled, reddish-auburn hair escaping from a dark green beanie, a paint-flecked oversized denim jacket over a striped top, a silver hoop earring. SAME character design, same framing, same colours as her neutral portrait — this is the UPSET expression: jaw set, brows drawn, looking away to the side, arms crossed at the bottom of frame. Head-and-shoulders bust for a dialogue portrait."
+    },
+    {
+      "id": "char/juergen_neutral",
+      "kind": "portrait",
+      "w": 190,
+      "h": 230,
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "prompt": "'Bottle' Jürgen, a Flaschensammler (bottle collector) in his 60s: weathered, kind, deeply lined face, grey stubble, a dark knit cap, a worn olive parka with a frayed collar, fingerless gloves, a clear bag of empty bottles slung over his shoulder as his signature prop. Neutral, guarded, eyes that avoid contact. Head-and-shoulders bust for a dialogue portrait, Coffee Talk proportions and outline weight."
+    },
+    {
+      "id": "char/juergen_warm",
+      "kind": "portrait",
+      "w": 190,
+      "h": 230,
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "concept-art/main character target state.png"
+      ],
+      "prompt": "'Bottle' Jürgen, a Flaschensammler in his 60s: weathered kind lined face, grey stubble, dark knit cap, worn olive parka with frayed collar, fingerless gloves, a clear bag of empty bottles over his shoulder. SAME character design, same framing, same colours as his neutral portrait — this is the WARM expression: a small, surprised, crinkled smile, meeting the viewer's eyes for once. Head-and-shoulders bust for a dialogue portrait."
+    },
+    {
+      "id": "char/mehmet_neutral",
+      "kind": "portrait",
+      "w": 190,
+      "h": 230,
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "prompt": "Mehmet, who runs the döner place next door, in his 50s: broad, warm face, a big grey-black moustache, short greying hair, a white paper hat, a dark apron over a rolled-sleeve shirt, a tea glass (tulip-shaped Turkish çay glass) held in one hand as his signature prop. Calm, watchful, faintly amused. Head-and-shoulders bust for a dialogue portrait, Coffee Talk proportions and outline weight."
+    },
+    {
+      "id": "char/oneoff_clubber_neutral",
+      "kind": "portrait",
+      "w": 190,
+      "h": 230,
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "prompt": "A one-off customer: a Berlin techno clubber at 6am, late 20s, any gender, still glowing — glitter on the cheekbones, smudged eyeliner, sunglasses pushed up into short bleached hair, a black mesh top under an open bomber jacket, a tiny bag on a chain. Blissed-out, tired, smiling. Head-and-shoulders bust for a dialogue portrait, Coffee Talk proportions and outline weight."
+    },
+    {
+      "id": "char/oneoff_tourist_neutral",
+      "kind": "portrait",
+      "w": 190,
+      "h": 230,
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "prompt": "A one-off customer: a lost tourist, 30s, rain-damp, a bright rain jacket with the hood half down, a big backpack strap over one shoulder, holding a phone with a map up near the chest, polite confused smile, slightly raised eyebrows. Head-and-shoulders bust for a dialogue portrait, Coffee Talk proportions and outline weight."
+    },
+    {
+      "id": "sku/beer",
+      "kind": "prop",
+      "w": 14,
+      "h": 36,
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "filter": "lanczos",
+      "prompt": "A single green glass beer bottle with a plain cream paper label (no text) and a gold cap, standing upright, seen from the front, Coffee Talk material shading with a warm rim light."
+    },
+    {
+      "id": "sku/mate",
+      "kind": "prop",
+      "w": 14,
+      "h": 36,
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "filter": "lanczos",
+      "prompt": "A single clear glass bottle of a yellow-brown Mate-like soft drink with a plain yellow label (no text) and a yellow cap, standing upright, seen from the front, Coffee Talk material shading with a warm rim light."
+    },
+    {
+      "id": "sku/cola",
+      "kind": "prop",
+      "w": 14,
+      "h": 36,
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "filter": "lanczos",
+      "prompt": "A single generic dark cola-like soft drink bottle, plain red label with no text, standing upright, front view, Coffee Talk material shading."
+    },
+    {
+      "id": "sku/water",
+      "kind": "prop",
+      "w": 14,
+      "h": 36,
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "filter": "lanczos",
+      "prompt": "A single generic clear plastic water bottle with a plain pale blue label and no text, standing upright, front view, Coffee Talk material shading."
+    },
+    {
+      "id": "sku/chips",
+      "kind": "prop",
+      "w": 26,
+      "h": 32,
+      "transparent": true,
+      "gen": "1024x1024",
+      "aspect": "square",
+      "filter": "lanczos",
+      "prompt": "A single generic bag of paprika crisps, plain warm orange-red foil bag with a simple potato-chip illustration and no text, front view, Coffee Talk material shading."
+    },
+    {
+      "id": "sku/chocolate",
+      "kind": "prop",
+      "w": 30,
+      "h": 14,
+      "transparent": true,
+      "gen": "1024x1024",
+      "aspect": "square",
+      "filter": "lanczos",
+      "prompt": "A single generic milk chocolate bar in a plain purple wrapper with no text, lying flat at a slight angle, front-above view, Coffee Talk material shading."
+    },
+    {
+      "id": "sku/gummi",
+      "kind": "prop",
+      "w": 24,
+      "h": 28,
+      "transparent": true,
+      "gen": "1024x1024",
+      "aspect": "square",
+      "filter": "lanczos",
+      "prompt": "A single generic bag of gummy bears, plain gold-yellow bag with a transparent window showing colourful gummies, no text, front view, Coffee Talk material shading."
+    },
+    {
+      "id": "sku/cigarettes",
+      "kind": "prop",
+      "w": 22,
+      "h": 30,
+      "transparent": true,
+      "gen": "1024x1024",
+      "aspect": "square",
+      "filter": "lanczos",
+      "prompt": "A single generic pack of cigarettes, plain dark-blue box with a simple white stripe and no text or warnings, front view, Coffee Talk material shading."
+    },
+    {
+      "id": "sku/lighter",
+      "kind": "prop",
+      "w": 10,
+      "h": 24,
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "filter": "lanczos",
+      "prompt": "A single generic disposable lighter, translucent magenta plastic body with a metal top, standing upright, front view, Coffee Talk material shading."
+    },
+    {
+      "id": "sku/coffee",
+      "kind": "prop",
+      "w": 22,
+      "h": 22,
+      "transparent": true,
+      "gen": "1024x1024",
+      "aspect": "square",
+      "filter": "lanczos",
+      "prompt": "A single small paper to-go coffee cup with a brown sleeve and a white lid, no text, front/slightly-above view, a wisp of steam, Coffee Talk material shading."
+    },
+    {
+      "id": "ui/icon_clock",
+      "kind": "icon",
+      "w": 16,
+      "h": 16,
+      "mode": "exact",
+      "filter": "lanczos",
+      "transparent": true,
+      "gen": "1024x1024",
+      "aspect": "square",
+      "prompt": "A 16x16 pixel-art icon of a round wall clock, cream face, dark outline, two dark hands, one tiny warm highlight."
+    },
+    {
+      "id": "ui/icon_cash",
+      "kind": "icon",
+      "w": 16,
+      "h": 16,
+      "mode": "exact",
+      "filter": "lanczos",
+      "transparent": true,
+      "gen": "1024x1024",
+      "aspect": "square",
+      "prompt": "A 16x16 pixel-art icon of a small stack of euro coins (gold and silver) with a folded green banknote behind, dark outline."
+    },
+    {
+      "id": "ui/icon_pfand",
+      "kind": "icon",
+      "w": 16,
+      "h": 16,
+      "mode": "exact",
+      "filter": "lanczos",
+      "transparent": true,
+      "gen": "1024x1024",
+      "aspect": "square",
+      "prompt": "A 16x16 pixel-art icon of a small plastic crate holding three green empty bottles, dark outline."
+    },
+    {
+      "id": "ui/icon_trust",
+      "kind": "icon",
+      "w": 16,
+      "h": 16,
+      "mode": "exact",
+      "filter": "lanczos",
+      "transparent": true,
+      "gen": "1024x1024",
+      "aspect": "square",
+      "prompt": "A 16x16 pixel-art icon of two small hands clasped in a handshake, warm skin tones, dark outline."
+    },
+    {
+      "id": "ui/icon_profit",
+      "kind": "icon",
+      "w": 16,
+      "h": 16,
+      "mode": "exact",
+      "filter": "lanczos",
+      "transparent": true,
+      "gen": "1024x1024",
+      "aspect": "square",
+      "prompt": "A 16x16 pixel-art icon of a small cash register with a glowing green display, dark outline."
+    }
   ]
 }
