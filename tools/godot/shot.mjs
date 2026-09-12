@@ -18,7 +18,8 @@ const frames = Number(args.frames || 12);
 const godotOut = out.replaceAll(String.fromCharCode(92), '/');
 const releaseLock = acquireGodotLock();
 
-if (!fs.existsSync(path.join(GODOT_DIR, '.godot'))) {
+// Always re-import: a PNG replaced on disk (an art promotion) has no import cache yet and would load as a placeholder.
+{
   const { spawnSync } = await import('node:child_process');
   spawnSync(godot, ['--headless', '--path', '.', '--import'], { cwd: GODOT_DIR, stdio: 'ignore', timeout: 180_000 });
 }
