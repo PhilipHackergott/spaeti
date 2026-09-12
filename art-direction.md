@@ -1,0 +1,61 @@
+# Art Direction — Späti Simulator (working title)
+
+> The visual-cohesion contract. **LOCKED 2026-05-25 (user):** **HD, hand-drawn-looking pixel art** — *a
+> Berlin-Späti version of **Coffee Talk / Coffee Talk Tokyo***. **2D** (Coffee-Talk side-counter). The
+> earlier flat-vector SVGs are **rejected/superseded** (wrong medium); the 3D-diorama avenue is **parked**.
+
+## 1. The target — "a Berlin Späti version of Coffee Talk Tokyo"
+A warm, cozy, slightly melancholy **HD pixel-art** scene that *looks hand-drawn* — rich, painterly pixels,
+not blocky retro and **not vector**. **Coffee Talk / Coffee Talk Tokyo is the canonical reference** (the
+user's screenshot). Re-skin that look for a **late-night Berlin Späti**:
+- **Framing:** fixed **side-on, behind-the-counter** view — the **character you're serving sits/stands at
+  the counter facing the player**, a big **dialogue box** (name in colour + white text + a continue ▾) along
+  the bottom, your cup/goods on the counter lip, small **HUD icons** tucked in the corners.
+- **The set (read straight off the reference, Berlin-ified):** a warm **wood counter**, glowing **fridges**
+  behind, **neon sign** + a hand-painted "SPÄTI", **framed pictures/posters** (Berlin: a U-Bahn sign, a
+  techno flyer, a football scarf), **plants**, a **vintage phone**, shelves of stand-in product, stickers on
+  the glass, a **Pfand crate** — the Coffee-Talk "wall of cozy stuff," but a Kiez kiosk.
+- **Mood/palette:** deep warm browns + amber counter light against cool blue night through the window;
+  neon magenta/cyan accents; soft rim-light on faces; a little grain. Coffee-Talk warmth × the bittersweet
+  Berlin night. **Time-of-night** shifts the palette (dusk → deep night → pre-dawn).
+
+## 2. Characters — HD pixel portraits at the counter
+Like Coffee Talk: **detailed, expressive, hand-drawn-looking pixel-art busts** seen across the counter,
+with a few **expression states** (neutral / warm / wary / upset) for dialogue. Strong silhouette + one
+signature prop per character; warm shading. This is the load-bearing art (the cast carries the story).
+
+## 3. Rendering — HD pixel (the factory's high-logical-res default)
+- **2D, Pixi.** **HD logical canvas ≈ 960×540 (rec; floor 640×360)**, **integer nearest-neighbor upscale**,
+  `antialias:false` → crisp pixels *and* a legible dialogue box / HUD at 1080p+ (the low-res look is out;
+  see the factory HD-pixel rule). Pixel font sized for readability. Tokens in `render/theme.ts` ↔ `:root`.
+- **Subtle life:** drifting neon flicker, rain on the glass, steam off a coffee, a passing U-Bahn glow —
+  small looping animations, Coffee-Talk-calm.
+
+## 4. Asset reality (the honest constraint — and why no more vector mockups)
+This is **authored, hand-drawn-style HD pixel art** — a skilled pixel artist's work. **Claude cannot
+produce it to this bar** (no image-gen here; vector/hand-pixel won't reach Coffee-Talk quality — that's why
+the SVG pieces are rejected). The plan:
+- **Pin the reference** (Coffee Talk / Coffee Talk Tokyo) as the canonical look + this spec, so an artist /
+  an AI-pixel pipeline can match it. *(Drop the user's reference image into `concept-art/reference/` to keep it with the project.)*
+- **Commission / AI-pixel-generate** the counter set + character portraits to this spec; integrate via an
+  **asset-manifest seam** (`app/src/assets/manifest.ts`, like Magical Athlete) so the engine never waits on art.
+- Ship **placeholder** portraits/props first; swap to finals via the manifest. Concept "art" from Claude is
+  **direction/layout only** (and the prior SVGs are superseded — §6).
+
+## 5. UI / HUD (Coffee-Talk-clean, HD-legible)
+The **dialogue box** (portrait-adjacent, coloured name + white body + choices) is the centerpiece, exactly
+like the reference. ONE `<Modal>`/overlay shell + atoms (`<Ticket>` order, `<MoneyTag>`, `<RepMeter>` for
+Kiez-Trust/Profit/Integrity, `Button`, `Panel`, `Tooltip`). Corner HUD icons (clock, cash, the Sunday/
+Ordnungsamt flag). As community systems unlock (GDD §4b), the HUD gains panels (board, events, relationships).
+A11y: colorblind-safe reputation (icon+label), keyboard, text scaling, reduce-motion (disable grain/rain).
+
+## 6. Superseded (do NOT use as the look)
+- The flat-vector SVGs `concept-art/{cast,counter-2d,protagonist}.svg` — **layout / casting / character-
+  design reference ONLY; the *style* is rejected** (vector). The character *designs* (the protagonist from
+  the photo, the cast silhouettes/props) still inform the pixel art; the *rendering* must be HD pixel art.
+- The 3D-diorama avenue + "explore both substrates" — **parked**; 2D HD pixel (Coffee Talk) is the lock.
+
+## 7. Concept art (direction/layout only — not the final look)
+- `concept-art/protagonist.svg`, `cast.svg`, `counter-2d.svg` — **character designs + scene layout** to brief
+  the pixel artist (the *content*, not the *style*). Viewer: `concept-art/index.html`.
+- **Canonical style target:** Coffee Talk / Coffee Talk Tokyo (user reference) → Berlin Späti re-skin.

@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="560" viewBox="0 0 900 560" font-family="'Trebuchet MS',sans-serif">
+  <defs>
+    <linearGradient id="night" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1a2a44"/><stop offset="1" stop-color="#23314e"/></linearGradient>
+    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a2c46"/><stop offset="1" stop-color="#2a2038"/></linearGradient>
+    <linearGradient id="counter" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6a4a2e"/><stop offset="1" stop-color="#4a3220"/></linearGradient>
+    <radialGradient id="pool" cx="0.42" cy="0.6" r="0.6"><stop offset="0" stop-color="#ffcf8a" stop-opacity="0.35"/><stop offset="1" stop-color="#ffcf8a" stop-opacity="0"/></radialGradient>
+    <radialGradient id="fridge" cx="0.5" cy="0.4" r="0.7"><stop offset="0" stop-color="#bfe9ff" stop-opacity="0.5"/><stop offset="1" stop-color="#bfe9ff" stop-opacity="0"/></radialGradient>
+    <radialGradient id="vig" cx="0.5" cy="0.5" r="0.75"><stop offset="0.55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.5"/></radialGradient>
+  </defs>
+
+  <!-- back wall -->
+  <rect width="900" height="400" fill="url(#wall)"/>
+
+  <!-- window (left): cold night + rain + neon glow -->
+  <g>
+    <rect x="40" y="60" width="250" height="210" rx="4" fill="url(#night)" stroke="#5a4a66" stroke-width="6"/>
+    <line x1="165" y1="60" x2="165" y2="270" stroke="#5a4a66" stroke-width="4"/><line x1="40" y1="165" x2="290" y2="165" stroke="#5a4a66" stroke-width="4"/>
+    <!-- distant street lights / U-Bahn glow -->
+    <circle cx="90" cy="120" r="4" fill="#ffd98a" opacity="0.8"/><circle cx="230" cy="100" r="3" fill="#9fd0ee" opacity="0.7"/><rect x="60" y="200" width="180" height="40" fill="#2a3a58" opacity="0.6"/>
+    <!-- rain streaks -->
+    <g stroke="#cfe3ff" stroke-width="1.5" opacity="0.4"><line x1="80" y1="70" x2="74" y2="100"/><line x1="120" y1="90" x2="114" y2="120"/><line x1="200" y1="75" x2="194" y2="105"/><line x1="250" y1="110" x2="244" y2="140"/><line x1="150" y1="180" x2="144" y2="210"/></g>
+  </g>
+
+  <!-- neon SPÄTI sign -->
+  <g transform="translate(330,40)">
+    <rect x="0" y="0" width="220" height="50" rx="10" fill="#241830" stroke="#ff5fa2" stroke-width="3"/>
+    <text x="110" y="36" text-anchor="middle" font-size="30" font-weight="bold" fill="#ffd1e8" letter-spacing="6" stroke="#ff5fa2" stroke-width="0.5">SPÄTI</text>
+  </g>
+  <text x="560" y="64" fill="#9fe0ff" font-size="13" font-weight="bold" opacity="0.85">24 STD</text>
+
+  <!-- fridge wall (right) with cyan glow -->
+  <g transform="translate(580,70)">
+    <rect x="-10" y="-10" width="300" height="290" rx="6" fill="#1f2a3a"/>
+    <rect x="0" y="0" width="280" height="270" rx="4" fill="#2a3a4e" stroke="#3f5a72" stroke-width="3"/>
+    <rect x="6" y="6" width="280" height="270" fill="url(#fridge)"/>
+    <!-- product rows (Mate yellow, beer green, soft red/blue) -->
+    <g>
+      <g transform="translate(14,16)"><rect width="20" height="40" rx="3" fill="#e6c84a"/><rect x="26" width="20" height="40" rx="3" fill="#e6c84a"/><rect x="52" width="20" height="40" rx="3" fill="#4fa24f"/><rect x="78" width="20" height="40" rx="3" fill="#4fa24f"/><rect x="104" width="20" height="40" rx="3" fill="#d9442e"/><rect x="130" width="20" height="40" rx="3" fill="#3f8fc0"/><rect x="156" width="20" height="40" rx="3" fill="#e6c84a"/><rect x="182" width="20" height="40" rx="3" fill="#9a6abf"/><rect x="208" width="20" height="40" rx="3" fill="#4fa24f"/><rect x="234" width="20" height="40" rx="3" fill="#d9442e"/></g>
+      <rect x="8" y="62" width="262" height="6" fill="#1f2a3a"/>
+      <g transform="translate(14,76)"><rect width="20" height="40" rx="3" fill="#3f8fc0"/><rect x="26" width="20" height="40" rx="3" fill="#e6c84a"/><rect x="52" width="20" height="40" rx="3" fill="#d9442e"/><rect x="78" width="20" height="40" rx="3" fill="#4fa24f"/><rect x="104" width="20" height="40" rx="3" fill="#e6c84a"/><rect x="130" width="20" height="40" rx="3" fill="#9a6abf"/><rect x="156" width="20" height="40" rx="3" fill="#4fa24f"/><rect x="182" width="20" height="40" rx="3" fill="#d9442e"/><rect x="208" width="20" height="40" rx="3" fill="#3f8fc0"/><rect x="234" width="20" height="40" rx="3" fill="#e6c84a"/></g>
+      <rect x="8" y="122" width="262" height="6" fill="#1f2a3a"/>
+      <g transform="translate(14,136)"><rect width="20" height="36" rx="3" fill="#e6c84a"/><rect x="26" width="20" height="36" rx="3" fill="#4fa24f"/><rect x="52" width="20" height="36" rx="3" fill="#d9442e"/><rect x="78" width="20" height="36" rx="3" fill="#e6c84a"/><rect x="104" width="20" height="36" rx="3" fill="#3f8fc0"/><rect x="130" width="20" height="36" rx="3" fill="#4fa24f"/><rect x="156" width="20" height="36" rx="3" fill="#d9442e"/><rect x="182" width="20" height="36" rx="3" fill="#e6c84a"/><rect x="208" width="20" height="36" rx="3" fill="#9a6abf"/><rect x="234" width="20" height="36" rx="3" fill="#4fa24f"/></g>
+    </g>
+  </g>
+
+  <!-- warm light pool over the counter -->
+  <ellipse cx="380" cy="380" rx="420" ry="200" fill="url(#pool)"/>
+
+  <!-- the customer (a late-night regular, leaning at the counter) -->
+  <g transform="translate(300,250)">
+    <ellipse cx="0" cy="150" rx="70" ry="16" fill="#000" opacity="0.25"/>
+    <rect x="-46" y="60" width="92" height="80" rx="18" fill="#6a4c8a"/>                  <!-- jacket -->
+    <rect x="-46" y="60" width="92" height="22" rx="18" fill="#7d5aa6"/>
+    <circle cx="0" cy="12" r="40" fill="#e8b98a" stroke="#c79468" stroke-width="2"/>      <!-- head -->
+    <path d="M-42 4 Q-48 -40 0 -44 Q48 -40 42 4 L40 -10 Q0 -30 -40 -10 Z" fill="#2a1f3a"/> <!-- dark hair -->
+    <rect x="-18" y="-46" width="36" height="10" rx="4" fill="#3a2f50"/>                  <!-- headphones band -->
+    <circle cx="-40" cy="6" r="8" fill="#3a2f50"/><circle cx="40" cy="6" r="8" fill="#3a2f50"/>
+    <circle cx="-14" cy="12" r="3.6" fill="#241a30"/><circle cx="14" cy="12" r="3.6" fill="#241a30"/>
+    <path d="M-10 30 Q0 36 10 30" stroke="#a06a4a" stroke-width="2.5" fill="none"/>
+  </g>
+  <!-- dialogue panel -->
+  <g transform="translate(20,250)">
+    <rect width="250" height="92" rx="10" fill="#1a1430" stroke="#f4c430" stroke-width="2" opacity="0.95"/>
+    <text x="14" y="26" fill="#ffd1e8" font-size="13" font-weight="bold">Aylin</text>
+    <text x="14" y="48" fill="#f4e9cf" font-size="12">"Eine Mate und... ach, hast du noch</text>
+    <text x="14" y="66" fill="#f4e9cf" font-size="12">offen Sonntag? Du Verrückter."</text>
+    <text x="236" y="84" text-anchor="end" fill="#8a7db8" font-size="10">▸</text>
+  </g>
+
+  <!-- COUNTER (foreground bar) -->
+  <rect x="0" y="396" width="900" height="164" fill="url(#counter)"/>
+  <rect x="0" y="396" width="900" height="10" fill="#8a6a44"/>
+  <!-- till -->
+  <g transform="translate(120,410)"><rect width="120" height="60" rx="6" fill="#2a2440" stroke="#5a4a66" stroke-width="2"/><rect x="10" y="8" width="100" height="20" rx="3" fill="#7fe0a0"/><text x="60" y="23" text-anchor="middle" font-size="12" fill="#0a2a14" font-weight="bold">€ 4,20</text><rect x="14" y="36" width="18" height="14" rx="2" fill="#3f3a5a"/><rect x="38" y="36" width="18" height="14" rx="2" fill="#3f3a5a"/><rect x="62" y="36" width="18" height="14" rx="2" fill="#3f3a5a"/></g>
+  <!-- Pfand crate -->
+  <g transform="translate(720,420)"><rect width="120" height="50" rx="4" fill="#3a2f1a" stroke="#2a2012" stroke-width="2"/><g transform="translate(8,-12)"><rect width="14" height="22" rx="2" fill="#4fa24f"/><rect x="18" width="14" height="22" rx="2" fill="#8a6a2a"/><rect x="36" width="14" height="22" rx="2" fill="#3f8f6f"/><rect x="54" width="14" height="22" rx="2" fill="#4fa24f"/><rect x="72" width="14" height="22" rx="2" fill="#8a6a2a"/></g><text x="60" y="44" text-anchor="middle" font-size="10" fill="#caa24a" font-weight="bold">PFAND</text></g>
+  <!-- a product set on the counter (the order) -->
+  <g transform="translate(400,430)"><rect width="22" height="44" rx="4" fill="#e6c84a" stroke="#9c8226" stroke-width="1.5"/><text x="11" y="-6" text-anchor="middle" font-size="10" fill="#ffe08a">Mate</text></g>
+
+  <!-- ===== HUD overlay ===== -->
+  <!-- order ticket (top-right) -->
+  <g transform="translate(690,90)">
+    <rect width="190" height="92" rx="8" fill="#f4e8d0" stroke="#caa24a" stroke-width="2"/>
+    <rect width="190" height="22" rx="8" fill="#2a2440"/><text x="12" y="16" fill="#ffe9a0" font-size="12" font-weight="bold">ORDER</text>
+    <text x="12" y="44" fill="#2a2440" font-size="12">• Mate ............ €1,50</text>
+    <text x="12" y="62" fill="#2a2440" font-size="12">• Pfand return .. −€0,25</text>
+    <text x="12" y="82" fill="#1f6b2a" font-size="13" font-weight="bold">TOTAL  €1,25</text>
+  </g>
+  <!-- reputation meters + clock (top-left) -->
+  <g transform="translate(20,20)">
+    <rect width="250" height="92" rx="8" fill="#1a1430" stroke="#3a2f60" stroke-width="2" opacity="0.92"/>
+    <text x="12" y="22" fill="#9fd0ee" font-size="12" font-weight="bold">03:14  ·  Fri night</text>
+    <g transform="translate(12,32)">
+      <text x="0" y="12" fill="#f4e9cf" font-size="11">Kiez-Trust</text><rect x="92" y="2" width="140" height="12" rx="6" fill="#2a2440"/><rect x="92" y="2" width="96" height="12" rx="6" fill="#4fa24f"/>
+      <text x="0" y="32" fill="#f4e9cf" font-size="11">Profit</text><rect x="92" y="22" width="140" height="12" rx="6" fill="#2a2440"/><rect x="92" y="22" width="64" height="12" rx="6" fill="#e6c84a"/>
+      <text x="0" y="52" fill="#f4e9cf" font-size="11">Integrity</text><rect x="92" y="42" width="140" height="12" rx="6" fill="#2a2440"/><rect x="92" y="42" width="112" height="12" rx="6" fill="#6fb8e0"/>
+    </g>
+  </g>
+  <!-- Sunday / Ordnungsamt risk chip -->
+  <g transform="translate(330,118)">
+    <rect width="240" height="26" rx="13" fill="#3a1414" stroke="#d9442e" stroke-width="2"/>
+    <text x="120" y="18" text-anchor="middle" fill="#ffb3a3" font-size="12" font-weight="bold">⚠ OPEN SUNDAY — Ordnungsamt risk</text>
+  </g>
+
+  <!-- grain/vignette -->
+  <rect width="900" height="560" fill="url(#vig)"/>
+
+  <!-- caption -->
+  <rect x="280" y="524" width="340" height="28" rx="8" fill="#2a2440" stroke="#f4c430" stroke-width="2"/>
+  <text x="450" y="543" text-anchor="middle" fill="#fff6df" font-size="12" font-weight="bold">2D / 2.5D counter — Coffee Talk × Papers Please (mood + layout)</text>
+</svg>
