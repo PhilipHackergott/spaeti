@@ -20,9 +20,13 @@ Score each axis 0–100 (−1 = not applicable to this candidate):
 - **ui_style** — dialogue box / panels / HUD look like Coffee Talk's: minimal dark translucent rounded boxes,
   coloured speaker name + white body text in a clean pixel font, small corner icons; legible at 1080p; no
   generic engine-default widgets (grey boxes, default fonts, drop-shadow buttons).
-- **berlin_reskin** — reads as a Berlin Späti, not a café: glowing drinks fridges, generic stand-in
-  products, Pfand crate, "SPÄTI" sign, U-Bahn/techno/football texture, stickers, rain on the glass.
-  No real brands. No caricature.
+- **berlin_reskin** — reads as a REAL Berlin Späti, not a café and not a tavern (the user's reference photos):
+  cool-white fluorescent light, cream/white walls with white or grey METAL shelving, a dense wall of generic
+  cigarette packs and tobacco pouches behind the counter, glass-door drinks fridges with blue LED strips, a
+  cluttered LAMINATE counter (newspapers, sweets boxes, a white cash register / card reader, a Pfand crate),
+  stickers and an "OPEN" neon on the door, graffiti-tagged plaster outside, a bench. Penalise hard: dark wood
+  panelling, beams, a wooden bar, pendant lamps, jukeboxes, framed art, mugs, hanging plants as décor — anything
+  that reads as café/pub/tavern. No real brands. No caricature.
 
 **overall** is a holistic call: "would a Coffee Talk fan believe this is a screenshot from a sibling game?"
 Roughly: 90+ = yes, ship; 80–89 = close, small fixes; 60–79 = clearly the right direction, specific gaps;
