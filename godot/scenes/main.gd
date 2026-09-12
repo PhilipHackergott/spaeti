@@ -52,7 +52,7 @@ func _swap(screen_name: String) -> void:
 	for c in host.get_children():
 		host.remove_child(c)
 		c.queue_free()
-	var inst := SCREENS[screen_name].instantiate()
+	var inst: Node = SCREENS[screen_name].instantiate()
 	host.add_child(inst)
 	current_screen = screen_name
 	if inst.has_signal("request_screen"):

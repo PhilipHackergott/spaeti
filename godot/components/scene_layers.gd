@@ -61,6 +61,13 @@ func mount(node: Node) -> void:
 func set_time(progress: float) -> void:
 	night_progress = progress
 
+## Where the counter band starts on screen — the line a bust is cut off at.
+func counter_top() -> int:
+	var counter := get_node_or_null("%Counter") as TextureRect
+	if counter == null or counter.texture == null:
+		return Palette.COUNTER_TOP
+	return Palette.BASE.y - int(counter.texture.get_size().y)
+
 func _refresh_art() -> void:
 	var back := get_node_or_null("%Backdrop") as TextureRect
 	if back == null:
@@ -68,7 +75,13 @@ func _refresh_art() -> void:
 	back.texture = Assets.texture(backdrop_id)
 	var counter := get_node_or_null("%Counter") as TextureRect
 	if counter != null:
-		counter.texture = Assets.texture(counter_id)
+		var tex := Assets.texture(counter_id)
+		counter.texture = tex
+		if tex != null:
+			# The counter band is always flush with the bottom of the frame, whatever height the
+			# art turns out to be, so the customer's lower body is hidden exactly as in Coffee Talk.
+			counter.size = tex.get_size()
+			counter.position = Vector2(0, float(Palette.BASE.y) - tex.get_size().y)
 
 func _refresh_tint() -> void:
 	var tint := get_node_or_null("%Tint") as ColorRect

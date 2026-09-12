@@ -57,7 +57,9 @@ func test_scenes_apply_every_capture_preset() -> void:
 		for preset in SCENE_PRESETS[path]:
 			var inst := packed.instantiate()
 			assert_true(inst.has_method("apply_capture_preset"), path + " has apply_capture_preset")
-			assert_true(inst.has_method("render"), path + " has render")
+			# Main is the shell (it owns which screen is on); only the screens themselves render a view.
+			if path != "res://scenes/Main.tscn":
+				assert_true(inst.has_method("render"), path + " has render")
 			inst.call("apply_capture_preset", preset)
 			_dispose(inst)
 
@@ -90,6 +92,8 @@ func test_assets_fall_back_to_placeholders() -> void:
 		assert_true(tex != null, "texture for " + id)
 		if tex == null:
 			continue
+		if Assets.is_real(id):
+			continue  # real art has landed; its size is the art lane's business
 		var want: Vector2i = Assets.size_of(id)
 		assert_eq(Vector2i(tex.get_size()), want, id + " keeps its base-pixel size")
 	assert_true(Assets.portrait("char/nobody", "warm") != null, "unknown portrait still resolves")

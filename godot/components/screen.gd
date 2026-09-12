@@ -29,6 +29,9 @@ func session() -> Node:
 	return get_node_or_null("/root/Session")
 
 func view() -> Dictionary:
+	# A capture preset is deterministic by definition: it never reads the live Session.
+	if _capture_mode:
+		return _view
 	var s := session()
 	if s != null and s.has_method("view"):
 		return s.view()
