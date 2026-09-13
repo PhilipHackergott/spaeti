@@ -67,6 +67,24 @@ const SIZES := {
 }
 
 const FALLBACK_SIZE := Vector2i(32, 32)
+
+## How a bust meets the counter (mirrors `stage` in docs/asset-spec.json). "behind": the classic Coffee Talk
+## seat, the counter hides the lower body. "leaning": the sprite ENDS at the forearms' underside (the generator
+## paints only the key colour below the counter line) and is layered IN FRONT of the counter with that line a
+## few px onto the laminate — the customer visibly leans on it (the judges' first fix, 2026-09-13).
+const STAGING := {
+	"char/lena_neutral": "leaning",
+	"char/lena_warm": "leaning",
+	"char/lena_upset": "leaning",
+}
+
+## Staging of a character's bust: by the resolved expression id first, then the character's neutral.
+static func staging(portrait_id: String, expression: String = "neutral") -> String:
+	var pid := portrait_id if portrait_id != "" else "char/oneoff_clubber"
+	var exact := "%s_%s" % [pid, expression if expression != "" else "neutral"]
+	if STAGING.has(exact):
+		return String(STAGING[exact])
+	return String(STAGING.get("%s_neutral" % pid, "behind"))
 const NEIGHBOURS := [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]
 
 static var _cache: Dictionary = {}

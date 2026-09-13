@@ -120,6 +120,9 @@ const SERVE_RECT := Rect2i(228, 8, 248, 256)
 ## 37 rows are the wall behind the counter, so flush-with-the-bottom hid the countertop under the panel.
 const COUNTER_LIFT := 0   # r7 carries its laminate edge in its top 10 rows; the 20-px lift was for r6 (37 rows of wall above the edge)
 const PORTRAIT_OVERLAP := 30
+## A LEANING bust (Assets.staging) sits in front of the counter with its bottom edge — the forearms'
+## underside — this many px below the counter's back edge, i.e. resting on the laminate surface.
+const LEAN_ONTO := 6
 const PORTRAIT_TOP_MIN := 14   # 2026-09-13: with the 144x174 busts the clamp, not the overlap, decided the seat; 14 lets the forearms clear the counter edge
 ## The bust is anchored by its BOTTOM-CENTRE, never by a spec rectangle: shipped art is narrower than
 ## the 190-px placeholder box (you_neutral is 155), so a left-anchored bust would slide off centre.

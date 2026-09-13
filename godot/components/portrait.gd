@@ -40,6 +40,23 @@ func place_behind(counter_edge_y: int, centre_x: int = Palette.PORTRAIT_CENTRE_X
 	var top := counter_edge_y + Palette.PORTRAIT_OVERLAP - h
 	position = Palette.snap(Vector2(float(centre_x - w / 2), float(maxi(Palette.PORTRAIT_TOP_MIN, top))))
 
+## Seats a LEANING bust: layered in front of the counter, its bottom edge (the forearms' underside, where
+## the sprite ends) `Palette.LEAN_ONTO` px below the counter's back edge, i.e. on the laminate. Bottom-centre
+## like place_behind; the top is only clamped if the sprite is taller than the frame above the counter.
+func place_on(counter_edge_y: int, centre_x: int = Palette.PORTRAIT_CENTRE_X) -> void:
+	var bust := get_node_or_null("%Bust") as TextureRect
+	var has_art := bust != null and bust.texture != null
+	var h := int(bust.size.y) if has_art else int(size.y)
+	var w := int(bust.size.x) if has_art else int(size.x)
+	if h <= 0:
+		return
+	var top := counter_edge_y + Palette.LEAN_ONTO - h
+	position = Palette.snap(Vector2(float(centre_x - w / 2), float(maxi(Palette.PORTRAIT_TOP_MIN, top))))
+
+## "leaning" or "behind" — the staging of the bust currently shown (Assets.STAGING mirrors the spec).
+func staging() -> String:
+	return Assets.staging(portrait_id, expression)
+
 ## How many base pixels of the bust the counter actually hides, given where it now sits. The framing
 ## table wants 25-35; a taller bust than the table assumes reports more, and that is the art's to fix.
 func overlap_behind(counter_edge_y: int) -> int:

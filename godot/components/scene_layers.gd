@@ -53,9 +53,10 @@ func _ready() -> void:
 	_flicker()
 	set_process(raining and not Palette.reduce_motion)
 
-## Where the customer bust goes: in front of the backdrop, behind the counter.
-func mount(node: Node) -> void:
-	var slot := get_node_or_null("%Characters") as Control
+## Where the customer bust goes: in front of the backdrop, behind the counter — or, for a LEANING bust
+## (Assets.staging), in front of the counter so its forearms rest on the laminate.
+func mount(node: Node, in_front: bool = false) -> void:
+	var slot := get_node_or_null("%Leaners" if in_front else "%Characters") as Control
 	if slot == null or node == null or node.get_parent() == slot:
 		return
 	# reparent() keeps `owner`; remove_child()+add_child() would clear it and with it the node's
