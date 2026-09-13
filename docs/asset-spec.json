@@ -528,8 +528,9 @@
         "art/raw/char/tobias_neutral.png"
       ],
       "$resumeNote": "Generate only after char/tobias_neutral is final (its raw is the second reference image).",
-      "prompt": "Tobias, the new-money startup transplant, early 30s: an undercut with a neat beard, a premium grey hoodie under a slim black bomber jacket, one wireless earbud in, a smart watch, an oat-milk coffee cup held up as his signature prop. Friendly, over-eager, a little oblivious. Image 2 is THIS character — reproduce the exact face, hair, colours and clothes; change ONLY the expression. This is the WARM expression: a genuine small smile, eyes softened, head tilted a touch. Head-and-shoulders bust for a dialogue portrait, Coffee Talk proportions and outline weight, real alpha background.",
-      "stage": "leaning"
+      "prompt": "IDENTITY + POSE + FRAMING REFERENCE: the attached neutral portrait (image 2) is the CANONICAL Tobias — copy it EXACTLY except the expression: the same person, hair, clothes, signature prop, palette, the same forward lean with BOTH forearms resting on one straight horizontal counter line at 74 % of the image height (the forearms' underside is that line; BELOW it paint NOTHING but the flat #00ff00 key colour — no torso, no counter), the same framing and scale, the same warm ivory/amber highlight clusters and cyan rim on the right. Change ONLY the expression to WARM: a closed-lip smile lifting the cheeks two pixels, eyes softened and crinkled at the outer corners, head tilted a touch toward the viewer — the one you earn.  Same 160x193-art-pixel hard-clustered rendering: flat clusters, 4-6 tones per material, one clean dark contour, no gradients, no anti-aliasing, no speckle.",
+      "stage": "leaning",
+      "$wave": "expressions wave 2 (docs/09 §3)"
     },
     {
       "id": "char/tobias_upset",
@@ -544,8 +545,9 @@
         "art/raw/char/tobias_neutral.png"
       ],
       "$resumeNote": "Generate only after char/tobias_neutral is final (its raw is the second reference image).",
-      "prompt": "Tobias, the new-money startup transplant, early 30s: an undercut with a neat beard, a premium grey hoodie under a slim black bomber jacket, one wireless earbud in, a smart watch, an oat-milk coffee cup held up as his signature prop. Friendly, over-eager, a little oblivious. Image 2 is THIS character — reproduce the exact face, hair, colours and clothes; change ONLY the expression. This is the UPSET expression: jaw set, brows drawn together, mouth flat, eyes cut to the side, shoulders tense. Head-and-shoulders bust for a dialogue portrait, Coffee Talk proportions and outline weight, real alpha background.",
-      "stage": "leaning"
+      "prompt": "IDENTITY + POSE + FRAMING REFERENCE: the attached neutral portrait (image 2) is the CANONICAL Tobias — copy it EXACTLY except the expression: the same person, hair, clothes, signature prop, palette, the same forward lean with BOTH forearms resting on one straight horizontal counter line at 74 % of the image height (the forearms' underside is that line; BELOW it paint NOTHING but the flat #00ff00 key colour — no torso, no counter), the same framing and scale, the same warm ivory/amber highlight clusters and cyan rim on the right. Change ONLY the expression to UPSET: brows pulled in and up at the inner ends, mouth pressed or turned down at one corner, gaze dropped off to the left — hurt for some, angry for others; the brow does the work.  Same 160x193-art-pixel hard-clustered rendering: flat clusters, 4-6 tones per material, one clean dark contour, no gradients, no anti-aliasing, no speckle.",
+      "stage": "leaning",
+      "$wave": "expressions wave 2 (docs/09 §3)"
     },
     {
       "id": "char/schulz_wary",
@@ -560,8 +562,9 @@
         "art/raw/char/schulz_neutral.png"
       ],
       "$resumeNote": "Generate only after char/schulz_neutral is final (its raw is the second reference image).",
-      "prompt": "Frau Schulz, an East-Berlin Oma in her late 70s: a patterned headscarf, large glasses, a knitted mustard cardigan over a floral blouse, a wheeled shopping trolley handle visible at the bottom of frame as her signature prop. Sharp eyes, a small dry smile, unbowed. Image 2 is THIS character — reproduce the exact face, hair, colours and clothes; change ONLY the expression. This is the WARY expression: narrowed eyes, one brow up, lips pressed, chin slightly lowered, guarded. Head-and-shoulders bust for a dialogue portrait, Coffee Talk proportions and outline weight, real alpha background.",
-      "stage": "leaning"
+      "prompt": "IDENTITY + POSE + FRAMING REFERENCE: the attached neutral portrait (image 2) is the CANONICAL Frau Schulz — copy it EXACTLY except the expression: the same person, hair, clothes, signature prop, palette, the same forward lean with BOTH forearms resting on one straight horizontal counter line at 74 % of the image height (the forearms' underside is that line; BELOW it paint NOTHING but the flat #00ff00 key colour — no torso, no counter), the same framing and scale, the same warm ivory/amber highlight clusters and cyan rim on the right. Change ONLY the expression to WARY: chin down a few pixels, one brow lower than the other, mouth a flat short line, eyes holding steady on the viewer — guarded, never hostile.  Same 160x193-art-pixel hard-clustered rendering: flat clusters, 4-6 tones per material, one clean dark contour, no gradients, no anti-aliasing, no speckle.",
+      "stage": "leaning",
+      "$wave": "expressions wave 2 (docs/09 §3)"
     },
     {
       "id": "char/nadia_warm",
@@ -576,8 +579,9 @@
         "art/raw/char/nadia_neutral.png"
       ],
       "$resumeNote": "Generate only after char/nadia_neutral is final (its raw is the second reference image).",
-      "prompt": "Nadia, a night-shift nurse and single mum, mid 30s: teal scrubs under an open dark parka, hair tied back tightly, tired-kind eyes with faint shadows, a lanyard, a paper coffee cup held near her chin as her signature prop. Warm but running on empty. Image 2 is THIS character — reproduce the exact face, hair, colours and clothes; change ONLY the expression. This is the WARM expression: a genuine small smile, eyes softened, head tilted a touch. Head-and-shoulders bust for a dialogue portrait, Coffee Talk proportions and outline weight, real alpha background.",
-      "stage": "leaning"
+      "prompt": "IDENTITY + POSE + FRAMING REFERENCE: the attached neutral portrait (image 2) is the CANONICAL Nadia — copy it EXACTLY except the expression: the same person, hair, clothes, signature prop, palette, the same forward lean with BOTH forearms resting on one straight horizontal counter line at 74 % of the image height (the forearms' underside is that line; BELOW it paint NOTHING but the flat #00ff00 key colour — no torso, no counter), the same framing and scale, the same warm ivory/amber highlight clusters and cyan rim on the right. Change ONLY the expression to WARM: a closed-lip smile lifting the cheeks two pixels, eyes softened and crinkled at the outer corners, head tilted a touch toward the viewer — the one you earn.  Same 160x193-art-pixel hard-clustered rendering: flat clusters, 4-6 tones per material, one clean dark contour, no gradients, no anti-aliasing, no speckle.",
+      "stage": "leaning",
+      "$wave": "expressions wave 2 (docs/09 §3)"
     },
     {
       "id": "char/nadia_upset",
@@ -592,8 +596,9 @@
         "art/raw/char/nadia_neutral.png"
       ],
       "$resumeNote": "Generate only after char/nadia_neutral is final (its raw is the second reference image).",
-      "prompt": "Nadia, a night-shift nurse and single mum, mid 30s: teal scrubs under an open dark parka, hair tied back tightly, tired-kind eyes with faint shadows, a lanyard, a paper coffee cup held near her chin as her signature prop. Warm but running on empty. Image 2 is THIS character — reproduce the exact face, hair, colours and clothes; change ONLY the expression. This is the UPSET expression: jaw set, brows drawn together, mouth flat, eyes cut to the side, shoulders tense. Head-and-shoulders bust for a dialogue portrait, Coffee Talk proportions and outline weight, real alpha background.",
-      "stage": "leaning"
+      "prompt": "IDENTITY + POSE + FRAMING REFERENCE: the attached neutral portrait (image 2) is the CANONICAL Nadia — copy it EXACTLY except the expression: the same person, hair, clothes, signature prop, palette, the same forward lean with BOTH forearms resting on one straight horizontal counter line at 74 % of the image height (the forearms' underside is that line; BELOW it paint NOTHING but the flat #00ff00 key colour — no torso, no counter), the same framing and scale, the same warm ivory/amber highlight clusters and cyan rim on the right. Change ONLY the expression to UPSET: brows pulled in and up at the inner ends, mouth pressed or turned down at one corner, gaze dropped off to the left — hurt for some, angry for others; the brow does the work.  Same 160x193-art-pixel hard-clustered rendering: flat clusters, 4-6 tones per material, one clean dark contour, no gradients, no anti-aliasing, no speckle.",
+      "stage": "leaning",
+      "$wave": "expressions wave 2 (docs/09 §3)"
     },
     {
       "id": "sku/energy",
@@ -1205,6 +1210,358 @@
       ],
       "prompt": "Rüdiger Bley, 61, corporate real-estate financier at 03:10: silver hair combed back, a long good charcoal wool coat with a dark scarf, a signet ring, a small STILL-WATER bottle on the counter line by one hand (signature prop). NEUTRAL: composed, faintly weary, the look of a man who considers you staff and is beginning not to. IDENTITY STYLE: the same game as the attached Lena bust (image 2) — same pixel density, palette discipline, contour weight, lean and counter line; a different person. FRAMING FOR THE COUNTER: a relaxed forward lean, BOTH forearms resting on one straight horizontal counter line at 74 % of the image height; the forearms' UNDERSIDE is that line. BELOW that line paint NOTHING but the flat #00ff00 key colour — no torso, no counter. Head top ~6 % of the height, chin ~36 %, shoulders ~70 % of the width, forearms ~85 % of the width, elbows, cuffs and hands fully visible. LIGHT: warm ivory/amber highlight clusters on the forehead, cheekbones, nose, shoulder tops and forearm tops (warm fluorescent from above-left), a narrow cyan rim on the right silhouette from the fridge, cool blue-grey shadows; skin in five desaturated tones, never orange. RENDERING: a true pixel sprite of about 160x193 art pixels — hard-edged flat clusters, 4-6 tones per material, one clean dark contour, deliberate dark pixel clusters for eyelids, brows, nostrils and mouth corners; no gradients, no anti-aliasing, no speckle.",
       "$card": "docs/09 section 2"
+    },
+    {
+      "id": "char/schulz_warm",
+      "kind": "portrait",
+      "w": 160,
+      "h": 193,
+      "stage": "leaning",
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "concept-art/main character target state.png",
+        "art/raw/char/schulz_neutral.png"
+      ],
+      "prompt": "IDENTITY + POSE + FRAMING REFERENCE: the attached neutral portrait (image 2) is the CANONICAL Frau Schulz — copy it EXACTLY except the expression: the same person, hair, clothes, signature prop, palette, the same forward lean with BOTH forearms resting on one straight horizontal counter line at 74 % of the image height (the forearms' underside is that line; BELOW it paint NOTHING but the flat #00ff00 key colour — no torso, no counter), the same framing and scale, the same warm ivory/amber highlight clusters and cyan rim on the right. Change ONLY the expression to WARM: a closed-lip smile lifting the cheeks two pixels, eyes softened and crinkled at the outer corners, head tilted a touch toward the viewer — the one you earn.  Same 160x193-art-pixel hard-clustered rendering: flat clusters, 4-6 tones per material, one clean dark contour, no gradients, no anti-aliasing, no speckle.",
+      "$wave": "expressions wave 2 (docs/09 §3)"
+    },
+    {
+      "id": "char/schulz_surprised",
+      "kind": "portrait",
+      "w": 160,
+      "h": 193,
+      "stage": "leaning",
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "concept-art/main character target state.png",
+        "art/raw/char/schulz_neutral.png"
+      ],
+      "prompt": "IDENTITY + POSE + FRAMING REFERENCE: the attached neutral portrait (image 2) is the CANONICAL Frau Schulz — copy it EXACTLY except the expression: the same person, hair, clothes, signature prop, palette, the same forward lean with BOTH forearms resting on one straight horizontal counter line at 74 % of the image height (the forearms' underside is that line; BELOW it paint NOTHING but the flat #00ff00 key colour — no torso, no counter), the same framing and scale, the same warm ivory/amber highlight clusters and cyan rim on the right. Change ONLY the expression to SURPRISED: brows high and level, eyes a row taller with more white above the iris, mouth a small open oval, head pulled back one pixel, the hands stopped.  Same 160x193-art-pixel hard-clustered rendering: flat clusters, 4-6 tones per material, one clean dark contour, no gradients, no anti-aliasing, no speckle.",
+      "$wave": "expressions wave 2 (docs/09 §3)"
+    },
+    {
+      "id": "char/schulz_tired",
+      "kind": "portrait",
+      "w": 160,
+      "h": 193,
+      "stage": "leaning",
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "concept-art/main character target state.png",
+        "art/raw/char/schulz_neutral.png"
+      ],
+      "prompt": "IDENTITY + POSE + FRAMING REFERENCE: the attached neutral portrait (image 2) is the CANONICAL Frau Schulz — copy it EXACTLY except the expression: the same person, hair, clothes, signature prop, palette, the same forward lean with BOTH forearms resting on one straight horizontal counter line at 74 % of the image height (the forearms' underside is that line; BELOW it paint NOTHING but the flat #00ff00 key colour — no torso, no counter), the same framing and scale, the same warm ivory/amber highlight clusters and cyan rim on the right. Change ONLY the expression to TIRED: upper lids low and heavy, shadow blocks under the eyes, mouth slack and slightly open, head and shoulders dropped two pixels, one forearm taking real weight on the laminate.  Same 160x193-art-pixel hard-clustered rendering: flat clusters, 4-6 tones per material, one clean dark contour, no gradients, no anti-aliasing, no speckle.",
+      "$wave": "expressions wave 2 (docs/09 §3)"
+    },
+    {
+      "id": "char/achim_warm",
+      "kind": "portrait",
+      "w": 160,
+      "h": 193,
+      "stage": "leaning",
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "concept-art/main character target state.png",
+        "art/raw/char/achim_neutral.png"
+      ],
+      "prompt": "IDENTITY + POSE + FRAMING REFERENCE: the attached neutral portrait (image 2) is the CANONICAL Achim — copy it EXACTLY except the expression: the same person, hair, clothes, signature prop, palette, the same forward lean with BOTH forearms resting on one straight horizontal counter line at 74 % of the image height (the forearms' underside is that line; BELOW it paint NOTHING but the flat #00ff00 key colour — no torso, no counter), the same framing and scale, the same warm ivory/amber highlight clusters and cyan rim on the right. Change ONLY the expression to WARM: a closed-lip smile lifting the cheeks two pixels, eyes softened and crinkled at the outer corners, head tilted a touch toward the viewer — the one you earn.  Same 160x193-art-pixel hard-clustered rendering: flat clusters, 4-6 tones per material, one clean dark contour, no gradients, no anti-aliasing, no speckle.",
+      "$wave": "expressions wave 2 (docs/09 §3)"
+    },
+    {
+      "id": "char/achim_surprised",
+      "kind": "portrait",
+      "w": 160,
+      "h": 193,
+      "stage": "leaning",
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "concept-art/main character target state.png",
+        "art/raw/char/achim_neutral.png"
+      ],
+      "prompt": "IDENTITY + POSE + FRAMING REFERENCE: the attached neutral portrait (image 2) is the CANONICAL Achim — copy it EXACTLY except the expression: the same person, hair, clothes, signature prop, palette, the same forward lean with BOTH forearms resting on one straight horizontal counter line at 74 % of the image height (the forearms' underside is that line; BELOW it paint NOTHING but the flat #00ff00 key colour — no torso, no counter), the same framing and scale, the same warm ivory/amber highlight clusters and cyan rim on the right. Change ONLY the expression to SURPRISED: brows high and level, eyes a row taller with more white above the iris, mouth a small open oval, head pulled back one pixel, the hands stopped.  Same 160x193-art-pixel hard-clustered rendering: flat clusters, 4-6 tones per material, one clean dark contour, no gradients, no anti-aliasing, no speckle.",
+      "$wave": "expressions wave 2 (docs/09 §3)"
+    },
+    {
+      "id": "char/achim_upset",
+      "kind": "portrait",
+      "w": 160,
+      "h": 193,
+      "stage": "leaning",
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "concept-art/main character target state.png",
+        "art/raw/char/achim_neutral.png"
+      ],
+      "prompt": "IDENTITY + POSE + FRAMING REFERENCE: the attached neutral portrait (image 2) is the CANONICAL Achim — copy it EXACTLY except the expression: the same person, hair, clothes, signature prop, palette, the same forward lean with BOTH forearms resting on one straight horizontal counter line at 74 % of the image height (the forearms' underside is that line; BELOW it paint NOTHING but the flat #00ff00 key colour — no torso, no counter), the same framing and scale, the same warm ivory/amber highlight clusters and cyan rim on the right. Change ONLY the expression to UPSET: brows pulled in and up at the inner ends, mouth pressed or turned down at one corner, gaze dropped off to the left — hurt for some, angry for others; the brow does the work. PROP STATE: his flyers are CRUSHED in his fist. Same 160x193-art-pixel hard-clustered rendering: flat clusters, 4-6 tones per material, one clean dark contour, no gradients, no anti-aliasing, no speckle.",
+      "$wave": "expressions wave 2 (docs/09 §3)"
+    },
+    {
+      "id": "char/karim_warm",
+      "kind": "portrait",
+      "w": 160,
+      "h": 193,
+      "stage": "leaning",
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "concept-art/main character target state.png",
+        "art/raw/char/karim_neutral.png"
+      ],
+      "prompt": "IDENTITY + POSE + FRAMING REFERENCE: the attached neutral portrait (image 2) is the CANONICAL Karim — copy it EXACTLY except the expression: the same person, hair, clothes, signature prop, palette, the same forward lean with BOTH forearms resting on one straight horizontal counter line at 74 % of the image height (the forearms' underside is that line; BELOW it paint NOTHING but the flat #00ff00 key colour — no torso, no counter), the same framing and scale, the same warm ivory/amber highlight clusters and cyan rim on the right. Change ONLY the expression to WARM: a closed-lip smile lifting the cheeks two pixels, eyes softened and crinkled at the outer corners, head tilted a touch toward the viewer — the one you earn.  Same 160x193-art-pixel hard-clustered rendering: flat clusters, 4-6 tones per material, one clean dark contour, no gradients, no anti-aliasing, no speckle.",
+      "$wave": "expressions wave 2 (docs/09 §3)"
+    },
+    {
+      "id": "char/karim_surprised",
+      "kind": "portrait",
+      "w": 160,
+      "h": 193,
+      "stage": "leaning",
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "concept-art/main character target state.png",
+        "art/raw/char/karim_neutral.png"
+      ],
+      "prompt": "IDENTITY + POSE + FRAMING REFERENCE: the attached neutral portrait (image 2) is the CANONICAL Karim — copy it EXACTLY except the expression: the same person, hair, clothes, signature prop, palette, the same forward lean with BOTH forearms resting on one straight horizontal counter line at 74 % of the image height (the forearms' underside is that line; BELOW it paint NOTHING but the flat #00ff00 key colour — no torso, no counter), the same framing and scale, the same warm ivory/amber highlight clusters and cyan rim on the right. Change ONLY the expression to SURPRISED: brows high and level, eyes a row taller with more white above the iris, mouth a small open oval, head pulled back one pixel, the hands stopped.  Same 160x193-art-pixel hard-clustered rendering: flat clusters, 4-6 tones per material, one clean dark contour, no gradients, no anti-aliasing, no speckle.",
+      "$wave": "expressions wave 2 (docs/09 §3)"
+    },
+    {
+      "id": "char/karim_wary",
+      "kind": "portrait",
+      "w": 160,
+      "h": 193,
+      "stage": "leaning",
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "concept-art/main character target state.png",
+        "art/raw/char/karim_neutral.png"
+      ],
+      "prompt": "IDENTITY + POSE + FRAMING REFERENCE: the attached neutral portrait (image 2) is the CANONICAL Karim — copy it EXACTLY except the expression: the same person, hair, clothes, signature prop, palette, the same forward lean with BOTH forearms resting on one straight horizontal counter line at 74 % of the image height (the forearms' underside is that line; BELOW it paint NOTHING but the flat #00ff00 key colour — no torso, no counter), the same framing and scale, the same warm ivory/amber highlight clusters and cyan rim on the right. Change ONLY the expression to WARY: chin down a few pixels, one brow lower than the other, mouth a flat short line, eyes holding steady on the viewer — guarded, never hostile.  Same 160x193-art-pixel hard-clustered rendering: flat clusters, 4-6 tones per material, one clean dark contour, no gradients, no anti-aliasing, no speckle.",
+      "$wave": "expressions wave 2 (docs/09 §3)"
+    },
+    {
+      "id": "char/nadia_tired",
+      "kind": "portrait",
+      "w": 160,
+      "h": 193,
+      "stage": "leaning",
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "concept-art/main character target state.png",
+        "art/raw/char/nadia_neutral.png"
+      ],
+      "prompt": "IDENTITY + POSE + FRAMING REFERENCE: the attached neutral portrait (image 2) is the CANONICAL Nadia — copy it EXACTLY except the expression: the same person, hair, clothes, signature prop, palette, the same forward lean with BOTH forearms resting on one straight horizontal counter line at 74 % of the image height (the forearms' underside is that line; BELOW it paint NOTHING but the flat #00ff00 key colour — no torso, no counter), the same framing and scale, the same warm ivory/amber highlight clusters and cyan rim on the right. Change ONLY the expression to TIRED: upper lids low and heavy, shadow blocks under the eyes, mouth slack and slightly open, head and shoulders dropped two pixels, one forearm taking real weight on the laminate.  Same 160x193-art-pixel hard-clustered rendering: flat clusters, 4-6 tones per material, one clean dark contour, no gradients, no anti-aliasing, no speckle.",
+      "$wave": "expressions wave 2 (docs/09 §3)"
+    },
+    {
+      "id": "char/nadia_surprised",
+      "kind": "portrait",
+      "w": 160,
+      "h": 193,
+      "stage": "leaning",
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "concept-art/main character target state.png",
+        "art/raw/char/nadia_neutral.png"
+      ],
+      "prompt": "IDENTITY + POSE + FRAMING REFERENCE: the attached neutral portrait (image 2) is the CANONICAL Nadia — copy it EXACTLY except the expression: the same person, hair, clothes, signature prop, palette, the same forward lean with BOTH forearms resting on one straight horizontal counter line at 74 % of the image height (the forearms' underside is that line; BELOW it paint NOTHING but the flat #00ff00 key colour — no torso, no counter), the same framing and scale, the same warm ivory/amber highlight clusters and cyan rim on the right. Change ONLY the expression to SURPRISED: brows high and level, eyes a row taller with more white above the iris, mouth a small open oval, head pulled back one pixel, the hands stopped.  Same 160x193-art-pixel hard-clustered rendering: flat clusters, 4-6 tones per material, one clean dark contour, no gradients, no anti-aliasing, no speckle.",
+      "$wave": "expressions wave 2 (docs/09 §3)"
+    },
+    {
+      "id": "char/nadia_wary",
+      "kind": "portrait",
+      "w": 160,
+      "h": 193,
+      "stage": "leaning",
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "concept-art/main character target state.png",
+        "art/raw/char/nadia_neutral.png"
+      ],
+      "prompt": "IDENTITY + POSE + FRAMING REFERENCE: the attached neutral portrait (image 2) is the CANONICAL Nadia — copy it EXACTLY except the expression: the same person, hair, clothes, signature prop, palette, the same forward lean with BOTH forearms resting on one straight horizontal counter line at 74 % of the image height (the forearms' underside is that line; BELOW it paint NOTHING but the flat #00ff00 key colour — no torso, no counter), the same framing and scale, the same warm ivory/amber highlight clusters and cyan rim on the right. Change ONLY the expression to WARY: chin down a few pixels, one brow lower than the other, mouth a flat short line, eyes holding steady on the viewer — guarded, never hostile.  Same 160x193-art-pixel hard-clustered rendering: flat clusters, 4-6 tones per material, one clean dark contour, no gradients, no anti-aliasing, no speckle.",
+      "$wave": "expressions wave 2 (docs/09 §3)"
+    },
+    {
+      "id": "char/tobias_surprised",
+      "kind": "portrait",
+      "w": 160,
+      "h": 193,
+      "stage": "leaning",
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "concept-art/main character target state.png",
+        "art/raw/char/tobias_neutral.png"
+      ],
+      "prompt": "IDENTITY + POSE + FRAMING REFERENCE: the attached neutral portrait (image 2) is the CANONICAL Tobias — copy it EXACTLY except the expression: the same person, hair, clothes, signature prop, palette, the same forward lean with BOTH forearms resting on one straight horizontal counter line at 74 % of the image height (the forearms' underside is that line; BELOW it paint NOTHING but the flat #00ff00 key colour — no torso, no counter), the same framing and scale, the same warm ivory/amber highlight clusters and cyan rim on the right. Change ONLY the expression to SURPRISED: brows high and level, eyes a row taller with more white above the iris, mouth a small open oval, head pulled back one pixel, the hands stopped.  Same 160x193-art-pixel hard-clustered rendering: flat clusters, 4-6 tones per material, one clean dark contour, no gradients, no anti-aliasing, no speckle.",
+      "$wave": "expressions wave 2 (docs/09 §3)"
+    },
+    {
+      "id": "char/robin_wary",
+      "kind": "portrait",
+      "w": 160,
+      "h": 193,
+      "stage": "leaning",
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "concept-art/main character target state.png",
+        "art/raw/char/robin_neutral.png"
+      ],
+      "prompt": "IDENTITY + POSE + FRAMING REFERENCE: the attached neutral portrait (image 2) is the CANONICAL Robin — copy it EXACTLY except the expression: the same person, hair, clothes, signature prop, palette, the same forward lean with BOTH forearms resting on one straight horizontal counter line at 74 % of the image height (the forearms' underside is that line; BELOW it paint NOTHING but the flat #00ff00 key colour — no torso, no counter), the same framing and scale, the same warm ivory/amber highlight clusters and cyan rim on the right. Change ONLY the expression to WARY: chin down a few pixels, one brow lower than the other, mouth a flat short line, eyes holding steady on the viewer — guarded, never hostile. PROP STATE: the rolling tin is SHUT under their hand. Same 160x193-art-pixel hard-clustered rendering: flat clusters, 4-6 tones per material, one clean dark contour, no gradients, no anti-aliasing, no speckle.",
+      "$wave": "expressions wave 2 (docs/09 §3)"
+    },
+    {
+      "id": "char/robin_surprised",
+      "kind": "portrait",
+      "w": 160,
+      "h": 193,
+      "stage": "leaning",
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "concept-art/main character target state.png",
+        "art/raw/char/robin_neutral.png"
+      ],
+      "prompt": "IDENTITY + POSE + FRAMING REFERENCE: the attached neutral portrait (image 2) is the CANONICAL Robin — copy it EXACTLY except the expression: the same person, hair, clothes, signature prop, palette, the same forward lean with BOTH forearms resting on one straight horizontal counter line at 74 % of the image height (the forearms' underside is that line; BELOW it paint NOTHING but the flat #00ff00 key colour — no torso, no counter), the same framing and scale, the same warm ivory/amber highlight clusters and cyan rim on the right. Change ONLY the expression to SURPRISED: brows high and level, eyes a row taller with more white above the iris, mouth a small open oval, head pulled back one pixel, the hands stopped.  Same 160x193-art-pixel hard-clustered rendering: flat clusters, 4-6 tones per material, one clean dark contour, no gradients, no anti-aliasing, no speckle.",
+      "$wave": "expressions wave 2 (docs/09 §3)"
+    },
+    {
+      "id": "char/robin_warm",
+      "kind": "portrait",
+      "w": 160,
+      "h": 193,
+      "stage": "leaning",
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "concept-art/main character target state.png",
+        "art/raw/char/robin_neutral.png"
+      ],
+      "prompt": "IDENTITY + POSE + FRAMING REFERENCE: the attached neutral portrait (image 2) is the CANONICAL Robin — copy it EXACTLY except the expression: the same person, hair, clothes, signature prop, palette, the same forward lean with BOTH forearms resting on one straight horizontal counter line at 74 % of the image height (the forearms' underside is that line; BELOW it paint NOTHING but the flat #00ff00 key colour — no torso, no counter), the same framing and scale, the same warm ivory/amber highlight clusters and cyan rim on the right. Change ONLY the expression to WARM: a closed-lip smile lifting the cheeks two pixels, eyes softened and crinkled at the outer corners, head tilted a touch toward the viewer — the one you earn.  Same 160x193-art-pixel hard-clustered rendering: flat clusters, 4-6 tones per material, one clean dark contour, no gradients, no anti-aliasing, no speckle.",
+      "$wave": "expressions wave 2 (docs/09 §3)"
+    },
+    {
+      "id": "char/aylin_warm",
+      "kind": "portrait",
+      "w": 160,
+      "h": 193,
+      "stage": "leaning",
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "concept-art/main character target state.png",
+        "art/raw/char/aylin_neutral.png"
+      ],
+      "prompt": "IDENTITY + POSE + FRAMING REFERENCE: the attached neutral portrait (image 2) is the CANONICAL Aylin — copy it EXACTLY except the expression: the same person, hair, clothes, signature prop, palette, the same forward lean with BOTH forearms resting on one straight horizontal counter line at 74 % of the image height (the forearms' underside is that line; BELOW it paint NOTHING but the flat #00ff00 key colour — no torso, no counter), the same framing and scale, the same warm ivory/amber highlight clusters and cyan rim on the right. Change ONLY the expression to WARM: a closed-lip smile lifting the cheeks two pixels, eyes softened and crinkled at the outer corners, head tilted a touch toward the viewer — the one you earn. PROP STATE: her lighter is LIT — a small flame. Same 160x193-art-pixel hard-clustered rendering: flat clusters, 4-6 tones per material, one clean dark contour, no gradients, no anti-aliasing, no speckle.",
+      "$wave": "expressions wave 2 (docs/09 §3)"
+    },
+    {
+      "id": "char/aylin_tired",
+      "kind": "portrait",
+      "w": 160,
+      "h": 193,
+      "stage": "leaning",
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "concept-art/main character target state.png",
+        "art/raw/char/aylin_neutral.png"
+      ],
+      "prompt": "IDENTITY + POSE + FRAMING REFERENCE: the attached neutral portrait (image 2) is the CANONICAL Aylin — copy it EXACTLY except the expression: the same person, hair, clothes, signature prop, palette, the same forward lean with BOTH forearms resting on one straight horizontal counter line at 74 % of the image height (the forearms' underside is that line; BELOW it paint NOTHING but the flat #00ff00 key colour — no torso, no counter), the same framing and scale, the same warm ivory/amber highlight clusters and cyan rim on the right. Change ONLY the expression to TIRED: upper lids low and heavy, shadow blocks under the eyes, mouth slack and slightly open, head and shoulders dropped two pixels, one forearm taking real weight on the laminate.  Same 160x193-art-pixel hard-clustered rendering: flat clusters, 4-6 tones per material, one clean dark contour, no gradients, no anti-aliasing, no speckle.",
+      "$wave": "expressions wave 2 (docs/09 §3)"
+    },
+    {
+      "id": "char/aylin_surprised",
+      "kind": "portrait",
+      "w": 160,
+      "h": 193,
+      "stage": "leaning",
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "concept-art/main character target state.png",
+        "art/raw/char/aylin_neutral.png"
+      ],
+      "prompt": "IDENTITY + POSE + FRAMING REFERENCE: the attached neutral portrait (image 2) is the CANONICAL Aylin — copy it EXACTLY except the expression: the same person, hair, clothes, signature prop, palette, the same forward lean with BOTH forearms resting on one straight horizontal counter line at 74 % of the image height (the forearms' underside is that line; BELOW it paint NOTHING but the flat #00ff00 key colour — no torso, no counter), the same framing and scale, the same warm ivory/amber highlight clusters and cyan rim on the right. Change ONLY the expression to SURPRISED: brows high and level, eyes a row taller with more white above the iris, mouth a small open oval, head pulled back one pixel, the hands stopped.  Same 160x193-art-pixel hard-clustered rendering: flat clusters, 4-6 tones per material, one clean dark contour, no gradients, no anti-aliasing, no speckle.",
+      "$wave": "expressions wave 2 (docs/09 §3)"
+    },
+    {
+      "id": "char/bley_wary",
+      "kind": "portrait",
+      "w": 160,
+      "h": 193,
+      "stage": "leaning",
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "concept-art/main character target state.png",
+        "art/raw/char/bley_neutral.png"
+      ],
+      "prompt": "IDENTITY + POSE + FRAMING REFERENCE: the attached neutral portrait (image 2) is the CANONICAL Herr Bley — copy it EXACTLY except the expression: the same person, hair, clothes, signature prop, palette, the same forward lean with BOTH forearms resting on one straight horizontal counter line at 74 % of the image height (the forearms' underside is that line; BELOW it paint NOTHING but the flat #00ff00 key colour — no torso, no counter), the same framing and scale, the same warm ivory/amber highlight clusters and cyan rim on the right. Change ONLY the expression to WARY: chin down a few pixels, one brow lower than the other, mouth a flat short line, eyes holding steady on the viewer — guarded, never hostile.  Same 160x193-art-pixel hard-clustered rendering: flat clusters, 4-6 tones per material, one clean dark contour, no gradients, no anti-aliasing, no speckle.",
+      "$wave": "expressions wave 2 (docs/09 §3)"
+    },
+    {
+      "id": "char/bley_surprised",
+      "kind": "portrait",
+      "w": 160,
+      "h": 193,
+      "stage": "leaning",
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "concept-art/main character target state.png",
+        "art/raw/char/bley_neutral.png"
+      ],
+      "prompt": "IDENTITY + POSE + FRAMING REFERENCE: the attached neutral portrait (image 2) is the CANONICAL Herr Bley — copy it EXACTLY except the expression: the same person, hair, clothes, signature prop, palette, the same forward lean with BOTH forearms resting on one straight horizontal counter line at 74 % of the image height (the forearms' underside is that line; BELOW it paint NOTHING but the flat #00ff00 key colour — no torso, no counter), the same framing and scale, the same warm ivory/amber highlight clusters and cyan rim on the right. Change ONLY the expression to SURPRISED: brows high and level, eyes a row taller with more white above the iris, mouth a small open oval, head pulled back one pixel, the hands stopped.  Same 160x193-art-pixel hard-clustered rendering: flat clusters, 4-6 tones per material, one clean dark contour, no gradients, no anti-aliasing, no speckle.",
+      "$wave": "expressions wave 2 (docs/09 §3)"
+    },
+    {
+      "id": "char/bley_tired",
+      "kind": "portrait",
+      "w": 160,
+      "h": 193,
+      "stage": "leaning",
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "concept-art/main character target state.png",
+        "art/raw/char/bley_neutral.png"
+      ],
+      "prompt": "IDENTITY + POSE + FRAMING REFERENCE: the attached neutral portrait (image 2) is the CANONICAL Herr Bley — copy it EXACTLY except the expression: the same person, hair, clothes, signature prop, palette, the same forward lean with BOTH forearms resting on one straight horizontal counter line at 74 % of the image height (the forearms' underside is that line; BELOW it paint NOTHING but the flat #00ff00 key colour — no torso, no counter), the same framing and scale, the same warm ivory/amber highlight clusters and cyan rim on the right. Change ONLY the expression to TIRED: upper lids low and heavy, shadow blocks under the eyes, mouth slack and slightly open, head and shoulders dropped two pixels, one forearm taking real weight on the laminate. PROP STATE: an untouched chocolate bar lies on the counter beside the water bottle. Same 160x193-art-pixel hard-clustered rendering: flat clusters, 4-6 tones per material, one clean dark contour, no gradients, no anti-aliasing, no speckle.",
+      "$wave": "expressions wave 2 (docs/09 §3)"
     }
   ],
   "modelByKind": {
