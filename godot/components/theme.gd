@@ -284,6 +284,14 @@ static func wall_cell_rect(row: int, col: int, cell_size: Vector2i) -> Rect2i:
 			return Rect2i(WALL_SHELF3_X0 + col * WALL_SHELF3_PITCH, WALL_SHELF3_BOTTOM - cell_size.y, cell_size.x, cell_size.y)
 
 ## The price rail under a shelf row, stretched to hold the cells it serves.
+## The horizontal step between two brands on a shelf — the room a facing has to fill with stock.
+static func wall_pitch(row: int) -> int:
+	if row == 0:
+		return WALL_SHELF1_PITCH
+	if row == 1:
+		return WALL_SHELF2_PITCH
+	return WALL_SHELF3_PITCH
+
 static func wall_rail_rect(row: int, cells: int, pitch: int, x0: int, cell_w: int) -> Rect2i:
 	var y := WALL_RAIL1_Y if row == 0 else (WALL_RAIL2_Y if row == 1 else WALL_RAIL3_Y)
 	var span := maxi(cell_w, (cells - 1) * pitch + cell_w)
