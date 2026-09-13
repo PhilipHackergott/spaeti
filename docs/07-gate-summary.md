@@ -1,4 +1,4 @@
-# 07 — Gate summary: the guest-interaction vertical slice (2026-09-12, branch `godot-vertical-slice`)
+# 07 — Gate summary: the guest-interaction vertical slice (2026-09-13, branch `godot-vertical-slice`)
 
 **What this round set out to prove:** a Coffee-Talk-style Späti where guests queue at the register, you take them one
 by one, and each conversation is a D&D-style branching tree whose choices roll or gate against six stats — rendered as
@@ -9,14 +9,16 @@ Godot 4.7.2; every screen is a real `.tscn` you can open in the editor.
 
 | Piece | State | Proof |
 |---|---|---|
-| Pure GDScript engine (rules, economy, story, finale, seeded RNG) | done | `node tools/godot/test.mjs` → **99 tests, 0 failed** |
-| Six stats + d20 checks + gates, deterministic per seed | done | `test_dialogue.gd`; a mid-conversation save round-trips byte-identically |
-| Dialogue graphs: Lena (7 nodes, 2 checks), Jürgen (6, 1 check + 1 gate), Mehmet (8, 2 checks), generic one-off | done | `engine/content/dialogues.gd`; flag-gated branches; every graph playable |
-| **The line:** guests wait at the register until you take them; patience runs in line | done | `tools/godot/play.mjs` → `PLAY ok steps=13, guests=67` |
-| Register screen: QueueStrip (FIFO, Next guest), StatsStrip (Tab), DialogueBox with stat tags + locked gates, DiceResult pop | done | `docs/gallery/night-*.png` |
+| Pure GDScript engine (rules, economy, story, finale, seeded RNG) | done | `node tools/godot/test.mjs` → **108 tests, 0 failed** |
+| Six stats (Muscle · Hands · Stamina · Brains · Kiez Sense · Schnauze) + d20 checks + gates, deterministic per seed | done | `test_dialogue.gd`; a mid-conversation save round-trips byte-identically |
+| Dialogue graphs: Lena (7 nodes, 2 checks), Jürgen (6, 1 check + 1 gate), Mehmet (8, 2 checks), generic one-off, minor/restricted refusal | done | `engine/content/dialogues.gd`; flag-gated branches; every graph playable; unread flags now surface on the Manage board |
+| **The line:** guests wait at the register until you take them; patience runs in line | done | `tools/godot/play.mjs` → `PLAY ok steps=13, guests=66`; autosave on every action (Title → Continue) |
+| Register screen: QueueStrip (Talk to them / Next guest), StatsStrip (Tab), DialogueBox with the choices inside the panel, stat tags + locked gates, DiceResult pop | done | `docs/gallery/night-*.png` |
 | Expression portraits driving the Portrait per node | done | lena {neutral, warm, upset} · juergen {neutral, warm} · mehmet {neutral, warm, wary} — `night-talk_result.png` shows the swap |
-| Component pool (18 components, one Theme, one string table, measured pixel font) | done | `docs/04-component-catalog.md`; tests enforce no raw colours / literals |
+| **Leaning staging:** a bust whose sprite ends at the forearms sits in front of the counter with the forearms on the laminate | done (Lena) | `Assets.STAGING`, `SceneLayers` slot `Leaners`, `Portrait.place_on`; Jürgen/Mehmet still use the behind-the-counter seat |
+| Component pool (18 components, one Theme, one string table, measured pixel font, stepped light-pool shader) | done | `docs/04-component-catalog.md`; tests enforce no raw colours / literals |
 | Art pipeline: Codex generates, Codex judges, Godot snaps to the 480×270 grid | done | `docs/00`, `02`; `tools/codex/*.mjs`, `tools/godot/*.mjs` |
+| Review fleet (Opus reviewers → skeptics → one fixer) | done | 30 findings → 24 confirmed → 24 fixed, suite 99 → 108 (docs/03, 02:12) |
 
 ## Judge scores (gpt-6-astra, rubric in `docs/judge-rubric.md`; 85 = hero bar, 80 = asset bar)
 
@@ -24,30 +26,47 @@ Godot 4.7.2; every screen is a real `.tscn` you can open in the editor.
 |---|---|---|
 | Title key art (r4) | **86 pass** | the user's chosen style reference |
 | Concept painting r3 (real-Späti set) at game density | 77 | set fidelity 86–94; rendering is the gap |
-| Backdrop (r5, promoted) | 74 | Berlin 91, composition 85, pixel 64 |
-| Counter (r6, edge-to-edge, flat key) | not scored | two judges timed out (600 s, 1500 s) under concurrency; r5, the same construction, scored 72 |
-| Jürgen neutral | **84 pass** | |
-| Lena / Mehmet neutral | 79 / 79 | one point short, both after 3 rounds |
+| Backdrop r6 (promoted) | 77 | r5 was 74; composition 81, Berlin 87, palette 73, pixel 75 |
+| Counter r7 (promoted) | not scored alone | takeaway cup, newspaper, Pfand crate, prop weights; judged inside the composed frame |
+| Jürgen neutral | **84 pass** | behind-the-counter version |
+| Lena / Mehmet neutral | 79 / 79 | Lena since regenerated ×3 in the leaning format (composed only) |
 | One-offs (clubber, tourist) | 78 / 78 | |
-| You / Brandt / Tobias / Schulz / Nadia | 73 / 76 / 75 / 74 / 68 | outside the demo path; nearest re-snap only |
-| **Hero screen (`dialogue_choice`, composed)** | pending | three 1080p runs timed out (600/1500/1500 s, 3 sessions open); lean solo rerun (half-size lossless, 3 refs, effort high) in flight |
+| You / Brandt / Tobias / Schulz / Nadia | 73 / 76 / 75 / 74 / 68 | outside the demo path |
+| **Hero screen (`dialogue_choice`, composed)** | **74** (v10) | trajectory 71 → 74 → 70/74 → 73 → 72 → 73 → 70 → 74 over ten rounds; v11 (larger leaner, lower counter edge) judging |
 
-Pattern across every verdict: set, palette and character fidelity score 85–95; **pixel rendering scores 60–79** —
-astra paints "softly modelled" shading where the target has authored clusters. Measured levers: nearest-neighbour
-snapping (+3…+15), prompt discipline; not palette quantisation (±0) or despeckling (+1).
+What moved the composed score: the choices inside the panel (+3), the three HUD plates → minimal HUD in conversation,
+the leaning staging (character fidelity 63 → 74). What did not: the light-pool overlay (read as "washed-out grey"),
+palette quantisation, despeckling. The judge oscillates ±3 between runs and has asked for both a smaller and a
+larger Lena; take single-run deltas under 4 as noise.
+
+**The ceiling is rendering, not design.** Across every verdict, set, palette family, Berlin fidelity and UI language
+score 85–91; `pixel_rendering` scores 73–81 and `palette_lighting` 61–73 — astra paints "softly modelled" shading and
+a grey ambient where the target has authored clusters and a warm pool against the blue night. Every fix the judge still
+lists is art: warm highlight clusters on skin and laminate, connected shadow clusters in the face and hair, varied stock
+instead of repeated rectangles, contact shadows, wet-pavement reflections. Those need a better pixel-art generator or a
+human pass over the raws; another round of prompt discipline is not going to close 11 points.
+
+## Pipeline findings worth keeping (docs/02, docs/03)
+
+- Astra + a strict `--output-schema` stalls on vision requests (four of four); the same request with the JSON shape in
+  the prompt answers in ~45 s. `judge.mjs` runs astra without the schema, from a lossless half-size candidate, three
+  references, effort `high`, 2–3 attempts × 300–420 s. sol judges in ~30 s and scores 2–6 points higher.
+- Busts are 144×174 (the OG framing table's ~145 px); the first build had them at 190 (heads at 36 % of the frame).
+- A bust generated with the key colour below the counter line trims to the forearms and can sit in front of the counter.
 
 ## Honest gaps
 
-- The hero screens have not yet been judged ≥ 85; the composed frame is the number that matters and is in flight.
-- SKU sprites and HUD icons were parked when the slice refocused on conversation (the serve panel still works; 6 SKUs
-  have sprites, the rest are placeholders; HUD icons are placeholder discs).
-- No audio, no character-creation screen (stats are defaults), only three regulars have trees. Autosave lands on every player action; the title's Continue resumes it.
-- Codex concurrency: more than ~4 simultaneous astra sessions makes verdicts queue and time out; the wrappers now
-  default to 1500 s for composed frames.
+- The hero screen has not been judged ≥ 85 and, per the pattern above, will not be with this generator.
+- SKU sprites were parked when the slice refocused on conversation (6 SKUs have sprites, the rest are placeholders);
+  HUD icons: clock, cash and Pfand are real, trust and profit generating.
+- Jürgen and Mehmet still use the behind-the-counter seat; Lena leans — the two stagings differ visibly when the queue
+  advances. Jürgen's leaning portrait is generating.
+- No audio, no character-creation screen (stats are defaults), only three regulars have trees.
+- Lena's warm sprite is 9 px taller than neutral, so her head lifts on the expression swap.
 
 ## How to run
 
-Open `godot/` in Godot 4.7.2 → Play. Title → New game → Manage → Open up → guests queue → Next guest → talk (Space/click
-advances; choices show `[Schnauze 12]`-style tags; locked gates are greyed) → dawn → Summary → Next day. `Tab` shows the
-stats strip. Headless: `node tools/godot/test.mjs`. Windowed (Godot cannot render headless, so it needs a
-desktop session): `node tools/godot/play.mjs` → `shots/play-NN-<step>.png` + `shots/play-log.json`.
+Open `godot/` in Godot 4.7.2 → Play. Title → New game (or Continue) → Manage → Open up → guests queue → Talk to them
+(Space/click advances; choices show `[Schnauze 12]`-style tags; locked gates are greyed) → dawn → Summary → Next day.
+`Tab` shows the stats strip. Headless: `node tools/godot/test.mjs`. Windowed (Godot cannot render headless, so it needs
+a desktop session): `node tools/godot/play.mjs` → `shots/play-NN-<step>.png` + `shots/play-log.json`.
