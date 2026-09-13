@@ -215,7 +215,7 @@ const DATA: Array[Dictionary] = [
 	},
 
 	# ── Nadia Ferreira — 03:40, and the tobacco wall still argues with her every night ─────────
-	{"id": "nadia", "name": "Nadia", "portrait": "char/nadia", "expressions": ["neutral", "warm", "tired"],
+	{"id": "nadia", "name": "Nadia", "portrait": "char/nadia", "expressions": ["neutral", "warm", "wary", "upset", "surprised", "tired"],
 		"archetype_id": "nurse", "colour": "#7fbfb0",
 		"wants": {"coffee": 3, "schrippe": 2, "painkillers": 1},
 		"age": 34, "job": "ITU night nurse", "strand_id": "nadia",
@@ -334,7 +334,7 @@ const DATA: Array[Dictionary] = [
 	},
 
 	# ── Rüdiger Bley — 03:10, still water, and a term sheet he read on a Tuesday ───────────────
-	{"id": "bley", "name": "Herr Bley", "portrait": "char/bley", "expressions": ["neutral", "wary"],
+	{"id": "bley", "name": "Herr Bley", "portrait": "char/bley", "expressions": ["neutral", "wary", "surprised", "tired"],
 		"archetype_id": "insomniac", "colour": "#8a949c",
 		"wants": {"water": 3, "chocolate": 2, "cigarettes": 1},
 		"age": 61, "job": "Corporate real-estate financing", "strand_id": "bley",
