@@ -54,6 +54,8 @@ const SCENE_PRESETS := {
 ## The keys `Rules.view(state)` must hand a scene (docs/05 section 5).
 const VIEW_KEYS := [
 	"phase", "day", "weekday_name", "clock_ms", "night_progress", "time_label", "cash", "pfand_held",
+	# docs/05 §11: the year the cast's seven-step arcs are keyed to.
+	"season", "day_in_season",
 	"pfand_rate", "reputation", "hud", "active", "queue_len", "dialogue", "shelf", "summary", "manage", "ending",
 	# docs/06-dialogue-and-stats.md section 4: the line, the conversation and the character sheet.
 	"queue", "talk", "player",

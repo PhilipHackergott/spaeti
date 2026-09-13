@@ -915,7 +915,10 @@ static func _open_talk(n: Dictionary) -> bool:
 	var active: Dictionary = n["active"]
 	if active.is_empty():
 		return false
-	var graph_id := Content.dialogue_id_for(String(active.get("character_id", "")))
+	# SEASON-AWARE (docs/06 §8): the state goes in, so a guest opens the tree written for the arc
+	# step they are ON — `<char>_<letter><step>` if the cast lane has written it, else their plain
+	# tree, else the parade's. The selector is the only thing that knows the convention.
+	var graph_id := Content.dialogue_id_for(String(active.get("character_id", "")), n)
 	# A minor asking for a restricted SKU gets the ID check instead of the parade's "Here you go." —
 	# the counter's blanket refusal used to swallow that answer into a silent Kiez tick (docs/06 §7).
 	if graph_id == Content.DIALOGUE_FALLBACK and _is_illegal_want(active):
@@ -1021,6 +1024,10 @@ static func _end_talk(n: Dictionary, dismiss: bool, serve_them: bool, allow_rest
 	var active: Dictionary = n["active"]
 	if active.is_empty():
 		return
+	# THE ENCOUNTER IS OVER, so this guest's arc moves on one step (docs/06 §8) — whether a beat brought
+	# them in or they simply turned up and talked. The `last_day` guard inside `advance_step` makes that
+	# at most one step a night, so a beat that already advanced them tonight is not counted twice.
+	StoryFlow.advance_step_for(n, String(active.get("character_id", "")))
 	# THE REGISTER IS THE SERVE NOW (docs/08 §1). Her talk graph ends, the box slides away and she is
 	# STILL STANDING THERE with her basket on the counter — the player scans it and rings it up. The
 	# docs/06 §7 auto-serve was written when a guest had one `want` and ending the sentence was the
@@ -1258,6 +1265,11 @@ static func view(s: Dictionary) -> Dictionary:
 		"phase": s["phase"],
 		"day": int(s["day"]),
 		"weekday_name": WEEKDAY_NAMES[int(s["weekday"]) % 7],
+		# THE YEAR (docs/05 §11): `season_days` cut into four quarters, which is the calendar the cast's
+		# seven-step arcs and the season-aware tree selector both read. Derived here so a screen never
+		# divides days by four on its own and drifts from the reducer.
+		"season": Season.of_state(s),
+		"day_in_season": Season.day_in_season_of_state(s),
 		"clock_ms": int(s["clock_ms"]),
 		"night_progress": progress,
 		"time_label": time_label(progress),

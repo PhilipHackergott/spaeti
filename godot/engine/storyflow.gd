@@ -3,8 +3,9 @@ extends RefCounted
 ## Story delivery — ported from app/src/engine/storyflow.ts with THE ONE DESIGN CHANGE of
 ## docs/05-engine-api.md §4: a beat no longer appears as morning text. It walks in.
 ##
-## open_night → schedule_beats() injects an arrival for the character whose beat is due (≤ 2 story
-## arrivals a night, main arc first, ≤ 1 beat per strand per day). When that customer becomes active,
+## open_night → schedule_beats() injects an arrival for the character whose beat is due (ONE story
+## arrival a night, main arc first, then the guest unseen longest, ≤ 1 beat per strand per day, and
+## never the same face twice in one night). When that customer becomes active,
 ## on_customer_active() makes the beat pending; while pending the UI may only resolve it; resolving
 ## applies the choice and leaves the customer standing there, so the ordinary serve still follows.
 ## All mutations here are in-place on an already-cloned state (Rules.apply owns the cloning).
@@ -12,8 +13,11 @@ extends RefCounted
 const MASK: int = 0xFFFFFFFF
 ## % of quiet (no cast beat) nights that surface a one-off vignette.
 const VIGNETTE_CHANCE: int = 60
-## Cap on story arrivals per night — the loop stays a shop, not a visual novel.
-const MAX_STORY_ARRIVALS: int = 2
+## Cap on story arrivals per night — ONE STORY GUEST AT A TIME (docs/06 §8). The loop stays a shop,
+## not a visual novel: a night carries one cast encounter and the rest of the queue is the parade.
+## It was 2 until the arcs landed; with seven steps per guest the pacing is the ROTATION in
+## `_sorts_before`, not the number of beats crammed into one night.
+const MAX_STORY_ARRIVALS: int = 1
 
 ## Deterministic 32-bit hash: vignette selection is keyed on seed+day only, so it never disturbs the
 ## rng stream that places customers (the prototype's trick — keep it).
@@ -23,16 +27,30 @@ static func _hash2(a: int, b: int) -> int:
 	h ^= h >> 15
 	return h & MASK
 
-## The strand beats that may fire tonight, highest priority first (main arc = 100).
+## The strand beats that may fire tonight, in the order `schedule_beats` should spend the night's one
+## slot on them. A STRAND'S CURRENT BEAT IS ITS CURRENT ARC STEP (docs/06 §8), so the gates are the
+## four it always had — `after_day`, `min_kiez`, `requires_flag`, one beat per strand per day — plus
+## the SEASON.
 static func eligible_beats(s: Dictionary) -> Array:
 	var story: Dictionary = s["story"]
+	var season := Season.of_state(s)
 	var out: Array = []
+	var order := 0
 	for strand in Content.STRANDS:
+		order += 1
 		var progress: Dictionary = story["strands"].get(strand["id"], {})
 		if progress.is_empty():
 			continue
 		var cur: String = progress["cur"]
+		# `last_day` is the "seen tonight" guard, and EVERY encounter stamps it now — a resolved beat
+		# or a closed tree, both through `advance_step`. That is what makes "at most one arc step a
+		# night" and "never the same guest twice in a night" the same single rule.
 		if cur == "" or int(progress["last_day"]) == int(s["day"]):
+			continue
+		# THE SEASON GATE. A step is due from its own season onward and never before: step 5 cannot
+		# play in the summer. A step whose season passed unplayed is STILL due — which is how an arc
+		# catches up ONE STEP PER ENCOUNTER instead of skipping ahead to whatever the date says.
+		if not Season.step_is_due(int(progress.get("step", Season.FIRST_STEP)), season):
 			continue
 		var beat: Dictionary = (strand["beats"] as Dictionary).get(cur, {})
 		if beat.is_empty():
@@ -44,9 +62,34 @@ static func eligible_beats(s: Dictionary) -> Array:
 		var flag: String = beat.get("requires_flag", "")
 		if flag != "" and not (story["flags"] as Array).has(flag):
 			continue
-		out.append({"strand": strand, "beat": beat})
-	out.sort_custom(func(a, b): return int(a["strand"].get("priority", 0)) > int(b["strand"].get("priority", 0)))
+		out.append({"strand": strand, "beat": beat, "last_day": int(progress["last_day"]), "order": order})
+	out.sort_custom(func(a, b): return _sorts_before(a, b))
 	return out
+
+## THE MAIN ARC OUTRANKS THE CAST OUTRIGHT; INSIDE THE CAST, FAIRNESS OUTRANKS PRIORITY.
+##   1. the main arc (priority >= MAIN_ARC_PRIORITY) — its beats are pinned to day milestones and may
+##      not be made to wait behind a regular,
+##   2. whoever has been UNSEEN LONGEST (`last_day` ascending),
+##   3. their `priority`, which is now a tiebreak between two guests last seen on the same night,
+##   4. registry order.
+## Key 2 is what turns a one-a-night cap into a ROTATION. Sorting on `priority` first (which is what
+## this did when a night held two arrivals) starves the bottom of the table completely: measured over
+## a 28-night season, Herr Bley — priority 4, the lowest — never walked in once. Every key is a pure
+## function of state, so the schedule still replays byte-for-byte from {config, seed, actions}.
+const MAIN_ARC_PRIORITY: int = 100
+
+static func _sorts_before(a: Dictionary, b: Dictionary) -> bool:
+	var pa := int((a["strand"] as Dictionary).get("priority", 0))
+	var pb := int((b["strand"] as Dictionary).get("priority", 0))
+	var main_a := pa >= MAIN_ARC_PRIORITY
+	var main_b := pb >= MAIN_ARC_PRIORITY
+	if main_a != main_b:
+		return main_a
+	if int(a["last_day"]) != int(b["last_day"]):
+		return int(a["last_day"]) < int(b["last_day"])
+	if pa != pb:
+		return pa > pb
+	return int(a["order"]) < int(b["order"])
 
 ## Called by open_night AFTER the ordinary arrivals are built: injects tonight's cast arrivals, or —
 ## on a quiet night — pins one unseen vignette onto an ordinary customer. Keeps `arrivals` time-sorted.
@@ -54,6 +97,11 @@ static func schedule_beats(s: Dictionary, rng: Rng) -> void:
 	var arrivals: Array = s["arrivals"]
 	var available: Array = (s["inventory"] as Dictionary).keys()
 	var scheduled := 0
+	# NEVER THE SAME GUEST TWICE IN A NIGHT. A beat may be spoken by someone else's face (the main
+	# arc's `squeeze` is Mehmet's), so two eligible beats can name one person — and two Mehmets in one
+	# queue is a bug the player can see. Deliberately independent of MAX_STORY_ARRIVALS: raising the
+	# cap later must not quietly reintroduce the double.
+	var tonight: Dictionary = {}
 	for entry in eligible_beats(s):
 		if scheduled >= MAX_STORY_ARRIVALS:
 			break
@@ -66,6 +114,8 @@ static func schedule_beats(s: Dictionary, rng: Rng) -> void:
 		var character := Content.character(character_id)
 		if not character.is_empty():
 			archetype_id = beat.get("archetype_id", character.get("archetype_id", archetype_id))
+		if character_id != "" and tonight.has(character_id):
+			continue
 		var arch := Content.archetype(archetype_id)
 		if arch.is_empty():
 			continue
@@ -81,6 +131,8 @@ static func schedule_beats(s: Dictionary, rng: Rng) -> void:
 			# and the arrival shape stays identical to the parade's so `from_json` cannot re-shape it.
 			"bottles": rng.randi_below(Rules.PFAND_MAX_RETURN + 1),
 		})
+		if character_id != "":
+			tonight[character_id] = true
 		scheduled += 1
 	if scheduled == 0:
 		_schedule_vignette(s, rng)
@@ -226,10 +278,41 @@ static func apply_beat_choice(s: Dictionary, choice_index: int) -> void:
 	# `met` holds the strand's display name — Finale composes the tapestry from exactly these.
 	if not (story["met"] as Array).has(strand["character"]):
 		(story["met"] as Array).append(strand["character"])
-	progress["last_day"] = int(s["day"])
+	advance_step(s, strand_id)  # the beat resolved: the arc moves on one step, and `last_day` is stamped
 	progress["cur"] = choice.get("next", "")
 	story["pending"] = {}
 	_set_expression(s, choice)
+
+## THE ARC LEDGER (docs/06 §8). `step` is the Truby step this guest plays NEXT; `season_seen` is the
+## season the last one actually happened in. Three rules, all of them here:
+##   · a step advances when an ENCOUNTER resolves — a beat answered, or the guest's own tree closed;
+##   · AT MOST ONE STEP PER NIGHT PER GUEST: `last_day` is the guard, and stamping it unconditionally
+##     is also what stops the same guest being scheduled again tonight (`eligible_beats` reads it);
+##   · NEVER A SKIP: it is +1, never "jump to whatever the season says", so an arc whose season passed
+##     unplayed catches up one step per encounter. `Season.step_is_due` is the other half of that.
+## It saturates at `Season.LAST_STEP` — once step 7 has played, that tree stays the guest's voice.
+static func advance_step(s: Dictionary, strand_id: String) -> bool:
+	if strand_id == "":
+		return false
+	var progress: Dictionary = (s["story"]["strands"] as Dictionary).get(strand_id, {})
+	if progress.is_empty():
+		return false
+	var day := int(s["day"])
+	var first_tonight := int(progress.get("last_day", -1)) != day
+	progress["last_day"] = day
+	if not first_tonight:
+		return false
+	progress["season_seen"] = Season.of_state(s)
+	progress["step"] = mini(int(progress.get("step", Season.FIRST_STEP)) + 1, Season.LAST_STEP)
+	return true
+
+## The same ledger addressed by the FACE at the counter rather than by the strand — what
+## `Rules._end_talk` calls when a guest's own conversation closes. A face with no persona card (the
+## whole nameless parade) has no strand_id and therefore moves nothing.
+static func advance_step_for(s: Dictionary, character_id: String) -> bool:
+	if character_id == "":
+		return false
+	return advance_step(s, String(Content.character(character_id).get("strand_id", "")))
 
 ## Apply the chosen option of the pending one-off vignette (never repeats: it joins seen_vignettes).
 static func apply_vignette_choice(s: Dictionary, choice_index: int) -> void:

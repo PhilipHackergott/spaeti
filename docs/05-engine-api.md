@@ -13,9 +13,11 @@ godot/engine/rng.gd         class_name Rng        seeded PRNG (port app/src/engi
 godot/engine/state.gd       class_name SpatiState  static new_game(config: Dictionary) -> Dictionary · clone(s) -> Dictionary (duplicate(true)) · to_json(s)->String · from_json(String)->Dictionary · DEFAULT_CONFIG
 godot/engine/rules.gd       class_name Rules       static apply(s, action: Dictionary) -> Dictionary (PURE: returns a new state; an illegal action returns `s` itself, unchanged) · tick(s, dt_ms) · legal_actions(s) -> Array[Dictionary] · view(s) -> Dictionary (derived read-model, §5)
 godot/engine/economy.gd     class_name Economy     price_tier(sku_def, price)->String("steal"|"fair"|"high"|"gouge") · satisfaction(...) · tip_for(...) · kiez_delta(...) · night_traffic(s)->int · module_options(s)->Array
+godot/engine/season.gd      class_name Season      the year (§11): of_day/index_of_day/day_in_season/first_day_of/length_of · of_step/last_step_of/step_is_due · letter_of/index_of · of_state/day_in_season_of_state. PURE, no deps — ONE calendar for the reducer, the registry and the tests
 godot/engine/storyflow.gd   class_name StoryFlow   schedule_beats(s, rng) (called by open_night) · on_customer_active(s) · apply_beat_choice(s, idx) · apply_vignette_choice(s, idx) · current_dialogue(s) -> Dictionary|{}
 godot/engine/talk.gd        class_name Talk       the conversation at the register (§8 / docs/06): node_of(s), view(s), dialogue_view(s), choice_views(s, node), success_chance(dc, mod)
 godot/engine/finale.gd      class_name Finale      main_ending(s)->String · resolve_finale(s)->Dictionary{main, epilogues:[{character, line}]}
+                                                       season-aware dialogue selection (§11.2 / docs/06 §8): dialogue_id_for(character_id, state={}), arc_dialogue_id(), arc_tree_id(), arc_step_of(), arc_title_for_step()
 godot/engine/content/registry.gd  class_name Content   SKUS, SKU_BY_ID, ARCHETYPES, ARCHETYPE_BY_ID, UPGRADES, UPGRADE_BY_ID, STRANDS, STRAND_BY_ID, VIGNETTES, VIGNETTE_BY_ID, CHARACTERS (§6),
                                                        BRANDS/BRAND_BY_ID/BRANDS_BY_SKU/BRAND_BY_ICON + brand(), brands_for(), brand_spoken(), brand_logo(), brand_phrase(), brand_by_icon() (docs/08 §2)
 godot/engine/content/brands.gd    const DATA: Array[Dictionary] — the 22-row tobacco catalogue: 8 cigarettes, 4 pouches, 6 paper variants, 4 filter variants (docs/08 §2)
@@ -39,7 +41,7 @@ arrivals: Array[{ time_ms:int, archetype_id:String, want:String, character_id:St
 next_arrival:int   queue: Array[Customer]   active: Customer|null   next_customer_id:int
 tally: { revenue, cogs, tips, pfand_paid, sales:int, lost:int }
 summaries: Array[{ day, revenue, cogs, tips, bills_due, pfand_paid, profit, cash_after, sales, lost, kiez_delta }]
-story: { flags:Array[String], met:Array[String], strands:{ id:{ cur:String|"", outcome:String|"", last_day:int } },
+story: { flags:Array[String], met:Array[String], strands:{ id:{ cur:String|"", outcome:String|"", last_day:int, step:int 1..7, season_seen:String|"" } },   (the arc ledger — §11.1, docs/06 §8)
          main_outcome:String|"", pending:{ strand:String, beat:String }|{}, seen_vignettes:Array[String], pending_vignette:String|"" }
 rng_state:int   log: Array[{ ts:int, kind:String, text:String, data:Dictionary }]
 Customer = { (plus the register's own `basket` / `counter` / `register` / `hand`, §10.1) id:int, archetype_id:String, want:String, patience_left_ms:int, character_id:String|"", beat_id:String|"", vignette_id:String|"", expression:String ("neutral"|"warm"|"wary"|"upset"), bottles:int (empties THEY carried in — 0..Rules.PFAND_MAX_RETURN; `serve_active` clamps `pfand_bottles` to it. NOT `pfand_held`, which is the shop's crate) }
@@ -63,10 +65,12 @@ line (`_age_queue`) rather than advancing it, unless `config.auto_take_next` is 
 ## 4. Story at the counter (the one design change)
 
 - `open_night` → `StoryFlow.schedule_beats`: for every strand whose next beat is eligible (`after_day`, `min_kiez`,
-  `requires_flag`, ≤ 1 beat/strand/day, main arc first by `priority`), inject **one arrival** for that character
+  `requires_flag`, ≤ 1 beat/strand/day, **the beat's arc step being due in this season** — §11 / docs/06 §8 — main
+  arc first, then whoever has been unseen longest), inject **one arrival** for that character
   (`character_id`, `beat_id`, a `want` from the character's own wants) at a time on that character's curve. On quiet
   nights (no cast beat), schedule at most one eligible **one-off vignette** onto a random ordinary arrival (`vignette_id`).
-  Cap: ≤ 2 story arrivals per night so the loop stays a shop, not a visual novel.
+  Cap: **one story guest at a time** (`MAX_STORY_ARRIVALS = 1`) so the loop stays a shop, not a visual novel,
+  and never the same face twice in one night (docs/06 §8.4).
 - When such a customer becomes `active` (in `tick`), the reducer sets `story.pending = {strand, beat}` (or
   `story.pending_vignette`) and logs `kind:"beat"`. While pending, `legal_actions` offers only `resolve_beat` /
   `resolve_vignette`. Resolving applies the choice's `cash/kiez/profit/integrity/flags/outcome/next`, sets the
@@ -78,7 +82,7 @@ line (`_age_queue`) rather than advancing it, unless `config.auto_take_next` is 
 ## 5. `Rules.view(s)` — the read-model scenes render from (no logic in scenes)
 
 ```
-{ phase, day, weekday_name, clock_ms, night_progress:float 0..1, time_label:"22:40", cash, pfand_held, pfand_rate:float (= Rules.PFAND_PER_BOTTLE — the Till quotes this, never a literal),
+{ phase, day, weekday_name, season:"summer"|"autumn"|"winter"|"spring", day_in_season:int (§11), clock_ms, night_progress:float 0..1, time_label:"22:40", cash, pfand_held, pfand_rate:float (= Rules.PFAND_PER_BOTTLE — the Till quotes this, never a literal),
   reputation, hud:{ kiez_label, profit_label },
   active: {} | { customer, archetype:{id,name}, want:{sku_id,name,price,stock,icon:"sku/beer"}, portrait:"char/lena", expression, patience:float 0..1, is_story:bool, underage:bool, bottles:int },
   queue_len:int,
@@ -241,3 +245,71 @@ counter and to the wall and checks the first; the "−" chip that no `legal_acti
 `Night.controls_for(action)` which node offers it, synthesises a real move-press-release at that node's own
 rect centre, and asserts the state moved — **never a press by node name**, which is exactly how the original
 soft-lock shipped.
+
+---
+
+## 11. The season model (`engine/season.gd`, `class_name Season`)
+
+`config.season_days` is cut into **four equal quarters** — and those quarters are the year the cast's
+seven-step arcs are keyed to (docs/09 §2). One calendar, in one file, dependency-free and pure: the
+reducer, the content registry, `StoryFlow` and the tests all read it, so none of them can disagree
+about what month it is while each looks right on its own. (It replaces the dead three-act `act_of`,
+which had no spring to put step 7 in and which nothing ever called.)
+
+```
+Season.NAMES    ["summer", "autumn", "winter", "spring"]          registry order IS chronological
+Season.LETTERS  summer "s" · autumn "a" · winter "w" · SPRING "p"  (summer already owns "s")
+Season.STEPS    summer [1,2] · autumn [3,4] · winter [5,6] · spring [7]   ← the 2/2/2/1 split, once
+
+of_day(day, season_days) -> String            index_of_day(day, season_days) -> 0..3
+day_in_season(day, season_days) -> int        first_day_of(index, season_days) -> int
+length_of(index, season_days) -> int          index_of(season) -> int | -1     letter_of(season) -> String
+of_step(step) -> String                       last_step_of(season) -> int
+step_is_due(step, season) -> bool             FIRST_STEP = 1   LAST_STEP = 7
+of_state(s) / index_of_state(s) / day_in_season_of_state(s) / season_days_of(s)
+```
+
+**The map, for the shipped 28-night season:** summer **1–7** · autumn **8–14** · winter **15–21** ·
+spring **22–28**. The arithmetic is integer — `index = (day − 1) × 4 / season_days`, clamped — so the
+quarters stay as even as an odd `season_days` allows, every season has at least one day in it even at
+`season_days = 4`, and a day *past* the end (the reducer sets `phase = "end"` on `day > season_days`
+and `view` still renders that state) clamps to spring instead of running off the table.
+
+**`step_is_due(step, season)` is the arc rule** and lives here because it is a property of the
+calendar, not of any strand: a step opens in **its own season** and **stays open for ever after**.
+Step 5 may not play in the summer; step 1 still plays in the spring if nobody ever talked to that
+guest. That is what makes a missed season a catch-up rather than a skip (docs/06 §8).
+
+`Rules.view(s)` carries two derived keys so no screen ever divides days by four on its own:
+
+```
+season: "summer"|"autumn"|"winter"|"spring"      day_in_season: int (1-based, "day 3 of autumn")
+```
+
+`SpatiState.season_of(s)` / `SpatiState.day_in_season(s)` are the same two values for a caller that
+holds a state rather than a view.
+
+### 11.1 The arc ledger, in state
+
+`story.strands[id]` gains two keys (docs/06 §8 owns the rules; §2 above owns the shape):
+
+```
+step: int 1..7        the Truby step this guest plays NEXT — never skipped, at most one a night
+season_seen: String   the season the last one actually HAPPENED in ("" until they have been met)
+```
+
+`season_seen` is **not** the step's own season: an arc that missed the summer plays its summer steps
+in the winter, and the ledger records both facts. `from_json` reads both with defaults, so a save
+written before the seasons loads with every guest on step 1 and nothing seen — which is exactly where
+they were — and `step` is re-integered like every other int in the file.
+
+### 11.2 The season-aware tree selector
+
+```
+Content.dialogue_id_for(character_id: String, s: Dictionary = {}) -> String
+```
+
+Three tiers, first hit wins: **`<char>_<season-letter><step>`** → **`<char>`** → **`oneoff`**. The
+state argument is optional so a content test or a tool still resolves tiers 2–3. See docs/06 §8 for
+the convention and the supporting calls (`arc_tree_id`, `arc_step_of`, `arc_dialogue_id`,
+`arc_title_for_step`).

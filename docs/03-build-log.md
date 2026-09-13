@@ -1263,3 +1263,67 @@ actually see. Nothing here was found by reading the lanes' reports, which were a
 - **12:58 — every spec entry has art.** The last fifteen shelf sprites landed (cigarettes, rolling tobacco, papers, coffee, energy, Schrippe, toilet paper, condoms, batteries, painkillers, currywurst, ice cream, milk, eggs, vape): no placeholder block is left on the counter tray, the order card or the Manage board. 88 spec entries, one PNG each (only `concept/night_interaction`, which is a painting, and `char/brandt_wary` outstanding).
 - **13:55 — pack round 3 shelved, not promoted.** The judge asked for printed headers and warning panels on the cigarette packs; at 26×34 those are two-pixel bands, and the render that carried them also flipped Adler's chevron (the mark IS the brand — the whole matching game rests on it). `tob/pack_adler-r3.png` is kept as a variant; the shipped family stays r2. Micro-detail at facing size is a poor trade against mark legibility, and the measured levers on this project have always been framing and light, not sub-pixel print.
 - **14:03 — the lighting pass paid: register 74 → 76** (palette_lighting 69 → **76**, character 82, pixel 81, Berlin 83). Backdrop r7 (warm centre pool, cooler thirds, cyan fridge rim, darker doorway with neon bounce) and counter r8 (clean top cut — nothing sliced by the strip's edge — plus a warm laminate pool) are canonical. The remaining asks are UI footprint again (the empty receipt area) and wall density, not light.
+
+
+## 2026-09-13 — the seven-step arcs become playable (integrator)
+
+Four content lanes landed in one working tree: 66 new step trees in `dialogues.gd`, every cast strand in
+`story.gd` extended from 2–3 beats to seven, ~220 new `FLAG_READERS` rows, and 32 new test functions across four
+sections of `test_arcs.gd`. Each lane was green on its own three guests. The suite was green on arrival too —
+**263 run, 0 failed** — which is exactly why the integration was worth doing: a lane's own test asks for the tree
+that lane meant to write, so anything cross-cutting passes eleven times and is caught nowhere.
+
+- **The sweep, and why it is not a fourth copy of the lanes' tests.** New `test_arcs.gd` §12 asserts the
+  authoring bar over the cast *as a whole*, derived from `GUESTS` × `Season.STEPS` and `Content.STRANDS` rather
+  than from any list of what a lane happened to write — so a twelfth persona card joins it the day the card
+  lands, and a tree id one letter out fails here instead of shipping. Eight tests: all 77 (guest, step) rows
+  resolve through the **real** `Content.dialogue_id_for` to a distinct written tree and never to the parade, with
+  no orphan tree in the table that no step can name; the budget (5–8 nodes · ≥1 d20 · ≥1 gate locked at day-one
+  stats · faces); the order spoken in the first node; all 77 walked end-to-end through the **real** read-model
+  with no `{token}` reaching the box and the ledger moving on close; no gate anywhere can freeze a strand; the
+  top line carries every strand to its end; every chain seven beats deep with nothing orphaned; and the year.
+- **Two real defects, both invisible to 263 passing tests.**
+  **(1) Lena's and Mehmet's step-1 trees had no locked gate at all.** docs/09 §4 asks every tree for one, but
+  `test_content.gd::test_every_new_tree_locks_at_least_one_door` was written over the *eight new* guests, and
+  these three predate the rule. The day the plain trees became **arc step 1** they owed the same bar as the other
+  seventy-four. Fixed at the root in-voice, at the §0 minimum-locking number, re-using flags that already have
+  readers: Lena's hub node gains `[Schnauze 15] "Put it on the tab and go home, Lena."`, Mehmet's gains
+  `[Brains 14] Write his Widerspruch in lawyer German.` — which is the door his tree's own opening line asks for
+  (*"My German is fine. Lawyer German is another language."*). Jürgen already had his legacy `[Muscle 12]`.
+  **(2) The freeze rule was stated too narrowly to be true.** The lanes converged on "every choice routing into a
+  gated beat sets that beat's flag", which is a *sufficient* condition, not the property. Herr Bley's step 5
+  gates on `bley_talks`, written by his step 2 on both branches — a step reading three steps back is better
+  writing, not a bug, and the narrow rule calls it a defect. The test now walks **every path** of every strand
+  carrying the flags that path actually set, and asserts each beat's `requires_flag` is held on arrival. Only a
+  *terminal* beat may be left unreachable: that is the spring, where an arc forks on whether you ever listened
+  (`bley/b_patron`, `schulz/sc_corner`, `achim/a_elder`), and it is not a freeze — step 6 has recorded an outcome
+  and the step-7 tree still plays, because the selector reads the ledger, not the beat chain.
+- **One year, asked many questions.** Five tests each ran their own 112-night headless season — five identical
+  simulations of one seeded, deterministic state, and most of this file's runtime. The year is now computed once
+  per process (`static var _YEAR`) and read by all of them: `test_arcs.gd` alone went **43s → 22s** with strictly
+  more asserted, because the consolidation paid for two new per-night invariants on every night of the year —
+  **at most one named guest actually reaches the counter** (the queue-level cap was already checked; this checks
+  the night as *played*, now that fourteen strands compete for one slot) and **a byte-stable `to_json → from_json
+  → to_json` at every close**, which is where the ledger's two new keys would drift first.
+- **The four-season acceptance run.** A full headless year on the top line puts **all eleven guests on step 7**
+  with an outcome recorded and a real `season_seen`, every one of them in `story.met` for the Finale, and the
+  finished year round-trips byte for byte. Verified it is not vacuous by measuring shorter years: at
+  `season_days` 28 the cast reaches step **2–4** (typically 3), at 56 step **5–7**, at 112 all eleven reach 7.
+- **PACING is now a product decision with a number on it, and it is the one thing still open.** Roughly **40 %**
+  of the written arcs are reachable in a shipped 28-night run. That is arithmetic, not a bug: fourteen strands
+  share one story slot a night (`MAX_STORY_ARRIVALS = 1`) and `Season.step_is_due` allows at most two steps per
+  season, so seven steps need ~112 nights. `SpatiState.DEFAULT_CONFIG` is deliberately untouched at 28. Three
+  levers — grow `season_days`, put the cap back to 2 (costing the "one story guest at a time" feel the brief
+  asked for), or accept that 28 nights is one *season* of an arc and the spring is what a long game is for.
+  Measured table and the trade in docs/06 §8.7.
+- **Docs corrected where the content contradicted them**, rather than left to rot: docs/06 gains §8.6 (how a step
+  reads the step before it, and the freeze rule as a path property) and §8.7 (pacing, measured); docs/09 §2 and
+  §6 mark the arcs shipped — machinery *and* content — §4.9 records the two new gates, §0's DC table drops
+  "Schnauze: rarely, keep it for rolls" for the shipped distribution (`cha` 15 is the cast's **most**-gated stat,
+  ×17, because most of what these guests need is somebody to *say* something), and §4.10's hand-maintained list
+  of declared readers is replaced by a pointer to the table — ~220 rows is not a thing prose can track, and the
+  stale list was proof of it.
+
+**Suite 263 → 271, 0 failed** (`node tools/godot/test.mjs` → `TESTS 271 run, 0 failed, 114108 asserts`; the
+assert count *falls* because four duplicate 112-night years collapsed into one). `node tools/godot/play.mjs` →
+`PLAY ok steps=20 guests=65`. Nothing committed.

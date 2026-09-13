@@ -37,10 +37,14 @@ reads as a free choice, not as aspiration. So the *minimum locking* `min` per st
 | `con` Stamina | 12 | **13** | staying open later, shutting the shop and going with them |
 | `int` Brains | 13 | **14** | the clause, the lawyer German, the term sheet |
 | `wis` Kiez Sense | 12 | **13** | seeing the thing a person is hiding |
-| `cha` Schnauze | 14 | **15** | rarely — Schnauze is the player's strong suit, keep it for rolls |
+| `cha` Schnauze | 14 | **15** | saying the thing out loud: naming it, asking for it, closing it |
 
 Use exactly these numbers for new gates unless you mean "two upgrades away". Jürgen's existing
-`[Muscle 12]` gate is legacy and stays as written.
+`[Muscle 12]` gate is legacy and stays as written. **As shipped across all 77 trees** the gate
+distribution is `con` 13 ×24 · `cha` 15 ×17 · `dex` 12 ×15 · `str` 11 ×14 · `int` 14 ×14 · `wis` 13 ×4
+(plus Jürgen's legacy `str` 12) — Schnauze turned out to be the cast's most-gated stat, not its
+rarest, because most of what these guests need is for somebody to *say* something. The draft's
+"rarely — keep it for rolls" is corrected here rather than left to contradict the content.
 
 **Checks sit at DC 11–13.** Schnauze 12 = 55 % · Schnauze 13 = 50 % · Brains 13 = 45 % · Kiez Sense
 11 = 60 % · Kiez Sense 12 = 55 %. Nothing below 45 %, nothing above 65 %: a check should feel like a
@@ -49,11 +53,14 @@ real coin, never a tax.
 **The authoring rule the tests enforce:** **choice 0 of every node is never gated**, so the headless
 AutoPlayer (and any "just take the top line" player) always gets out. Every tree below obeys it.
 
-**Trees are keyed by CHARACTER ID.** `Content.dialogue_id_for(character_id)` returns the character id
-**only when `DIALOGUES.has(character_id)`** (`registry.gd`), otherwise the nameless parade's `oneoff`.
-So a tree named `achim_t` would be silently unreachable. Every new tree below is keyed `"achim"`,
-`"karim"`, `"bley"` — which auto-wires it for free. When seasonal swaps arrive, ship the season-aware
-selector in the same commit that renames them; until then, plain ids.
+**Trees are keyed by CHARACTER ID — and, since the seasons landed, by ARC STEP.**
+`Content.dialogue_id_for(character_id, state)` (`registry.gd`) resolves three tiers, first hit wins:
+**`<char>_<season letter><step>`** → **`<char>`** → the nameless parade's **`oneoff`**. Letters are
+summer `s` · autumn `a` · winter `w` · **spring `p`** (summer already owns `s`), and the letter comes
+from the STEP's season, never from the calendar — so `lena_s2` is her summer step 2 whether she plays
+it in July or, catching up, in February. A tree named `achim_t` is still silently unreachable: an id
+has to be one of those two shapes. Every tree below is keyed `"achim"`, `"karim"`, `"bley"` and is
+therefore that guest's **step 1**, auto-wired for free. Full rules: docs/06 §8.
 
 **One engine change is required, and it is five lines.** `Talk.node_of` (`engine/talk.gd:44`)
 currently substitutes only `{want}`, at **two** sites: line 63 (the node's `lines`) and line 67 (each
@@ -146,13 +153,32 @@ everything else. Three trees below order it by gauge.
 ## 2. The cast
 
 Eleven guests. Lena, Jürgen and Mehmet keep their ids, portraits, colours and existing trees — they
-get **one edit each**, the opening line becoming a list order (§4.9). The other eight come from
+get the opening line as a list order, plus (for Lena and Mehmet) the one locked gate every arc step
+owes (§4.9). The other eight come from
 `narrative-design.md` §8; seven of them already have a strand in `story.gd`, so the wiring cost is one
 `characters.gd` row plus one tree. Herr Bley is the only new strand.
 
 Arc steps are Truby's seven, keyed to the year: **Summer = steps 1–2 · Autumn = 3–4 · Winter = 5–6 ·
 Spring = 7.** Step titles are the **beat ids** a later season will ship — "The Night He Doesn't Come"
 is shippable; "Battle" is not.
+
+> **STATUS 2026-09-13 — the arcs are SHIPPED, content and all.** Every step title listed in §2.1–2.11
+> below now exists twice over: as a **beat** in that guest's `story.gd` strand (all eleven chains are
+> seven beats deep, one per step) and as a **dialogue tree** keyed `<char>_<season letter><step>` in
+> `dialogues.gd`. Seventy-seven trees: the eleven plain ones, which *are* step 1, plus sixty-six
+> written by four content lanes. They reach the counter through `Content.dialogue_id_for` with no
+> engine edit per tree — the rules are docs/06 §8, the cast-wide acceptance tests are `test_arcs.gd`
+> §12, and a headless four-season year puts **all eleven guests on step 7 with an outcome recorded**.
+>
+> Three things a writer touching a beat title should know. **(1)** A step number names exactly one
+> tree, for ever: the season letter comes from the *step's* season, never the calendar. **(2)** A beat
+> from step 2 on carries a `requires_flag` written by an earlier beat in the same chain — that is how
+> a step *reads* the step before it, because a dialogue tree cannot gate on a flag. **(3)** Renaming a
+> beat id is cheap; renaming the flag it gates on is not — `eligible_beats` drops a strand whose gate
+> can never be met, which is a guest who silently stops existing (docs/06 §8.6).
+>
+> **What the shipped 28-night year actually delivers is 2–4 of the seven steps per guest.** That is a
+> pacing decision still open, not a defect — the measured table and the three levers are in docs/06 §8.7.
 
 Every guest carries two mandatory clauses, **Stake** (to the Späti) and **Arc link** (to the main
 gentrification arc and to Frau Brandt, the developer's agent). No guest may be written without both.
@@ -1118,7 +1144,7 @@ happened between the draft and the build, both of them content bugs the tests wo
 	},
 ```
 
-### 4.9 The three existing trees — one edit each, not a rewrite
+### 4.9 The three existing trees — two edits each at most, not a rewrite
 
 `lena`, `juergen` and `mehmet` keep every node, every check and every flag they have. When the register
 lands, each opening line becomes a **list order** so the till has something to scan:
@@ -1128,6 +1154,22 @@ lands, each opening line becomes a **list order** so the till has something to s
 | `lena` | `hello` | `"Mate, ein Schrippe, und {brand.tobacco} mit {brand.papers}. …And I'm fifty cents short. Again."` |
 | `juergen` | `crate` | append: `"Und einmal die {brand.cigarettes}. Die kleinen. If it reaches."` |
 | `mehmet` | `letter` | prepend: `"Die {brand.cigarettes}, ein Mate, ein Wasser — und pack die Kippen unten hin, my wife has eyes like a Zollbeamter."` |
+
+**The second edit (2026-09-13, the arc integration pass): Lena and Mehmet each gained one LOCKED
+gate.** These three trees predate §4's "≥ 1 gate that is locked at day-one stats", and
+`test_content.gd::test_every_new_tree_locks_at_least_one_door` was written over the *eight new* guests
+only — so the rule never reached them. The moment the plain trees became **arc step 1** they owed the
+same bar as the other seventy-four, and `test_arcs.gd` §12's cast-wide sweep is what found it (Jürgen
+already had his legacy `[Muscle 12]`). Both new gates use the §0 minimum-locking number for their stat
+and re-use a flag that already has a reader, so no `FLAG_READERS` row moved:
+
+| tree | node | added choice |
+|---|---|---|
+| `lena` | `studio` (the hub every path crosses) | `[Schnauze 15] "Put it on the tab and go home, Lena."` → `kiez +1.5`, `lena_credit`, → `notice` |
+| `mehmet` | `plan` (he will not be the first to make noise) | `[Brains 14] Write his Widerspruch in lawyer German.` → `kiez +1.5`, `mehmet_evidence`, → `rally` |
+
+Mehmet's is the door his tree's own opening line asks for — *"My German is fine. Lawyer German is
+another language."* — which is what a gate should be: the thing the scene already wanted.
 
 ### 4.10 The flag economy
 
@@ -1145,18 +1187,20 @@ lands, each opening line becomes a **list order** so the till has something to s
   beat that *will* consume it. Kind 3 is a promise with a deadline:
   `test_flags.gd::test_no_declared_reader_is_dead` fails the build the day a real gate or a
   `FLAG_LABEL` takes over and the row is not deleted, so the table cannot drift into fiction of its
-  own. `bley_tip` is the first flag to graduate — `bley/b_patron.requires_flag` reads it for real.
-- **Declared readers:** `lena_*` → S1 autumn beat + the `found_voice` outcome · `juergen_*` → *The Night
-  He Doesn't Come* · `mehmet_*`, `kiez_rally` → main step 13 + S3 winter · `schulz_reserved |
-  schulz_hand | schulz_listen | schulz_bag | schulz_brandt_visit` → *They Take The Signal Box Down* and
-  the Brandt pressure beat · `achim_ally | achim_poster | achim_poster_inside | achim_route |
-  achim_cem_story | achim_maths` → the Versammlung at step 19 · `karim_word | karim_zackig | karim_form
-  | karim_helped` → S6 winter deadline · `nadia_held | nadia_offered | nadia_kid | nadia_seen |
-  nadia_tab | nadia_open_at_four` → S9 winter childcare battle · `tobias_lindner | tobias_digging |
-  tobias_warned | tobias_gouged | tobias_invited | tobias_fund_offered | took_fund` → main steps 15–17
-  and S8's fork · `robin_name | robin_crate | robin_rolled | robin_summer` → S10 winter ·
-  `aylin_jonas_two | aylin_named_it | aylin_bench | aylin_bench_talk | aylin_fence | aylin_bring_jonas |
-  aylin_lighter_jar` → S4 winter · `bley_talks | bley_lindner | bley_tip` → S13 winter.
+  own. `bley_tip` was the first flag to graduate — `bley/b_patron.requires_flag` reads it for real —
+  and five more followed it in the arc pass (below).
+- **Declared readers:** the prose list that stood here named ~40 flags and is no longer the truth —
+  the four content lanes added **~220 rows** to `StoryData.FLAG_READERS` between them, one per flag
+  their trees write, each naming the step or the Finale that consumes it. **The table is the list.**
+  Read it in `godot/engine/content/story.gd` or ask `Content.flag_reader(flag)`; do not maintain a
+  second copy in prose, which is exactly how this one rotted. What is worth recording *here* is the
+  rule the lanes kept converging on:
+  **a flag has exactly one reader kind, and promoting it deletes the old row.** Five flags graduated
+  from kind 3 to kind 1 in this pass — `bley_tip` (→ `bley/b_patron`), `bley_talks` (→ `bley/b_armour`),
+  `tobias_fund_offered` (→ `tobias/t_six`), `aylin_jonas_two` (→ `aylinjonas/aj_sundays`) — and two
+  went the other way, `schulz_listen` and `achim_listen` losing their declarations when
+  `schulz/sc_corner` and `achim/a_elder` started gating on them for real.
+  `test_flags.gd::test_no_declared_reader_is_dead` fails the build on either mistake.
 - **`main_lever_hint`** is set by three independent routes — Bley's clause, Tobias's March date, Aylin's
   fence notice — and read once, at the main arc's step 17. The lever is reachable without any single
   guest, which is what keeps it a discovery rather than a required node.
@@ -1271,11 +1315,12 @@ Nothing new enters `view`. A persona card is **static content**, so the reader c
 6 and 7** — eleven persona rows, the eight trees plus the three one-line edits, the `bley` strand
 (seven beats, three outcomes, twelve epilogue lines) and the `aylinjonas` two-field edit, `const
 EXPRESSIONS`, `test_tokens.gd` / `test_flags.gd` / the cast half of `test_content.gd`, and `REGULARS`
-in `test_dialogue.gd` widened from three ids to eleven. Still owed by other lanes: **item 3**
-(`Talk.subs_for` and the two `_apply` call sites — `Content.brand_spoken` / `brand_logo` exist, but
-nothing substitutes `{brand.*}` / `{qty.*}` / `{logo.*}` yet, so those tokens currently print raw),
-the three one-off silhouettes and the archetype remap they gate (§3), and **item 8/9** (art wave 1 and
-the QueueStrip job subtitle).
+in `test_dialogue.gd` widened from three ids to eleven. **Item 3 has since shipped too** —
+`Talk.subs_for` builds the token map once per node and both `_apply` sites read it, so `{qty.*}` /
+`{brand.*}` / `{logo.*}` resolve for real and `test_tokens.gd` + `test_arcs.gd` §12 assert that none
+of them reaches the box unsubstituted, on any of the 77 trees. Still owed by other lanes: the three
+one-off silhouettes and the archetype remap they gate (§3), and **item 8/9** (art wave 1 and the
+QueueStrip job subtitle).
 
 ### Now — the things that are expensive to retrofit
 
@@ -1319,11 +1364,19 @@ the QueueStrip job subtitle).
 
 - **Expression waves 2–4** (55 of 66 portraits). The trees already name them and already degrade to
   `_neutral`. Ship `neutral` for all eleven first so no character is half-drawn next to a finished one.
-- **The seasonal tree swaps.** Only the plain-id tree exists now. `<char>_a2` / `<char>_w3` read the
-  flags set above — and the day they land, the season-aware selector ships in the same commit as the
-  rename, because `dialogue_id_for` returns the character id and nothing else.
-- **The seven-step arcs as `story.gd` beats with season triggers.** The beat ids in §2 are written and
-  waiting; each tree above is that guest's step 1 or 2, so nothing is thrown away.
+- ~~**The seasonal tree swaps.**~~ **SHIPPED** (docs/06 §8). `Content.dialogue_id_for(character_id,
+  state)` now prefers **`<char>_<season letter><step>`** — summer `s` · autumn `a` · winter `w` · spring
+  `p`, the letter taken from the STEP's season — then the plain `<char>` tree, then `oneoff`. It is
+  data-driven (`DIALOGUES.has(id)`), so a lane ships `karim_a3` and it is live with no engine edit. The
+  plain trees above keep their ids and remain each guest's step 1, exactly as promised.
+- ~~**The seven-step arcs as `story.gd` beats with season triggers.**~~ **SHIPPED — machinery *and*
+  content (2026-09-13).** `story.strands[id]` carries `step` (1..7) and `season_seen`; a strand's
+  current beat IS its current arc step; `StoryFlow` will not schedule a step before its season and
+  never skips one (a missed season catches up one step per encounter). And the content landed behind
+  it: **all eleven strands are seven beats deep**, one per Truby step, against the beat ids in §2, and
+  **all 77 step trees are written** — the eleven plain trees (each guest's step 1) plus sixty-six
+  `<char>_<letter><step>` trees. Four content lanes wrote them; `test_arcs.gd` §12 is the cast-wide
+  sweep that holds every one of them to the same bar. See the status block at the top of §2.
 - **`epilogue[main_ending][local_outcome]`** for `achim`, `karim`, `robin`, `aylin`, `bley` — eleven
   guests × four endings × ~three outcomes is a writing job, not an engineering one. The shape exists.
 - **The persona-card overlay and the Kiez page** (§5 steps 2–3). The data ships now; the page is an

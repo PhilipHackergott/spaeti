@@ -98,7 +98,14 @@ static func new_tally() -> Dictionary:
 static func new_story() -> Dictionary:
 	var strands := {}
 	for strand in Content.STRANDS:
-		strands[strand["id"]] = {"cur": strand["start"], "outcome": "", "last_day": -1}
+		strands[strand["id"]] = {
+			"cur": strand["start"], "outcome": "", "last_day": -1,
+			# THE ARC LEDGER (docs/06 §8). `step` is the Truby step this guest plays NEXT (1..7, never
+			# skipped, at most one a night); `season_seen` is the season the last one actually happened
+			# in, which is "" until they have been met and is NOT the same as the step's own season —
+			# an arc that missed the summer plays its summer steps in the winter.
+			"step": Season.FIRST_STEP, "season_seen": "",
+		}
 	return {
 		"flags": [],
 		"met": [],
@@ -235,6 +242,11 @@ static func _normalise(s: Dictionary) -> Dictionary:
 	for strand_id in s["story"]["strands"]:
 		var progress: Dictionary = s["story"]["strands"][strand_id]
 		progress["last_day"] = int(progress["last_day"])
+		# The arc ledger post-dates the autosave, so both keys are read with defaults: a save written
+		# before the seasons landed loads with every guest on step 1 and no season seen, which is
+		# exactly where they were. Re-integering `step` is the usual JSON-makes-everything-a-float pass.
+		progress["step"] = clampi(int(progress.get("step", Season.FIRST_STEP)), Season.FIRST_STEP, Season.LAST_STEP)
+		progress["season_seen"] = String(progress.get("season_seen", ""))
 	var player: Dictionary = s.get("player", new_player())
 	for stat in (player["stats"] as Dictionary):
 		player["stats"][stat] = int(player["stats"][stat])
@@ -322,9 +334,12 @@ static func _normalise_verdict(verdict: Dictionary) -> Dictionary:
 					(entry as Dictionary)[key] = int((entry as Dictionary)[key])
 	return verdict
 
-## Act/season label from the calendar (Summer → Autumn → Winter thirds).
-static func act_of(s: Dictionary) -> String:
-	var f := float(s["day"]) / float(s["config"]["season_days"])
-	if f <= 1.0 / 3.0:
-		return "summer"
-	return "autumn" if f <= 2.0 / 3.0 else "winter"
+## The season label from the calendar. ONE calendar, in `Season` (docs/05 §11) — this is the alias the
+## rest of the engine reached for. It replaces the old three-act `act_of`, which split the year into
+## summer/autumn/winter thirds: the cast's arcs are keyed to FOUR seasons, so a three-way split had no
+## spring to put step 7 in and nothing ever called it.
+static func season_of(s: Dictionary) -> String:
+	return Season.of_state(s)
+
+static func day_in_season(s: Dictionary) -> int:
+	return Season.day_in_season_of_state(s)

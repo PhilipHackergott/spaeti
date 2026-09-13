@@ -166,6 +166,11 @@ static func _base() -> Dictionary:
 		"phase": "night",
 		"day": 3,
 		"weekday_name": "Mittwoch",  # day 3 = Rules.WEEKDAY_NAMES[2]; day 1 is a Montag
+		# The year (docs/05 §11). Day 3 of the default 28-day season is the third day of summer —
+		# derived from the engine's own calendar so a capture can never quote a season the reducer
+		# would not agree with.
+		"season": Season.of_day(3, SpatiState.DEFAULT_CONFIG["season_days"]),
+		"day_in_season": Season.day_in_season(3, SpatiState.DEFAULT_CONFIG["season_days"]),
 		"clock_ms": 9600000,
 		"night_progress": 0.33,
 		"time_label": "22:40",

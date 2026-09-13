@@ -138,9 +138,58 @@ static func basket_for(character_id: String) -> Array:
 static func flag_reader(flag: String) -> String:
 	return String(FLAG_READERS.get(flag, ""))
 
-## The conversation graph a guest gets: their own if one is written, else the nameless parade's.
-static func dialogue_id_for(character_id: String) -> String:
+## THE SEASON-AWARE SELECTOR (docs/06 §8, docs/09 §6). The conversation graph a guest gets, in three
+## tiers, first hit wins:
+##   1. `<char>_<season-letter><step>` — the tree the cast lane wrote for the arc step they are ON,
+##   2. `<char>`                       — their plain tree (which IS step 1 for the eight new guests),
+##   3. `oneoff`                       — the nameless parade's.
+## `s` is optional so a caller with no game in hand (a content test, a tool) still resolves tiers 2-3.
+## DATA-DRIVEN: existence is `DIALOGUES.has(id)` every time, never a hard-coded list of who has what —
+## a content lane ships `karim_a3` and it is live on the next night with no engine edit.
+static func dialogue_id_for(character_id: String, s: Dictionary = {}) -> String:
+	var seasonal := arc_dialogue_id(character_id, s)
+	if seasonal != "":
+		return seasonal
 	return character_id if DIALOGUES.has(character_id) else DIALOGUE_FALLBACK
+
+## Tier 1 on its own, or "" — the step tree this guest is on IF the cast lane has written it yet.
+static func arc_dialogue_id(character_id: String, s: Dictionary) -> String:
+	var step := arc_step_of(character_id, s)
+	if step <= 0:
+		return ""
+	var id := arc_tree_id(character_id, step)
+	return id if DIALOGUES.has(id) else ""
+
+## THE TREE-ID CONVENTION, in one place: `<character>_<season letter><step>` — `lena_s2`, `achim_a3`,
+## `bley_w5`, `karim_p7`. The letter comes from the STEP's season (Season.of_step), never from the
+## calendar, so a guest catching up on a summer step in the winter still opens the tree written for
+## that step. A step number therefore names exactly one tree, for ever.
+static func arc_tree_id(character_id: String, step: int) -> String:
+	var n := clampi(step, Season.FIRST_STEP, Season.LAST_STEP)
+	return "%s_%s%d" % [character_id, Season.letter_of(Season.of_step(n)), n]
+
+## Which of the seven steps this guest is on, out of their strand's ledger. 0 = not a cast member (the
+## parade, `you`, `brandt`), or a state with no story in it — both of which mean "no seasonal tree".
+static func arc_step_of(character_id: String, s: Dictionary) -> int:
+	if character_id == "" or s.is_empty():
+		return 0
+	var strand_id := String(character(character_id).get("strand_id", ""))
+	if strand_id == "":
+		return 0
+	var strands: Dictionary = (s.get("story", {}) as Dictionary).get("strands", {})
+	var progress: Dictionary = strands.get(strand_id, {})
+	if progress.is_empty():
+		return 0
+	return clampi(int(progress.get("step", Season.FIRST_STEP)), Season.FIRST_STEP, Season.LAST_STEP)
+
+## The beat id the persona card names for a step ("The Honest Piece") — authoring metadata the card
+## overlay prints and the cast lane writes trees against. The reducer never reads it.
+static func arc_title_for_step(character_id: String, step: int) -> String:
+	var n := clampi(step, Season.FIRST_STEP, Season.LAST_STEP)
+	var season := Season.of_step(n)
+	var titles: Array = (character(character_id).get("arc", {}) as Dictionary).get(season, [])
+	var i := (Season.STEPS[season] as Array).find(n)
+	return String(titles[i]) if i >= 0 and i < titles.size() else ""
 
 static func dialogue(id: String) -> Dictionary:
 	return DIALOGUES.get(id, {})
