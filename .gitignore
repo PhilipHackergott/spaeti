@@ -43,3 +43,6 @@ desktop.ini
 art/raw/
 shots/
 judge/
+
+# Codex image_gen scratch (a Codex session writes here when it is run from the repo root)
+tmp/
