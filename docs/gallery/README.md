@@ -9,4 +9,5 @@
 | night-queue_waiting.png | The line: three guests waiting, stats strip (Muscle…Schnauze), Next guest | — |
 | play-queue.png / play-talk-choice.png | Real playthrough frames (scripted driver on the live engine) | — |
 | title-r4.png | Title key art (astra) | **86 pass** |
+| ending.png | The season's end (phase `end`): the finale card the engine had composed since day one but no screen ever showed — verdict, per-regular epilogues, Back to title pinned in the foot | — |
 | concept-r3-grid.png | Composed target concept (astra), real-Späti set, at game density | 77 |
