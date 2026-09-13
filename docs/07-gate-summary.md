@@ -71,10 +71,7 @@ human pass over the raws; another round of prompt discipline is not going to clo
 - The one-off guests (clubber, tourist) and the five non-demo portraits still use the behind-the-counter seat; the
   three regulars lean.
 - No audio, no character-creation screen (stats are defaults).
-- **Eight of the eleven guests list only `neutral`**, and four of those (karim, robin, aylin, bley) have no PNG at
-  all and render as correctly-sized placeholders. The data is honest — `test_content.gd` fails any expression a
-  character claims without a file on disk — but the cast does not yet *read* as eleven people. Promotion is one
-  array edit per delivered portrait.
+- **All eleven guests have a leaning identity portrait on disk** (art wave 1 done 2026-09-13 morning); expression wave 2 — the 27 expressions the new trees actually use — is generating and lands one array edit per file in `characters.gd` (`test_content.gd` fails any claim without a file).
 - **Three one-off silhouettes are still unremapped:** six archetypes point at `char/oneoff_clubber`, and
   `oneoff_lateworker` / `dogwalker` / `kassenkind` are in neither `docs/asset-spec.json` nor `Assets.SIZES` (both
   orchestrator-owned). Order of operations is recorded at `characters.gd:358`.
