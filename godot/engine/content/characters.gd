@@ -125,7 +125,7 @@ const DATA: Array[Dictionary] = [
 	},
 
 	# ── Frau Brandt — NOT a guest: the developer's agent, pressure on all eleven (docs/09 §2.11) ─
-	{"id": "brandt", "name": "Frau Brandt", "portrait": "char/brandt", "expressions": ["neutral"],
+	{"id": "brandt", "name": "Frau Brandt", "portrait": "char/brandt", "expressions": ["neutral", "wary"],
 		"archetype_id": "tourist", "colour": "#8fa8c8",
 		"wants": {"water": 3, "coffee": 1}},
 
