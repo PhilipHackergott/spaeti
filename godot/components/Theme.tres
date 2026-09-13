@@ -257,6 +257,23 @@ corner_radius_bottom_right = 2
 corner_radius_bottom_left = 2
 anti_aliasing = false
 
+[sub_resource type="StyleBoxFlat" id="SB_StepDisabled"]
+content_margin_left = 4.0
+content_margin_top = 0.0
+content_margin_right = 4.0
+content_margin_bottom = 0.0
+bg_color = Color(0.09, 0.08, 0.08, 0.6)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 1, 1, 0.1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+anti_aliasing = false
+
 [sub_resource type="StyleBoxFlat" id="SB_MenuHover"]
 content_margin_left = 10.0
 content_margin_top = 2.0
@@ -366,6 +383,8 @@ StepButton/styles/focus = SubResource("SB_StepHover")
 StepButton/styles/hover = SubResource("SB_StepHover")
 StepButton/styles/normal = SubResource("SB_Step")
 StepButton/styles/pressed = SubResource("SB_StepHover")
+StepButton/styles/disabled = SubResource("SB_StepDisabled")
+StepButton/colors/font_disabled_color = Color(0.612, 0.549, 0.49, 0.6)
 TinyLabel/base_type = &"Label"
 TinyLabel/colors/font_color = Color(0.957, 0.906, 0.824, 1)
 TinyLabel/font_sizes/font_size = 16

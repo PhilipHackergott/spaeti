@@ -127,13 +127,35 @@ static func clone(s: Dictionary) -> Dictionary:
 static func to_json(s: Dictionary) -> String:
 	return JSON.stringify(s)
 
+## The keys `_normalise` INDEXES (as opposed to reading with a default). A half-written file, or a
+## save from a build before a key existed, parses as a Dictionary but is not a state — and indexing
+## it threw a script error out of the reducer while the title's Continue swallowed the click.
+## `player` and `talk` stay forgiving: they post-date the autosave and keep their `.get()` defaults.
+const SAVE_SHAPE := {
+	"": ["config", "phase", "day", "weekday", "clock_ms", "pfand_held", "next_arrival",
+		"next_customer_id", "rng_state", "cash", "ordnungsamt_heat", "inventory", "arrivals",
+		"queue", "active", "tally", "summaries", "story", "log"],
+	"config": ["seed", "night_len_ms", "season_days", "start_cash", "rent_per_day"],
+	"tally": ["sales", "lost"],
+	"story": ["strands"],
+}
+
 ## Parse + re-integer: Godot's JSON makes every number a float, so `day` would come back as 1.0 and
 ## stringify as "1.0" — the round-trip (and every `==` against an int) breaks without this pass.
+## A shape `_normalise` cannot walk comes back as `{}`, so a bad save is a dead Continue, never a crash.
 static func from_json(text: String) -> Dictionary:
 	var parsed: Variant = JSON.parse_string(text)
 	if typeof(parsed) != TYPE_DICTIONARY:
 		return {}
-	return _normalise(parsed as Dictionary)
+	var s := parsed as Dictionary
+	for section in SAVE_SHAPE:
+		var d: Variant = s if String(section) == "" else s.get(section)
+		if typeof(d) != TYPE_DICTIONARY:
+			return {}
+		for key in SAVE_SHAPE[section]:
+			if not (d as Dictionary).has(key):
+				return {}
+	return _normalise(s)
 
 static func _normalise(s: Dictionary) -> Dictionary:
 	var cfg: Dictionary = s["config"]

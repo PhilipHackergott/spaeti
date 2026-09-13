@@ -20,6 +20,11 @@ var pfand_rate: float = 0.0
 ## never stage more than this — the reducer clamps it anyway, and a button that stages a number the
 ## engine will throw away is a lie you can click.
 var pfand_available: int = 0
+## Can the counter take an order at all right now? `serve_active` / `skip_active` are offered only
+## with a guest at the counter and nobody mid-sentence (docs/05 §4). A button the reducer will refuse
+## is a lie you can click — and the scene used to clear the tray and close the panel on the refusal,
+## reporting a completed sale that moved no cash.
+var can_serve: bool = false
 
 const MAX_ROWS := 2
 
@@ -82,6 +87,11 @@ func set_pfand_available(n: int) -> void:
 	pfand_available = maxi(0, n)
 	_refresh()
 
+## Told, never read: the tray does not reach into the view (the same shape as `set_pfand_available`).
+func set_can_serve(v: bool) -> void:
+	can_serve = v
+	_refresh()
+
 func clear() -> void:
 	lines.clear()
 	pfand_bottles = 0
@@ -140,11 +150,14 @@ func _refresh() -> void:
 		total_label.text = Palette.money(total() - float(pfand_bottles) * pfand_rate)
 	var ring := get_node_or_null("%RingUp") as Button
 	if ring != null:
-		ring.disabled = lines.is_empty() and pfand_bottles == 0
+		ring.disabled = not can_serve or (lines.is_empty() and pfand_bottles == 0)
 	var pf := get_node_or_null("%PfandButton") as Button
 	if pf != null:
 		# Nothing on the counter, nothing to take back. A staged tray stays clearable either way.
 		pf.disabled = pfand_available <= 0 and pfand_bottles <= 0
+	var wave := get_node_or_null("%WaveOff") as Button
+	if wave != null:
+		wave.disabled = not can_serve   # nobody at the counter, nobody to wave off
 
 ## The rate as the row prints it: "0,15" (no euro sign — the row is already a price line).
 func _rate_text() -> String:

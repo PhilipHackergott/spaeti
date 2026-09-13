@@ -69,18 +69,14 @@ func save() -> bool:
 	f.close()
 	return true
 
-## Is there something for the title's "Continue" to load?
+## Is there something for the title's "Continue" to load? File existence is not enough: a truncated
+## write (a watchdog kill mid-save) or a save from an older key set parses to nothing, and the title
+## would light a button that swallows the click and prints a script error.
 func has_save() -> bool:
-	return FileAccess.file_exists(SAVE_PATH)
+	return not _read_save().is_empty()
 
 func load_save() -> bool:
-	if not FileAccess.file_exists(SAVE_PATH):
-		return false
-	var f := FileAccess.open(SAVE_PATH, FileAccess.READ)
-	if f == null:
-		return false
-	var loaded := SpatiState.from_json(f.get_as_text())
-	f.close()
+	var loaded := _read_save()
 	if loaded.is_empty():
 		return false
 	var prev := state
@@ -88,3 +84,14 @@ func load_save() -> bool:
 	_view_valid = false
 	changed.emit(prev, state)
 	return true
+
+## Read and close, THEN parse — a parse that aborts must not leave the handle open.
+func _read_save() -> Dictionary:
+	if not FileAccess.file_exists(SAVE_PATH):
+		return {}
+	var f := FileAccess.open(SAVE_PATH, FileAccess.READ)
+	if f == null:
+		return {}
+	var text := f.get_as_text()
+	f.close()
+	return SpatiState.from_json(text)

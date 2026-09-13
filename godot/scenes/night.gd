@@ -57,6 +57,8 @@ func _ready() -> void:
 		queue.talk_next.connect(_on_talk_next)
 	if box != null and not box.finished.is_connected(_on_dialogue_finished):
 		box.finished.connect(_on_dialogue_finished)
+	if box != null and not box.choices_shown.is_connected(_anchor_choice):
+		box.choices_shown.connect(_anchor_choice)
 	# The box settles its HEIGHT on its own (and a frame late, deferred), so the sheet cannot be placed
 	# from `_place_chrome` alone - it follows the box's real edge.
 	if box != null and not box.resized.is_connected(_place_stats):
@@ -162,13 +164,19 @@ func _advance_phase(v: Dictionary) -> bool:
 			var counter_clear := (v.get("active", {}) as Dictionary).is_empty() and int(v.get("queue_len", 0)) == 0
 			if not _closing and counter_clear:
 				_closing = true
-				dispatch({"type": "close_night"})
-				return true
-			return false
+				# NEVER dispatch from inside `render`: `Session.changed` re-enters `render()` while
+				# this one is still on the stack, and the inner pass re-seats the bust underneath the
+				# outer one (SceneLayers.mount then takes the not-in-tree branch and Godot warns the
+				# owner is inconsistent). Latch the close and fire it at idle; `render` stays a read.
+				dispatch.call_deferred({"type": "close_night"})
+			# Latched but not closed yet: the counter on screen is already stale, so do not redraw it.
+			return _closing
 		"summary", "end":
 			if not _leaving:
 				_leaving = true
-				request_screen.emit("summary")
+				# The reducer may already be past the summary (a season that ended on this night), so
+				# route by the phase rather than always handing over the P&L card.
+				request_screen.emit(Screen.screen_for(String(v.get("phase", ""))))
 			return true
 	return false
 
@@ -243,6 +251,8 @@ func apply_capture_preset(preset_name: String) -> void:
 ## walk the focus ring: a sheet that opens while the focus jumps to the next choice is worse than no
 ## sheet at all. Nothing else on this screen wants Tab.
 func _input(event: InputEvent) -> void:
+	if is_paused():
+		return   # the shell's pause overlay is up: the night stands still behind it, keys included
 	var key := event as InputEventKey
 	if key == null or not key.pressed or key.echo or key.keycode != KEY_TAB:
 		return
@@ -251,8 +261,31 @@ func _input(event: InputEvent) -> void:
 		stats.toggle()
 	get_viewport().set_input_as_handled()
 
+## A built choice list takes the keyboard, so a conversation is answerable without a mouse: `ui_up`/
+## `ui_down` then walk the rows and `ui_accept` presses one. The ring will not START from nothing.
+## Deferred: `_build_choices` sets `visible` after the rows are added, and `grab_focus()` on a
+## not-yet-visible control is dropped. Never in a capture — the focus ring is a real border on a
+## ChoiceButton and would land in the judged hero frame.
+func _anchor_choice() -> void:
+	if _capture_mode:
+		return
+	call_deferred("_anchor_choice_now")
+
+func _anchor_choice_now() -> void:
+	if _capture_mode or not is_inside_tree():
+		return
+	# Never steal the focus from something the player is already on; `_clear_choices` frees the
+	# focused row, so the next node re-anchors by itself.
+	if get_viewport().gui_get_focus_owner() != null:
+		return
+	var box := _dialogue()
+	if box != null:
+		box.focus_first_choice()
+
 ## Space / click advances the conversation; with nothing being said it opens the shelf.
 func _unhandled_input(event: InputEvent) -> void:
+	if is_paused():
+		return
 	if event.is_action_pressed("ui_accept"):
 		# The BOX is not the state: a guest at the counter always has their order line on screen
 		# (`render`'s `active` fallback), so `box.visible` was true in exactly the moment Space should
@@ -265,6 +298,25 @@ func _unhandled_input(event: InputEvent) -> void:
 		else:
 			toggle_serve()
 		get_viewport().set_input_as_handled()
+		return
+	# The rows print "1." / "2." (`Strings.CHOICE_NUMBER`) — the universal promise that the digit picks
+	# them. Nothing was bound to it. `_unhandled_input`, not `_input`: a focused control gets first
+	# refusal, unlike Tab, which is deliberately taken above.
+	var key := event as InputEventKey
+	if key != null and key.pressed and not key.echo:
+		var n := _digit(key.keycode if key.keycode != KEY_NONE else key.physical_keycode)
+		var box := _dialogue()
+		if n > 0 and box != null and box.visible and box.choose_number(n):
+			get_viewport().set_input_as_handled()
+
+## 1..9 from the number row or the keypad; 0 for anything else. This screen has no text field, so a
+## digit here can never be somebody's typing.
+static func _digit(code: int) -> int:
+	if code >= KEY_1 and code <= KEY_9:
+		return code - KEY_1 + 1
+	if code >= KEY_KP_1 and code <= KEY_KP_9:
+		return code - KEY_KP_1 + 1
+	return 0
 
 func toggle_serve() -> void:
 	var panel := _serve()
@@ -407,7 +459,11 @@ func _talk_dialogue(talk: Dictionary) -> Dictionary:
 	}
 
 func _on_serve(action: Dictionary) -> void:
-	dispatch(action)
+	# The reducer refused it (the guest balked between the render and the press, or nobody was there
+	# at all): the tray stays exactly as the player left it instead of reporting a sale that never
+	# happened.
+	if not dispatch(action):
+		return
 	var panel := _serve()
 	if panel != null:
 		var t := panel.till()
@@ -417,7 +473,8 @@ func _on_serve(action: Dictionary) -> void:
 	_place_chrome(view())
 
 func _on_wave_off() -> void:
-	dispatch({"type": "skip_active"})
+	if not dispatch({"type": "skip_active"}):
+		return
 	var panel := _serve()
 	if panel != null:
 		var t := panel.till()

@@ -81,3 +81,19 @@ func test_apply_never_mutates_the_state_it_was_given() -> void:
 	Rules.apply(s, {"type": "set_price", "sku": "beer", "price": 9.0})
 	Rules.apply(s, {"type": "close_night"})
 	assert_eq(SpatiState.to_json(s), before, "the reducer is pure")
+
+## 2026-09-13: `Session.has_save()` was `FileAccess.file_exists` alone, so a truncated write (a
+## watchdog kill mid-save) or a save from a build before a key existed lit "Continue" on the title —
+## and pressing it threw `Invalid access to property or key 'config'` out of `_normalise` and
+## swallowed the click. A shape the reducer cannot walk is not a save.
+func test_from_json_rejects_a_save_it_cannot_normalise() -> void:
+	assert_true(SpatiState.from_json('{"active":{},"arrivals":[{"archetype').is_empty(), "a truncated write is not a save")
+	assert_true(SpatiState.from_json('{"day":3,"phase":"manage"}').is_empty(), "an older key set is not a save")
+	assert_true(SpatiState.from_json("[1,2,3]").is_empty(), "a JSON array is not a save")
+	assert_true(SpatiState.from_json("").is_empty(), "an empty file is not a save")
+	var real := SpatiState.to_json(SpatiState.new_game({}))
+	assert_false(SpatiState.from_json(real).is_empty(), "a real save still loads")
+	# ...and one mid-season, with a night's worth of state in it.
+	var s := Rules.apply(SpatiState.new_game({"seed": 5}), {"type": "open_night"})
+	s = Rules.tick(s, 60000)
+	assert_false(SpatiState.from_json(SpatiState.to_json(s)).is_empty(), "so does a save taken mid-night")

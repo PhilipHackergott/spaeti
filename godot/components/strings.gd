@@ -105,6 +105,11 @@ const MANAGE_MODULES := "MODULES"
 const MANAGE_OWNED := "owned"
 const MANAGE_STANDING := "YOUR CORNER"           # the standing panel: what the modules and the conversations made
 const OPEN_UP := "Open up"
+## The Ladenschluss gamble (GDD §4.9): a standing decision, so the plate says which way it is set.
+## It is offered every manage hour because `legal_actions` is — the roll only happens on a Sonntag.
+const SUNDAY_CLOSED := "Sonntag: shut"
+const SUNDAY_OPEN := "Sonntag: open"
+const MANAGE_HEAT := "Ordnungsamt attention %d"   # what the gamble has cost so far
 const CASH := "Cash %s"
 const WHOLESALE := "buy %s"                     # the wholesale price of one unit
 

@@ -5,6 +5,9 @@ extends Control
 
 signal closed()
 
+## Who had the keyboard before we opened, so closing hands it straight back.
+var _focus_return: Control = null
+
 @export var title: String = "":
 	set(v):
 		title = v
@@ -31,6 +34,7 @@ func _ready() -> void:
 
 func open() -> void:
 	visible = true
+	_trap_focus(true)
 	if not Palette.reduce_motion and is_inside_tree():
 		modulate.a = 0.0
 		create_tween().tween_property(self, "modulate:a", 1.0, 0.14)
@@ -38,8 +42,57 @@ func open() -> void:
 		modulate.a = 1.0
 
 func close_modal() -> void:
+	_trap_focus(false)
 	visible = false
 	closed.emit()
+
+## The Dim stops the MOUSE; nothing stopped the keyboard. Godot's Tab ring only skips controls that
+## are invisible or unfocusable, so with the Title's Settings frame up one Tab landed on "Quit"
+## behind the dim and Enter ended the process. `focus_behavior_recursive` is the lever: the screen
+## behind us goes FOCUS_BEHAVIOR_DISABLED, our own subtree FOCUS_BEHAVIOR_ENABLED (it overrides the
+## disabled ancestor), and close puts both back to INHERITED plus the focus where we found it.
+func _trap_focus(on: bool) -> void:
+	# The flags are set tree or no tree (a test instantiates the screen loose); only the focus owner
+	# itself needs a viewport.
+	var behind := get_parent() as Control
+	if on:
+		if is_inside_tree():
+			_focus_return = get_viewport().gui_get_focus_owner()
+		focus_behavior_recursive = Control.FOCUS_BEHAVIOR_ENABLED
+		if behind != null:
+			behind.focus_behavior_recursive = Control.FOCUS_BEHAVIOR_DISABLED
+		if is_inside_tree():
+			_grab_first.call_deferred()   # deferred: the content is reparented and laid out this frame
+	else:
+		if behind != null:
+			behind.focus_behavior_recursive = Control.FOCUS_BEHAVIOR_INHERITED
+		focus_behavior_recursive = Control.FOCUS_BEHAVIOR_INHERITED
+		if _focus_return != null and is_instance_valid(_focus_return) and _focus_return.is_inside_tree():
+			_focus_return.grab_focus()
+		_focus_return = null
+
+## First focusable control inside the frame, so the keyboard starts where the eye is.
+func _grab_first() -> void:
+	if not visible or not is_inside_tree():
+		return
+	var first := _first_focusable(content())
+	if first == null:
+		first = get_node_or_null("%Close") as Control
+	if first != null and first.is_visible_in_tree():
+		first.grab_focus()
+
+func _first_focusable(root: Node) -> Control:
+	if root == null:
+		return null
+	for ch in root.get_children():
+		var c := ch as Control
+		# A disabled Button keeps FOCUS_ALL in Godot, so it would still swallow the opening focus.
+		if c != null and c.is_visible_in_tree() and c.get_focus_mode_with_override() == Control.FOCUS_ALL and not (c is BaseButton and (c as BaseButton).disabled):
+			return c
+		var deeper := _first_focusable(ch)
+		if deeper != null:
+			return deeper
+	return null
 
 ## Where a screen puts its rows.
 func content() -> Control:

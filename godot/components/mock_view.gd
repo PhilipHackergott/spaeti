@@ -12,6 +12,8 @@ const PRESETS := [
 	"serving", "pfand", "late_night", "manage", "summary",
 	# The register screen (docs/06-dialogue-and-stats.md section 5): the line, the conversation, the roll.
 	"queue_waiting", "talk_lines", "talk_choice", "talk_result",
+	# The season's end — the finale card (Finale.resolve_finale).
+	"ending",
 ]
 
 static func presets() -> Array:
@@ -106,6 +108,21 @@ static func view(preset: String) -> Dictionary:
 			talk["expression"] = "warm"
 			talk["lines"] = ["Ha. Fine — one sketch, one Mate. Don't tell Jürgen."]
 			v["talk"] = talk
+		"ending":
+			# The season is over: `legal_actions` is empty and `view.ending` is the whole screen. Two
+			# epilogues so the tapestry's list branch is exercised by every capture and test.
+			v["phase"] = "end"
+			_set_clock(v, "04:00", 1.0)
+			v["cash"] = 212.4
+			v["ending"] = {
+				"main": "held",
+				"title": "Held the Line",
+				"line": "Scarred and a little broke, but the doors are open and the Kiez is intact. You stayed.",
+				"epilogues": [
+					{"character": "lena", "line": "She still comes in on Sundays. The sketch of your corner is taped behind the till."},
+					{"character": "juergen", "line": "Jürgen keeps the crate by the door, and nobody moves it."},
+				],
+			}
 		_:
 			pass
 	# ONE source, exactly as the engine builds it (rules.gd: both fields come off `s["queue"]`), so a
@@ -147,7 +164,8 @@ static func _base() -> Dictionary:
 		# is a fresh corner, so the "your corner" panel stands down and the shot is unchanged.
 		"manage": {"restock_options": _restock(), "modules": _modules(),
 			"status": {"kiez_per_night": 0.0, "traffic_mult": 1.0, "systems": [], "flags": [],
-				"illegal": false, "has_security": false, "heat": 0.0}},
+				"illegal": false, "has_security": false, "heat": 0.0},
+			"open_sunday": false},
 		"ending": {},
 	}
 
@@ -276,4 +294,7 @@ static func _modules() -> Array:
 		{"def": {"id": "fridge_2", "name": "Second fridge", "cost": 120.0, "note": "+6 cold slots, fewer warm-beer balks"}, "owned": false, "available": true, "affordable": false, "reason": ""},
 		{"def": {"id": "coffee_pot", "name": "Filter coffee pot", "cost": 80.0, "note": "Unlocks Kaffee after midnight"}, "owned": true, "available": false, "affordable": true, "reason": ""},
 		{"def": {"id": "awning", "name": "Awning + bench", "cost": 150.0, "note": "Patience +15% when it rains"}, "owned": false, "available": true, "affordable": false, "reason": ""},
+		# A LOCKED one, so the capture presets actually render the row type the board grew in 2026-09-13.
+		# The wording mirrors `Economy.unlock_reason`: the mock may only say what the engine could.
+		{"def": {"id": "mate_tap", "name": "Mate on tap", "cost": 280.0, "note": "Pulls the late crowd"}, "owned": false, "available": false, "affordable": false, "reason": "unlocks on day 10"},
 	]

@@ -291,6 +291,21 @@ static func _serve(n: Dictionary, give: Array, pfand_bottles: int) -> void:
 		_log(n, "tip", "Tip: €%.2f." % tip)
 	_next_customer(n)
 
+## What a restock ACTUALLY costs after the crate's Pfand credit — the same arithmetic `_restock`
+## charges below, so `legal_actions` and the board's "+" gate on exactly what the reducer will accept
+## (with a full crate a restock goes through on 0,00 € cash; the old `cost <= cash` denied it).
+static func restock_cost(s: Dictionary, sku_id: String, qty: int) -> float:
+	var def := Content.sku(sku_id)
+	if def.is_empty() or not (s["inventory"] as Dictionary).has(sku_id) or qty <= 0:
+		return -1.0
+	var credit := float(s["pfand_held"]) * PFAND_PER_BOTTLE
+	return Economy.round2(maxf(0.0, float(qty) * float(def["cost"]) - credit))
+
+## Will `apply(s, {restock})` move the stock? The one affordability rule the UI may ask.
+static func can_restock(s: Dictionary, sku_id: String, qty: int) -> bool:
+	var cost := restock_cost(s, sku_id, qty)
+	return cost >= 0.0 and cost <= float(s["cash"])
+
 static func _restock(n: Dictionary, sku_id: String, qty: int) -> bool:
 	var def := Content.sku(sku_id)
 	var inv: Dictionary = (n["inventory"] as Dictionary).get(sku_id, {})
@@ -600,7 +615,7 @@ static func legal_actions(s: Dictionary) -> Array:
 			out.append({"type": "set_sunday_open", "open": not bool(s["open_sunday"])})
 			for sku_id in (s["inventory"] as Dictionary).keys():
 				out.append({"type": "set_price", "sku": sku_id, "price": float(s["inventory"][sku_id]["price"])})
-				if float(Content.sku(sku_id).get("cost", 0.0)) <= float(s["cash"]):
+				if can_restock(s, sku_id, 1):
 					out.append({"type": "restock", "sku": sku_id, "qty": 1})
 			for option in Economy.module_options(s):
 				if option["available"] and option["affordable"]:
@@ -680,8 +695,11 @@ static func view(s: Dictionary) -> Dictionary:
 		"summary": ((s["summaries"] as Array).back() if not (s["summaries"] as Array).is_empty() else {}),
 		# `status` is the standing roll-up: what the corner has become (modules, and the conversation
 		# branches that left a mark). Without it in the read-model the flags a graph writes are unread.
+		# `open_sunday` rides along because the board's toggle has to read the state it flips — a
+		# component may not reach into `s`, and `legal_actions` offers `set_sunday_open` every manage
+		# hour (the Sunday spike and the Ordnungsamt roll were unreachable content without it).
 		"manage": {"restock_options": _restock_options(s), "modules": Economy.module_options(s),
-			"status": Economy.corner_status(s)},
+			"status": Economy.corner_status(s), "open_sunday": bool(s["open_sunday"])},
 		"ending": (Finale.resolve_finale(s) if s["phase"] == "end" else {}),
 	}
 
@@ -781,5 +799,8 @@ static func _restock_options(s: Dictionary) -> Array:
 			"fair_hi": float(def["fair_hi"]),
 			# The board colours the price from this — the bands live here, never in a component.
 			"tier": Economy.price_tier(def, float(inv["price"])),
+			# …and greys the "+" from this: a board that re-derived `cost <= cash` would both offer
+			# restocks the reducer refuses and hide the ones the Pfand crate pays for.
+			"affordable": can_restock(s, String(def["id"]), 1),
 		})
 	return out

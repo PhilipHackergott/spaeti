@@ -84,7 +84,7 @@ line (`_age_queue`) rather than advancing it, unless `config.auto_take_next` is 
   player: { stats:{str,dex,con,int,wis,cha}, mods:{…} },
   dialogue: {} | { speaker, portrait:"char/lena", expression, lines:Array[String], choices:Array[{label}], kind:"beat"|"vignette"|"talk" },   (a projection of `talk` — §8)
   shelf: Array[{ sku_id, name, price, stock, icon, restricted, tier }],   (every SKU in inventory, registry order)
-  summary: {} | the last NightSummary,  manage:{ restock_options:[{sku_id,name,cost,stock,price,fair_lo,fair_hi}], modules:Economy.module_options(s) },
+  summary: {} | the last NightSummary,  manage:{ restock_options:[{sku_id,name,cost,stock,price,fair_lo,fair_hi,tier,affordable}], modules:Economy.module_options(s), status:Economy.corner_status(s), open_sunday:bool },
   ending: {} | Finale.resolve_finale(s) when phase=="end" }
 ```
 

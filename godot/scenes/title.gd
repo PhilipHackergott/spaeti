@@ -70,8 +70,14 @@ func _on_new_game() -> void:
 func _on_continue() -> void:
 	var s := session()
 	if s == null or not s.has_method("load_save") or not s.load_save():
+		# The save went bad between boot and the click: the button stops lying rather than swallowing it.
+		var cont := get_node_or_null("%Continue") as Button
+		if cont != null:
+			cont.disabled = true
 		return
-	request_screen.emit(_screen_for(String(view().get("phase", "manage"))))
+	# `Session.dispatch` autosaves after every non-tick action, so a save CAN sit at phase "end";
+	# the shared table is what keeps Continue from reopening it on the dead board.
+	request_screen.emit(Screen.screen_for(String(view().get("phase", "manage"))))
 
 func _on_settings() -> void:
 	var modal := get_node_or_null("%SettingsModal") as Modal
@@ -84,11 +90,3 @@ func _on_reduce_motion(on: bool) -> void:
 func _on_quit() -> void:
 	if is_inside_tree():
 		get_tree().quit()
-
-func _screen_for(phase: String) -> String:
-	match phase:
-		"night":
-			return "night"
-		"summary":
-			return "summary"
-	return "manage"

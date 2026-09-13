@@ -1,0 +1,87 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scenes/ending.gd" id="1_script"]
+[ext_resource type="Theme" path="res://components/Theme.tres" id="2_theme"]
+[ext_resource type="PackedScene" path="res://components/SceneLayers.tscn" id="3_layers"]
+[ext_resource type="PackedScene" path="res://components/PixelButton.tscn" id="4_button"]
+
+[node name="Ending" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_theme")
+script = ExtResource("1_script")
+default_preset = "ending"
+
+[node name="SceneLayers" parent="." instance=ExtResource("3_layers")]
+unique_name_in_owner = true
+raining = false
+
+[node name="Dim" type="ColorRect" parent="."]
+offset_right = 480.0
+offset_bottom = 270.0
+mouse_filter = 2
+
+[node name="Card" type="PanelContainer" parent="."]
+offset_left = 58.0
+offset_top = 18.0
+offset_right = 422.0
+offset_bottom = 252.0
+
+[node name="Box" type="VBoxContainer" parent="Card"]
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="Kicker" type="Label" parent="Card/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"SmallLabel"
+text = "The season is over"
+
+[node name="Title" type="Label" parent="Card/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"LeadLabel"
+text = "Held the Line"
+
+[node name="Rule" type="ColorRect" parent="Card/Box"]
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+
+[node name="Body" type="ScrollContainer" parent="Card/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+follow_focus = true
+horizontal_scroll_mode = 0
+
+[node name="Scroll" type="VBoxContainer" parent="Card/Box/Body"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="Line" type="Label" parent="Card/Box/Body/Scroll"]
+unique_name_in_owner = true
+layout_mode = 2
+autowrap_mode = 3
+text = "Scarred and a little broke, but the doors are open."
+
+[node name="Epilogues" type="VBoxContainer" parent="Card/Box/Body/Scroll"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="Rule2" type="ColorRect" parent="Card/Box"]
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+
+[node name="Foot" type="HBoxContainer" parent="Card/Box"]
+layout_mode = 2
+alignment = 2
+
+[node name="BackToTitle" parent="Card/Box/Foot" instance=ExtResource("4_button")]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"TitleButton"
+text = "Back to title"

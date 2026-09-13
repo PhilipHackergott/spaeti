@@ -1,10 +1,14 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene format=3 uid="uid://d34ittxnpwvsu"]
 
-[ext_resource type="Script" path="res://scenes/main.gd" id="1_script"]
-[ext_resource type="Theme" path="res://components/Theme.tres" id="2_theme"]
+[ext_resource type="Script" uid="uid://cuyw8qn1fxjoq" path="res://scenes/main.gd" id="1_script"]
+[ext_resource type="Theme" uid="uid://8jpelbydsor4" path="res://components/Theme.tres" id="2_theme"]
 [ext_resource type="PackedScene" path="res://components/Transition.tscn" id="3_transition"]
+[ext_resource type="PackedScene" path="res://components/Modal.tscn" id="4_modal"]
+[ext_resource type="PackedScene" path="res://components/PixelButton.tscn" id="5_button"]
 
-[node name="Main" type="Control"]
+[node name="Main" type="Control" unique_id=365890841]
+layout_mode = 3
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
@@ -12,13 +16,47 @@ grow_vertical = 2
 theme = ExtResource("2_theme")
 script = ExtResource("1_script")
 
-[node name="Screens" type="Control" parent="."]
+[node name="Screens" type="Control" parent="." unique_id=983750877]
 unique_name_in_owner = true
+anchors_preset = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 1
 
-[node name="Transition" parent="." instance=ExtResource("3_transition")]
+[node name="PauseMenu" type="VBoxContainer" parent="."]
 unique_name_in_owner = true
+offset_left = 40.0
+offset_top = 40.0
+offset_right = 440.0
+offset_bottom = 140.0
+theme_override_constants/separation = 4
+
+[node name="Resume" parent="PauseMenu" instance=ExtResource("5_button")]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"TitleButton"
+text = "Resume"
+
+[node name="BackToTitle" parent="PauseMenu" instance=ExtResource("5_button")]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"TitleButton"
+text = "Back to title"
+
+[node name="QuitGame" parent="PauseMenu" instance=ExtResource("5_button")]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"TitleButton"
+text = "Quit"
+
+[node name="Pause" parent="." instance=ExtResource("4_modal")]
+unique_name_in_owner = true
+visible = false
+title = "Paused"
+
+[node name="Transition" parent="." unique_id=600597653 instance=ExtResource("3_transition")]
+unique_name_in_owner = true
+visible = true
+layout_mode = 0

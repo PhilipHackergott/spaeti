@@ -10,6 +10,9 @@ extends Control
 signal choice(index: int)
 signal advanced()
 signal finished()
+## The rows are built and on screen. The SCREEN decides what to do with that (the night anchors the
+## keyboard on them); the box only says when.
+signal choices_shown()
 
 const CHOICE_SCENE := preload("res://components/PixelButton.tscn")
 ## The bottom edge never moves: the counter band ends where Coffee Talk's text box ends.
@@ -43,6 +46,14 @@ func _ready() -> void:
 	# column back), so the mark has to follow the edge rather than be placed once per line.
 	if not resized.is_connected(_update_mark):
 		resized.connect(_update_mark)
+	# The height comes from the panel's minimum size, and an autowrapped choice row only reports its real
+	# line count AFTER the container has laid it out at its final width. Both measurements in `_fit_height`
+	# can therefore still be the wrap-at-no-width guess (a two-choice node measured 765 px): the box grew
+	# past the top of the frame and its STOP rect swallowed the clicks over the whole counter. The panel
+	# says when its minimum has actually settled, so the height is re-applied then instead of trusted once.
+	var panel := get_node_or_null("%Box") as Control
+	if panel != null and not panel.minimum_size_changed.is_connected(_apply_height):
+		panel.minimum_size_changed.connect(_apply_height)
 	set_process(true)
 
 ## `d` is `view.dialogue`: {speaker, portrait, expression, lines, choices, kind}. Empty hides the box.
@@ -208,6 +219,34 @@ func _build_choices() -> void:
 	box.visible = true
 	_update_mark()
 	_fit_height()
+	choices_shown.emit()
+
+## The keyboard's way in. Godot only walks the focus ring FROM an existing owner, so a choice list
+## with nothing focused is a mouse-only decision (probed 2026-09-13: eight keys, no focus, nothing
+## moved). The box knows WHICH row can be pressed; it does not decide when — the screen does.
+func focus_first_choice() -> void:
+	var box := _choices_node()
+	if box == null or not visible or not box.visible or not is_inside_tree():
+		return
+	for row in box.get_children():
+		var btn := (row as Node).get_node_or_null("Line") as Button
+		if btn != null and not btn.disabled and btn.is_visible_in_tree():
+			btn.grab_focus()
+			return
+
+## Pick the choice a row's printed number names (`Strings.CHOICE_NUMBER`, "1." / "2."). The box that
+## writes the number owns the lookup, and it COUNTS GATES because the screen does: with "2." locked,
+## "3." is still `choices[2]`. False when the number names nothing pickable, so the caller leaves the
+## key unhandled instead of swallowing it.
+func choose_number(n: int) -> bool:
+	var box := _choices_node()
+	if box == null or not box.visible or n < 1 or n > box.get_child_count():
+		return false
+	var btn := box.get_child(n - 1).get_node_or_null("Line") as Button
+	if btn == null or btn.disabled:
+		return false
+	_on_choice(n - 1)
+	return true
 
 ## A rolled choice puts its tag on the same line (it is short: "[Charisma 12]"). A GATE puts its
 ## reason underneath instead, because "locked: needs Strength 12" plus the choice itself does not fit

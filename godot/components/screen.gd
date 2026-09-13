@@ -41,7 +41,19 @@ func view() -> Dictionary:
 	return _view
 
 func refresh() -> void:
+	# A screen Main has already swapped out stays connected to Session for the rest of the frame.
+	# Rendering it would re-seat its live nodes from the CAPTURE MOCK — `view()` falls back to `_view`
+	# once `session()` is out of reach — instead of the real read-model. A detached screen draws
+	# nothing, so it renders nothing.
+	if not is_inside_tree():
+		return
 	render(view())
+
+## Is the shell's pause overlay up? A screen that takes keys of its own (Night: Tab and Space) must
+## stand still behind it — the Dim stops the mouse, nothing stops the keyboard.
+func is_paused() -> bool:
+	var s := session()
+	return s != null and bool(s.get("paused"))
 
 ## Subclasses override. Never mutates state; reads the dictionary and sets nodes.
 func render(_v: Dictionary) -> void:
@@ -52,13 +64,32 @@ func apply_capture_preset(preset_name: String) -> void:
 	_view = MockView.view(preset_name)
 	render(_view)
 
-func dispatch(action: Dictionary) -> void:
+## Returns whether the REDUCER took the action. A screen must never navigate on a refusal: that is
+## how "Open up" at the end of a season walked the player onto a Night screen the engine had already
+## finished with (2026-09-13). Callers that do not care may ignore the value.
+func dispatch(action: Dictionary) -> bool:
 	var s := session()
 	if s != null and s.has_method("dispatch"):
-		s.dispatch(action)
+		var ok: bool = s.dispatch(action)
 		refresh()
-	else:
-		print("[dispatch] ", JSON.stringify(action))
+		return ok
+	# No Session (a capture preset, or a screen instantiated outside the tree): there is nothing to
+	# refuse, so the demo path navigates exactly as it always did.
+	print("[dispatch] ", JSON.stringify(action))
+	return true
+
+## Which screen belongs to a reducer phase. THE route table — a "next" press follows the phase the
+## reducer actually returned, never a hard-coded name: `advance_day` can end the season (day past
+## `season_days`, or cash < -200) under any of them.
+static func screen_for(phase: String) -> String:
+	match phase:
+		"night":
+			return "night"
+		"summary":
+			return "summary"
+		"end":
+			return "end"
+	return "manage"
 
 func _connect_session() -> void:
 	var s := session()

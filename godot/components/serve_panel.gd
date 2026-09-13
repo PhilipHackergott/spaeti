@@ -55,6 +55,11 @@ func render(view: Dictionary) -> void:
 		# fallback into the engine's constant from a component.
 		t.set_pfand_rate(float(view.get("pfand_rate", 0.0)))
 		t.set_pfand_available(_pfand_available)
+		# Mirrors `legal_actions` (docs/05 §4): serve/skip are on offer only with a guest at the
+		# counter and nobody mid-sentence — the same predicate `night.gd` uses for the Serve toggle.
+		t.set_can_serve(not (view.get("active", {}) as Dictionary).is_empty()
+			and (view.get("talk", {}) as Dictionary).is_empty()
+			and (view.get("dialogue", {}) as Dictionary).is_empty())
 	if shelf != null:
 		shelf.set_items(_shelf_items, t.counts() if t != null else {})
 		# The shelf is taller than its window (17 SKUs, 23 once the modules land), so the thing they
@@ -97,8 +102,22 @@ func open(instant: bool = false) -> void:
 
 func close(instant: bool = false) -> void:
 	is_open = false
+	# A closed panel must leave the UI, not just the screen. Slid off to x 482 it kept all twenty
+	# controls focusable: one arrow key landed on an ItemSlot at x 487 and Space filled an invisible
+	# till, and a mouse "Wave off" parked the focus on the off-screen button, which then ate every
+	# Space the night reads in `_unhandled_input` (2026-09-13). The focus goes back at once so the
+	# slide itself cannot be typed into; the hide happens when the slide is done.
+	_drop_focus()
 	_slide(HIDDEN_X, instant)
 	closed.emit()
+
+## Hands the keyboard back to the screen while the panel is still sliding.
+func _drop_focus() -> void:
+	if not is_inside_tree():
+		return
+	var focused := get_viewport().gui_get_focus_owner()
+	if focused != null and is_ancestor_of(focused):
+		focused.release_focus()
 
 func till() -> Till:
 	return get_node_or_null("%Till") as Till
@@ -117,6 +136,7 @@ func preload_picks(sku_ids: Array, pfand_bottles: int = 0) -> void:
 	t.set_pfand(pfand_bottles)
 	# A staged tray has to be a legal one: the guest brought at least what the capture puts in it.
 	t.set_pfand_available(maxi(pfand_bottles, _pfand_available))
+	t.set_can_serve(true)   # a capture stages a LEGAL tray: the presets all carry a guest
 	var shelf := get_node_or_null("%Shelf") as Shelf
 	if shelf != null:
 		shelf.set_counts(t.counts())
@@ -124,10 +144,17 @@ func preload_picks(sku_ids: Array, pfand_bottles: int = 0) -> void:
 func _slide(to_x: int, instant: bool) -> void:
 	if instant or Palette.reduce_motion or not is_inside_tree():
 		position = Vector2(to_x, position.y)
+		_settle_visibility()
 		return
 	var tw := create_tween()
 	tw.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	tw.tween_property(self, "position:x", float(to_x), SLIDE_MS / 1000.0)
+	tw.finished.connect(_settle_visibility)
+
+## Only an OPEN panel belongs in the focus ring. Read from `is_open`, never from a flag captured when
+## the tween started: re-opening mid-slide must win.
+func _settle_visibility() -> void:
+	visible = is_open
 
 func _on_picked(sku_id: String) -> void:
 	var t := till()

@@ -9,7 +9,7 @@ Godot 4.7.2; every screen is a real `.tscn` you can open in the editor.
 
 | Piece | State | Proof |
 |---|---|---|
-| Pure GDScript engine (rules, economy, story, finale, seeded RNG) | done | `node tools/godot/test.mjs` → **108 tests, 0 failed** |
+| Pure GDScript engine (rules, economy, story, finale, seeded RNG) | done | `node tools/godot/test.mjs` → **123 tests, 0 failed** |
 | Six stats (Muscle · Hands · Stamina · Brains · Kiez Sense · Schnauze) + d20 checks + gates, deterministic per seed | done | `test_dialogue.gd`; a mid-conversation save round-trips byte-identically |
 | Dialogue graphs: Lena (7 nodes, 2 checks), Jürgen (6, 1 check + 1 gate), Mehmet (8, 2 checks), generic one-off, minor/restricted refusal | done | `engine/content/dialogues.gd`; flag-gated branches; every graph playable; unread flags now surface on the Manage board |
 | **The line:** guests wait at the register until you take them; patience runs in line | done | `tools/godot/play.mjs` → `PLAY ok steps=13, guests=66`; autosave on every action (Title → Continue) |
@@ -19,6 +19,7 @@ Godot 4.7.2; every screen is a real `.tscn` you can open in the editor.
 | Component pool (18 components, one Theme, one string table, measured pixel font, stepped light-pool shader) | done | `docs/04-component-catalog.md`; tests enforce no raw colours / literals |
 | Art pipeline: Codex generates, Codex judges, Godot snaps to the 480×270 grid | done | `docs/00`, `02`; `tools/codex/*.mjs`, `tools/godot/*.mjs` |
 | Review fleet (Opus reviewers → skeptics → one fixer) | done | 30 findings → 24 confirmed → 24 fixed, suite 99 → 108 (docs/03, 02:12) |
+| **UI-reachability audit** (five probes drive the REAL game by pointer/keyboard → skeptics → one fixer) | done | 43 findings → 34 confirmed → 34 fixed, suite 109 → 123: an **Ending screen** for phase `end` (was a dead Manage board), the shell connects `request_screen` before the first render, a **pause menu** (Esc: Resume / Back to title / Quit), keyboard can pick dialogue choices (anchor focus, digit keys), Ring up / Wave off disabled at an empty counter, the serve panel releases focus when closed, Continue validates the save, locked modules listed with their unlock reason, a Sonntag toggle for the Sunday system, refused actions never navigate (docs/03, 03:30) |
 
 ## Judge scores (gpt-6-astra, rubric in `docs/judge-rubric.md`; 85 = hero bar, 80 = asset bar)
 
@@ -66,7 +67,7 @@ human pass over the raws; another round of prompt discipline is not going to clo
 
 ## How to run
 
-Open `godot/` in Godot 4.7.2 → Play. Title → New game (or Continue) → Manage → Open up → guests queue → Talk to them
+Open `godot/` in Godot 4.7.2 → Play. Title → New game (or Continue) → Manage (the board scrolls; Open up is pinned in the foot; Esc pauses anywhere in a run) → Open up → guests queue → Talk to them
 (Space/click advances; choices show `[Schnauze 12]`-style tags; locked gates are greyed) → dawn → Summary → Next day.
 `Tab` shows the stats strip. Headless: `node tools/godot/test.mjs`. Windowed (Godot cannot render headless, so it needs
 a desktop session): `node tools/godot/play.mjs` → `shots/play-NN-<step>.png` + `shots/play-log.json`.

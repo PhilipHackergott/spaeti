@@ -34,8 +34,9 @@ const SCENE_PRESETS := {
 		"queue_waiting", "talk_lines", "talk_choice", "talk_result"],
 	"res://scenes/Manage.tscn": ["manage"],
 	"res://scenes/Summary.tscn": ["summary"],
+	"res://scenes/Ending.tscn": ["ending"],
 	"res://scenes/Main.tscn": ["title", "customer_at_counter", "dialogue_choice", "serving", "pfand", "empty_counter", "late_night", "manage", "summary",
-		"queue_waiting", "talk_lines", "talk_choice", "talk_result"],
+		"queue_waiting", "talk_lines", "talk_choice", "talk_result", "ending"],
 }
 
 ## The keys `Rules.view(state)` must hand a scene (docs/05 section 5).
@@ -250,6 +251,46 @@ func test_dialogue_survives_being_re_rendered() -> void:
 	other["lines"] = ["Ganz anderer Satz."]
 	box.call("show_dialogue", other, false)
 	assert_eq(int(box.get("_line_index")), 0, "a different dialogue does start over")
+	_dispose(box)
+
+## 2026-09-13, the same class of bug as "Open up" below the modal: the box measured its own height from
+## `%Box.get_combined_minimum_size()` the moment the choice rows were added — before the container had laid
+## them out at their real width, where an autowrapped row still reports the wrap-at-no-width guess. A
+## two-choice node came out 765 px tall with its top at y=-505: the speaker and the spoken line were off the
+## frame and the box's MOUSE_FILTER_STOP rect covered the counter (the d20 plate and the queue strip stopped
+## taking clicks). The measurement is only trustworthy once the panel's minimum has SETTLED, so the box
+## re-applies its height then; the gallery never showed it because every capture preset changes the width
+## afterwards, which re-measures.
+func test_dialogue_box_reapplies_its_height_when_the_panel_settles() -> void:
+	var packed := load("res://components/DialogueBox.tscn") as PackedScene
+	assert_true(packed != null, "DialogueBox.tscn loads")
+	if packed == null:
+		return
+	var box := packed.instantiate()
+	# The runner has no SceneTree to add it to (run.gd IS the SceneTree, and its tests run from `_init`),
+	# so the component's own `_ready` — where it subscribes to its panel — is called here instead.
+	box.call("_ready")
+	var talk: Dictionary = MockView.view("talk_choice")["talk"]
+	box.call("show_final", {
+		"speaker": String(talk["speaker"]), "portrait": String(talk["portrait"]),
+		"expression": "neutral", "lines": [String((talk["lines"] as Array)[0])],
+		"choices": talk["choices"], "kind": "talk",
+	})
+	var panel := box.get_node("%Box") as Control
+	var subscribed := false
+	for c in panel.minimum_size_changed.get_connections():
+		if (c["callable"] as Callable).get_object() == box:
+			subscribed = true
+	assert_true(subscribed, "the box listens for its panel's minimum to settle")
+	# Whatever a premature measurement left behind…
+	box.set("size", Vector2(box.get("size").x, 765.0))
+	box.set("position", Vector2(box.get("position").x, float(DialogueBox.BOTTOM_Y) - 765.0))
+	# …the settled minimum puts the box back on the counter.
+	panel.minimum_size_changed.emit()
+	var want := maxf(float(Palette.DIALOGUE_RECT.size.y), panel.get_combined_minimum_size().y)
+	assert_eq(int(box.get("size").y), int(want), "the height is re-applied from the settled minimum")
+	assert_true(box.get("position").y >= 0.0, "the box's top stays inside the 270-px frame")
+	assert_eq(int(box.get("position").y + box.get("size").y), int(DialogueBox.BOTTOM_Y), "and its bottom edge never moves")
 	_dispose(box)
 
 ## docs/06 section 4: the read-model the register screen renders. The four new presets have to carry
@@ -537,6 +578,25 @@ func test_shelf_reveals_once_per_order() -> void:
 	assert_eq(panel._revealed_for, "", "and re-opening the panel re-centres on the want")
 	_dispose(panel)
 
+## 2026-09-13, same class as "I can't get out of the store setup screen": a control the player must
+## not reach is still reachable. The Modal's Dim swallows the MOUSE (mouse_filter STOP) but Godot's
+## focus ring only skips invisible/unfocusable controls, so with the Title's Settings frame open one
+## Tab landed on "Quit" behind the dim and Enter called get_tree().quit(). Verified live with a
+## windowed probe (Tab ring + arrow neighbours); here we pin the lever the ring obeys:
+## `focus_behavior_recursive` DISABLED on the screen behind, ENABLED on the frame, both released on
+## close. The test runner has no live viewport (run.gd works in `_init`), so this is the contract.
+func test_modal_traps_the_keyboard_behind_its_dim() -> void:
+	var title := (load("res://scenes/Title.tscn") as PackedScene).instantiate() as Control
+	var modal := title.get_node("%SettingsModal") as Modal
+	assert_eq(modal.focus_behavior_recursive, Control.FOCUS_BEHAVIOR_INHERITED, "a shut frame claims nothing")
+	modal.open()
+	assert_eq(title.focus_behavior_recursive, Control.FOCUS_BEHAVIOR_DISABLED, "an open frame takes the keyboard off the screen behind it")
+	assert_eq(modal.focus_behavior_recursive, Control.FOCUS_BEHAVIOR_ENABLED, "and keeps its own rows focusable through that")
+	modal.close_modal()
+	assert_eq(title.focus_behavior_recursive, Control.FOCUS_BEHAVIOR_INHERITED, "closing gives the menu its keyboard back")
+	assert_eq(modal.focus_behavior_recursive, Control.FOCUS_BEHAVIOR_INHERITED, "and the frame stops claiming it")
+	_dispose(title)
+
 func _dispose(n: Node) -> void:
 	if n == null:
 		return
@@ -562,7 +622,8 @@ func test_manage_board_names_its_modules_and_keeps_open_up_on_screen() -> void:
 		if bool(m["owned"]) or bool(m["available"]):
 			expected += 1
 	assert_true(expected > 0, "day 1 offers at least one module")
-	assert_eq(modules.get_child_count(), expected, "one row per module the hour can act on (owned or available)")
+	# Every module gets a row: the actionable ones first, the season's locked roadmap under them.
+	assert_eq(modules.get_child_count(), (v["manage"]["modules"] as Array).size(), "every module gets a row")
 	for row in modules.get_children():
 		var name_label := row.get_child(0) as Label
 		assert_true(name_label != null and name_label.text != "", "a module row names its module")
@@ -586,10 +647,316 @@ func test_manage_board_names_its_modules_and_keeps_open_up_on_screen() -> void:
 		n = n.get_parent()
 	assert_true(body_scrolls, "the module list scrolls instead of growing the board")
 	# Fixed parts (head + body minimum + foot) fit the modal's content area whatever the lists hold.
-	var body := board.get_node("%Body") as Control
+	var body := board.get_node("%Body") as ScrollContainer
+	# The body is taller than its window (17 SKUs + modules = ~406 px of content in a 167-px window)
+	# and every +/-/Buy in it is a tab stop: without `follow_focus` the ring walks controls the
+	# container clips away and the scrollbar never moves (measured: 28 of 56 stops invisible).
+	assert_true(body.follow_focus, "the scrolling body tracks the focus ring instead of walking clipped controls")
 	var head := board.get_node("Head") as Control
 	var foot := board.get_node("Foot") as Control
-	var fixed := head.get_combined_minimum_size().y + body.custom_minimum_size.y + foot.get_combined_minimum_size().y
+	# A dead band between the scrolling body and the foot: the boundary row is sliced at almost any
+	# scroll offset, and without it a click 2 px low on a half-visible price "+" started the night.
+	var gap := board.get_node("FootGap") as Control
+	assert_true(gap.custom_minimum_size.y >= 4.0, "the foot keeps a dead band above it")
+	assert_eq(gap.mouse_filter, Control.MOUSE_FILTER_IGNORE, "and the band itself takes no clicks")
+	var fixed := head.get_combined_minimum_size().y + body.custom_minimum_size.y + gap.custom_minimum_size.y + foot.get_combined_minimum_size().y
 	var modal_content := 254.0 - 48.0   # Modal.tscn frame 8..262 minus title row, rule and paddings
 	assert_true(fixed <= modal_content, "head + body minimum + foot (%d) fit the modal (%d)" % [int(fixed), int(modal_content)])
 	_dispose(board)
+
+## 2026-09-13: the season's end had no screen. `_advance_day` sets phase "end" (day past
+## `season_days`, or cash < -200), `legal_actions` is then empty — and the shell sent the player to
+## Manage, whose "Open up" pushed them on to a Night screen the reducer had finished with. The
+## finale `Rules.view` composes was rendered by nothing. On the REAL read-model, never the mock.
+func test_the_season_ends_on_a_screen_with_a_way_out() -> void:
+	var s := SpatiState.new_game({"season_days": 1})
+	s = Rules.apply(s, {"type": "open_night"})
+	s = Rules.apply(s, {"type": "close_night"})
+	s = Rules.apply(s, {"type": "advance_day"})
+	assert_eq(String(s["phase"]), "end", "a one-night season ends on the first advance_day")
+	assert_true((Rules.legal_actions(s) as Array).is_empty(), "the reducer offers nothing at the end")
+	var v := Rules.view(s)
+	var ending: Dictionary = v["ending"]
+	assert_false(ending.is_empty(), "phase end carries the finale")
+	# Every phase the reducer can reach has a screen the shell knows.
+	var screens: Dictionary = (load("res://scenes/main.gd") as GDScript).get_script_constant_map()["SCREENS"]
+	for phase in ["manage", "night", "summary", "end"]:
+		assert_true(screens.has(Screen.screen_for(phase)), "phase %s routes to a screen Main has" % phase)
+	var screen := (load("res://scenes/Ending.tscn") as PackedScene).instantiate() as Screen
+	# `_ready` by hand: the runner has no tree (tests/run.gd works from `_init`), so nothing calls it.
+	screen.call("_ready")
+	screen.render(v)
+	assert_eq((screen.get_node("%Title") as Label).text, String(ending["title"]), "the card carries the engine's ending")
+	assert_eq((screen.get_node("%Line") as Label).text, String(ending["line"]), "and its words")
+	var back := screen.get_node("%BackToTitle") as Button
+	assert_true(back.visible and not back.disabled, "the one control is live")
+	assert_ne(back.mouse_filter, Control.MOUSE_FILTER_IGNORE, "and it takes the pointer")
+	# Pinned outside the scrolling body: however long the tapestry grows, the way out stays on screen.
+	var n: Node = back
+	var scrolls := false
+	while n != null and n != screen:
+		if n is ScrollContainer:
+			scrolls = true
+		n = n.get_parent()
+	assert_false(scrolls, "the way out is outside the scrolling body")
+	var seen: Array[String] = []
+	screen.request_screen.connect(func(name: String) -> void: seen.append(name))
+	back.pressed.emit()
+	assert_eq(seen, ["title"], "and it leads back to the title")
+	_dispose(screen)
+
+## The tapestry: one row per met-and-resolved character, rebuilt (never appended) on every render.
+func test_the_ending_lists_its_epilogues() -> void:
+	var screen := (load("res://scenes/Ending.tscn") as PackedScene).instantiate() as Screen
+	var v := MockView.view("ending")
+	screen.render(v)
+	var rows := screen.get_node("%Epilogues") as VBoxContainer
+	assert_eq(rows.get_child_count(), (v["ending"]["epilogues"] as Array).size(), "one row per epilogue")
+	screen.render(v)
+	assert_eq(rows.get_child_count(), (v["ending"]["epilogues"] as Array).size(), "re-rendering rebuilds, never appends")
+	screen.render(Rules.view(SpatiState.new_game({})))
+	assert_eq(rows.get_child_count(), 0, "a view with no finale leaves no tapestry behind")
+	_dispose(screen)
+
+## A screen may ask for another one from its FIRST render — `add_child` runs `_ready` ->
+## `Screen.refresh()` -> `render()` — and the shell used to connect `request_screen` on the line
+## AFTER `add_child`, so that request went to a signal with no listener and Night's `_leaving` latch
+## made sure it was never asked again (2026-09-13).
+func test_main_hears_a_redirect_from_a_screens_first_render() -> void:
+	var src := FileAccess.get_file_as_string("res://scenes/main.gd")
+	var connect_at := src.find("inst.connect(\"request_screen\"")
+	var add_at := src.find("host.add_child(inst)")
+	assert_true(connect_at >= 0 and add_at >= 0, "main._swap still has both lines")
+	assert_true(connect_at < add_at, "request_screen is connected before add_child runs the screen's _ready")
+	# ...and the shell answers it without freeing a screen inside its own `_ready`.
+	var main := (load("res://scenes/Main.tscn") as PackedScene).instantiate()
+	main.call("_swap", "night")   # outside the tree: `_ready` has not run, so no first render yet
+	var night := main.call("_screen") as Screen
+	var v := MockView.view("summary")
+	v["phase"] = "end"
+	night.render(v)               # the render `_ready` would have done
+	assert_eq(String(main.get("current_screen")), "end", "the redirect is heard and routed by phase")
+	_dispose(main)
+
+## 2026-09-13: the rows print "1." / "2." and no digit was bound to them, and nothing on the Night
+## screen ever took focus — so with eight keys pressed at a live choice node the focus owner stayed
+## null and the conversation could only be answered with a mouse. `choose_number` counts GATES,
+## because the printed number does: with "2." locked, "3." is still `choices[2]`.
+func test_dialogue_box_picks_the_choice_its_number_prints() -> void:
+	var box := (load("res://components/DialogueBox.tscn") as PackedScene).instantiate() as DialogueBox
+	box.call("_ready")
+	box.show_final({
+		"speaker": "Lena", "portrait": "char/lena", "expression": "neutral", "kind": "talk",
+		"lines": ["..."],
+		"choices": [
+			{"label": "a"},
+			{"label": "b", "locked": true, "requires": {"stat": "str", "min": 12}},
+			{"label": "c"},
+		],
+	})
+	var picked: Array[int] = []
+	box.choice.connect(func(i: int) -> void: picked.append(i))
+	assert_true(box.choose_number(3), "the row printed '3.' is pickable")
+	assert_eq(picked, [2], "and it is choices[2] — the gate is counted, exactly as the label counts it")
+	assert_false(box.choose_number(2), "a gate is not pickable by its number")
+	assert_false(box.choose_number(4), "a number with no row does nothing")
+	# The screen anchors the keyboard off this signal; without it the ring has nowhere to start.
+	var announced := false
+	for c in box.choices_shown.get_connections():
+		announced = true
+	assert_true(box.has_method("focus_first_choice"), "the box can hand the keyboard its first live row")
+	assert_false(announced, "nothing is wired to a loose box — the SCREEN connects choices_shown")
+	_dispose(box)
+
+## 2026-09-13: "Ring up" and "Wave off" were live at an empty counter. The reducer refuses
+## `serve_active`/`skip_active` while `active` is empty (rules.gd), but the scene cleared the tray and
+## closed the panel regardless — the UI reported a sale that moved no cash and no `sales`. On the REAL
+## read-model: the two buttons must agree with what `legal_actions` actually offers.
+func test_till_buttons_agree_with_the_reducers_offer() -> void:
+	var s := Rules.apply(SpatiState.new_game({"seed": 7}), {"type": "open_night"})
+	assert_true((s["active"] as Dictionary).is_empty(), "nobody is at the counter when the night opens")
+	var panel := (load("res://components/ServePanel.tscn") as PackedScene).instantiate() as ServePanel
+	panel.render(Rules.view(s))
+	var t := panel.till()
+	t.add_sku({"sku_id": "beer", "name": "Sterni", "price": 1.2})
+	assert_eq(t.lines.size(), 1, "the shelf still stages a tray")
+	assert_true((t.get_node("%RingUp") as Button).disabled, "Ring up is dead with nobody to serve")
+	assert_true((t.get_node("%WaveOff") as Button).disabled, "Wave off is dead with nobody to wave off")
+	# …and both come back the moment somebody is standing there.
+	var s2 := Rules.apply(SpatiState.new_game({"seed": 7, "auto_take_next": true}), {"type": "open_night"})
+	var guard := 0
+	while (s2["active"] as Dictionary).is_empty() and guard < 600:
+		s2 = Rules.tick(s2, 1000)
+		guard += 1
+	assert_false((s2["active"] as Dictionary).is_empty(), "a guest reaches the counter")
+	panel.render(Rules.view(s2))
+	t.add_sku({"sku_id": "beer", "name": "Sterni", "price": 1.2})
+	assert_false((t.get_node("%RingUp") as Button).disabled, "a staged tray rings up for a real guest")
+	assert_false((t.get_node("%WaveOff") as Button).disabled, "and that guest can be waved off")
+	_dispose(panel)
+
+## 2026-09-13, the Manage bug's twin: a control the player cannot see still took their input.
+## `close()` only slid the panel to x 482, so "Wave off" kept FOCUS_ALL off-screen and ate every
+## `ui_accept` the night reads in `_unhandled_input` — one mouse wave-off killed Space for the rest
+## of the night, and an arrow key could fill an invisible till.
+func test_a_closed_serve_panel_leaves_the_ui() -> void:
+	var panel := (load("res://components/ServePanel.tscn") as PackedScene).instantiate() as ServePanel
+	panel.render(MockView.view("serving"))
+	panel.open(true)
+	assert_true(panel.visible, "an open panel is on screen")
+	panel.close(true)
+	assert_false(panel.visible, "a closed panel is out of the UI, not just off the screen")
+	assert_false(panel.is_open, "and it says so")
+	panel.open(true)
+	assert_true(panel.visible, "re-opening puts it back")
+	_dispose(panel)
+
+## 2026-09-13: once "New game" was pressed there was no pause, no Esc and no route back to the Title
+## — Manage's board modal is `closable = false`, Night and Summary carry no modal at all, and
+## `Strings.PAUSED`/`RESUME`/`BACK_TO_TITLE` plus `Session.paused` were declared and never used. The
+## only exit from a running season was the OS window. The overlay belongs to the shell, which is the
+## one node that survives every `_swap`.
+func test_a_running_game_always_has_a_pause_route() -> void:
+	var main := (load("res://scenes/Main.tscn") as PackedScene).instantiate()
+	main.call("_build_pause")
+	var pause := main.get_node("%Pause") as Modal
+	assert_true(pause != null, "the shell carries the pool's Modal, not a second overlay look")
+	assert_true(pause.closable, "and this one answers Esc, unlike Manage's board frame")
+	assert_false(pause.visible, "it is down at rest")
+	assert_eq(pause.title, Strings.PAUSED, "the title comes from the table the constant was dead in")
+	for pair in [["%Resume", Strings.RESUME], ["%BackToTitle", Strings.BACK_TO_TITLE], ["%QuitGame", Strings.QUIT]]:
+		var b := main.get_node(String(pair[0])) as Button
+		assert_eq(b.text, String(pair[1]), String(pair[0]) + " names itself from Strings")
+		assert_false(b.disabled, String(pair[0]) + " is live")
+		assert_true(b.pressed.get_connections().size() > 0, String(pair[0]) + " does something")
+		# The rows are inside the frame, so the Modal's focus trap covers them.
+		var n: Node = b
+		var inside := false
+		while n != null:
+			if n == pause:
+				inside = true
+			n = n.get_parent()
+		assert_true(inside, String(pair[0]) + " lives inside the pause frame")
+	main.call("open_pause")
+	assert_true(pause.visible, "Esc opens it")
+	main.call("close_pause")
+	assert_false(pause.visible, "and Resume / × / Esc put it away again")
+	_dispose(main)
+
+## 2026-09-13: at the season's end the board still drew 57 live controls over ZERO legal actions —
+## `Rules.view` builds the `manage` block for every phase and the board never looked at it. Belt and
+## braces behind the routing fix: whichever way a player reaches this board, it goes read-only when
+## the reducer will refuse it. On the REAL read-model, both directions, so the gate cannot rot into
+## always-off.
+func test_the_manage_board_is_read_only_outside_the_manage_hour() -> void:
+	var s := SpatiState.new_game({"season_days": 1})
+	s = Rules.apply(s, {"type": "open_night"})
+	s = Rules.apply(s, {"type": "close_night"})
+	s = Rules.apply(s, {"type": "advance_day"})
+	assert_eq(String(s["phase"]), "end", "a one-night season ends on the first advance_day")
+	var board := (load("res://components/ManageBoard.tscn") as PackedScene).instantiate() as ManageBoard
+	board.call("_ready")
+	board.render(Rules.view(s))
+	var live: Array[String] = []
+	_live_buttons(board, live)
+	assert_true(live.is_empty(), "no live control while every board action is refused: " + str(live))
+	board.render(Rules.view(SpatiState.new_game({})))
+	live.clear()
+	_live_buttons(board, live)
+	assert_true(live.has("OpenNight"), "the hour before opening is still fully playable")
+	assert_true(live.size() > 1, "and so are its rows")
+	_dispose(board)
+
+func _live_buttons(n: Node, out: Array[String]) -> void:
+	if n is Button and not (n as Button).disabled:
+		out.append(String(n.name))
+	for c in n.get_children():
+		_live_buttons(c, out)
+
+## 2026-09-13: `set_sunday_open` is legal every manage hour (rules.gd::legal_actions) and had NO
+## control anywhere — so `open_sunday` stayed false for the life of every run and the whole Sunday /
+## Ordnungsamt system (the ×1.6 traffic spike, the roll, the fine, `ordnungsamt_heat`) was unreachable
+## content. The general lens: every distinct legal action of the manage hour must have a control.
+func test_every_legal_manage_action_has_a_control() -> void:
+	var s := SpatiState.new_game({})
+	var board := (load("res://components/ManageBoard.tscn") as PackedScene).instantiate() as ManageBoard
+	board.call("_ready")   # the runner has no tree, so the foot's connections are made by hand
+	board.render(Rules.view(s))
+	var emitted: Array[Dictionary] = []
+	board.action.connect(func(a: Dictionary) -> void: emitted.append(a))
+	var opened := false
+	board.open_night.connect(func() -> void: opened = true)
+	_press_all(board)
+	var seen := {"open_night": opened}
+	for a in emitted:
+		seen[String(a["type"])] = true
+	for want in Rules.legal_actions(s):
+		assert_true(seen.has(String(want["type"])), "the board offers a control for " + String(want["type"]))
+	# ...and the one it never had emits what the reducer will actually take.
+	var sunday := board.get_node("%SundayToggle") as Button
+	assert_false(sunday.disabled, "the Sunday plate is live in the manage hour")
+	var flip := {}
+	for a in emitted:
+		if String(a["type"]) == "set_sunday_open":
+			flip = a
+	assert_eq(bool(flip["open"]), true, "a shut corner offers to open on Sundays")
+	assert_eq(bool(Rules.apply(s, flip)["open_sunday"]), true, "and the reducer takes it")
+	# Pinned in the foot with "Open up", outside the scrolling body, so it can never be pushed off.
+	var n: Node = sunday
+	var scrolls := false
+	while n != null and n != board:
+		if n is ScrollContainer:
+			scrolls = true
+		n = n.get_parent()
+	assert_false(scrolls, "the Sunday plate is pinned in the foot, not in the scrolling body")
+	_dispose(board)
+
+func _press_all(n: Node) -> void:
+	if n is Button and not (n as Button).disabled:
+		(n as Button).pressed.emit()
+	for c in n.get_children():
+		_press_all(c)
+
+## 2026-09-13: locked modules were dropped from the board entirely, so `Economy.unlock_reason`'s
+## strings ("unlocks on day 3", "needs Bigger fridge", "needs Kiez-Trust 60") were computed and
+## thrown away — a day-1 player saw 4 of 26 modules and had no way to learn the rest existed, which
+## also made the season's "the list grows" progression invisible as progression.
+func test_manage_board_shows_why_a_module_is_still_locked() -> void:
+	var s := SpatiState.new_game({})
+	var v := Rules.view(s)
+	var board := (load("res://components/ManageBoard.tscn") as PackedScene).instantiate() as ManageBoard
+	board.render(v)
+	var modules := board.get_node("%Modules") as VBoxContainer
+	var actionable := 0
+	var reasons := {}
+	for m in v["manage"]["modules"]:
+		if bool(m["owned"]) or bool(m["available"]):
+			actionable += 1
+		else:
+			assert_ne(String(m["reason"]), "", "the engine says why a locked module is locked")
+			reasons[String(m["reason"])] = true
+	assert_true(actionable > 0 and reasons.size() > 0, "day 1 has both buyable and locked modules")
+	assert_eq(modules.get_child_count(), (v["manage"]["modules"] as Array).size(), "every module gets a row")
+	for i in modules.get_child_count():
+		var row := modules.get_child(i) as HBoxContainer
+		var last := row.get_child(row.get_child_count() - 1)
+		var is_action := last is Button or String((last as Label).text) == Strings.MANAGE_OWNED
+		assert_eq(is_action, i < actionable, "actionable rows first, the locked roadmap under them")
+		if not is_action:
+			var why := row.get_child(1) as Label
+			assert_true(reasons.has(why.text), "a locked row prints the engine's reason: " + why.text)
+			assert_false(why.clip_text, "and it is never clipped off the right edge")
+	_dispose(board)
+
+## 2026-09-13: `StepButton` defined four styleboxes and left `disabled` to the base Button's 3-px
+## padded box, which raises the minimum from 18 to 24 px — and a Control never shrinks below a size
+## it already has, so the FIRST disabled frame latched the Serve toggle 6 px taller than
+## `Palette.SERVE_TOGGLE_RECT` for the rest of the night. It also slices a greyed SKU row out of
+## ROW_H, which matters now that the board greys itself outside the manage hour.
+func test_a_step_button_keeps_its_height_in_every_state() -> void:
+	var t := Palette.theme()
+	for state in ["normal", "hover", "pressed", "focus", "disabled"]:
+		assert_true(t.has_stylebox(state, "StepButton"), "StepButton defines its own " + state + " box")
+		if t.has_stylebox(state, "StepButton"):
+			assert_eq(t.get_stylebox(state, "StepButton").get_minimum_size().y, 0.0,
+				state + " adds no vertical padding, so the plate is the font's own height")

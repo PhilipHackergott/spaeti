@@ -17,6 +17,18 @@ func _ready() -> void:
 	var tally := _tally()
 	if tally != null and not _capture_mode:
 		tally.play()
+	# The same anchor Manage and Title carry: with no focus owner the keyboard ring cannot start.
+	# Deferred for the same reason Manage's is — a capture must not inherit a focus ring.
+	_seed_focus.call_deferred()
+
+func _seed_focus() -> void:
+	if _capture_mode or not is_inside_tree():
+		return
+	if get_viewport().gui_get_focus_owner() != null:
+		return
+	var cont := get_node_or_null("%Continue") as Button
+	if cont != null and cont.is_visible_in_tree() and not cont.disabled:
+		cont.grab_focus()
 
 func render(v: Dictionary) -> void:
 	if v.is_empty():
@@ -48,8 +60,11 @@ func render(v: Dictionary) -> void:
 		cash.text = Strings.CASH % Palette.money(float(s.get("cash_after", v.get("cash", 0.0))))
 
 func _on_continue() -> void:
-	dispatch({"type": "advance_day"})
-	request_screen.emit("manage")
+	# Follow the phase the reducer LANDED in, and only when it took the action: the last night's
+	# `advance_day` ends the season, and naming "manage" regardless put the player on a board where
+	# every control is live and every action refused.
+	if dispatch({"type": "advance_day"}):
+		request_screen.emit(Screen.screen_for(String(view().get("phase", "manage"))))
 
 func _paint(path: String, col: Color) -> void:
 	var r := get_node_or_null(path) as ColorRect
