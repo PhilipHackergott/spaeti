@@ -7,6 +7,7 @@
 [node name="ManageBoard" type="VBoxContainer"]
 offset_right = 400.0
 offset_bottom = 196.0
+size_flags_vertical = 3
 theme = ExtResource("2_theme")
 theme_override_constants/separation = 2
 script = ExtResource("1_script")
@@ -28,39 +29,46 @@ theme_type_variation = &"SpeakerLabel"
 text = "Cash 96,40 €"
 horizontal_alignment = 2
 
-[node name="Scroll" type="ScrollContainer" parent="."]
-custom_minimum_size = Vector2(0, 90)
+[node name="Body" type="ScrollContainer" parent="."]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 60)
 layout_mode = 2
+size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
-[node name="Rows" type="VBoxContainer" parent="Scroll"]
+[node name="List" type="VBoxContainer" parent="Body"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
+
+[node name="Rows" type="VBoxContainer" parent="Body/List"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 0
 
-[node name="Rule" type="ColorRect" parent="."]
+[node name="Rule" type="ColorRect" parent="Body/List"]
 custom_minimum_size = Vector2(0, 1)
 layout_mode = 2
 
-[node name="ModuleHead" type="Label" parent="."]
+[node name="ModuleHead" type="Label" parent="Body/List"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"SmallLabel"
 text = "MODULES"
 
-[node name="Modules" type="VBoxContainer" parent="."]
+[node name="Modules" type="VBoxContainer" parent="Body/List"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 1
 
-[node name="StandingHead" type="Label" parent="."]
+[node name="StandingHead" type="Label" parent="Body/List"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"SmallLabel"
 text = "YOUR CORNER"
 
-[node name="Standing" type="VBoxContainer" parent="."]
+[node name="Standing" type="VBoxContainer" parent="Body/List"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 0

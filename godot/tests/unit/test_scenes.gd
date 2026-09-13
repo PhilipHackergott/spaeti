@@ -543,3 +543,53 @@ func _dispose(n: Node) -> void:
 	if n.get_parent() != null:
 		n.get_parent().remove_child(n)
 	n.free()
+
+## 2026-09-13, reported by the user: "I can't get out of the store setup screen." The board read the
+## module list with the wrong keys (27 blank rows at 0,00 €) and had no scrolling body, so "Open up"
+## sat below the modal's bottom edge in the real game — the scripted playthrough presses the button by
+## name and never noticed. Two contracts, checked on the REAL read-model, not the mock:
+##   1. every module row the board draws carries the engine's name and cost;
+##   2. the foot with "Open up" is outside the scrolling body, and the fixed parts of the board fit the
+##      modal frame however long the lists get.
+func test_manage_board_names_its_modules_and_keeps_open_up_on_screen() -> void:
+	var s := SpatiState.new_game({})
+	var v := Rules.view(s)
+	var board := (load("res://components/ManageBoard.tscn") as PackedScene).instantiate() as ManageBoard
+	board.render(v)
+	var modules := board.get_node("%Modules") as VBoxContainer
+	var expected := 0
+	for m in v["manage"]["modules"]:
+		if bool(m["owned"]) or bool(m["available"]):
+			expected += 1
+	assert_true(expected > 0, "day 1 offers at least one module")
+	assert_eq(modules.get_child_count(), expected, "one row per module the hour can act on (owned or available)")
+	for row in modules.get_children():
+		var name_label := row.get_child(0) as Label
+		assert_true(name_label != null and name_label.text != "", "a module row names its module")
+		var last := row.get_child(row.get_child_count() - 1)
+		if last is Button:
+			assert_ne(String((last as Button).text), Palette.money(0.0), "a buy button quotes the module's real cost")
+	# The foot is pinned: not inside any ScrollContainer. The body scrolls: the module list IS inside one.
+	var open_up := board.get_node("%OpenNight") as Control
+	var n: Node = open_up
+	var foot_scrolls := false
+	while n != null and n != board:
+		if n is ScrollContainer:
+			foot_scrolls = true
+		n = n.get_parent()
+	assert_false(foot_scrolls, "Open up is outside the scrolling body, so it is always on screen")
+	n = modules
+	var body_scrolls := false
+	while n != null and n != board:
+		if n is ScrollContainer:
+			body_scrolls = true
+		n = n.get_parent()
+	assert_true(body_scrolls, "the module list scrolls instead of growing the board")
+	# Fixed parts (head + body minimum + foot) fit the modal's content area whatever the lists hold.
+	var body := board.get_node("%Body") as Control
+	var head := board.get_node("Head") as Control
+	var foot := board.get_node("Foot") as Control
+	var fixed := head.get_combined_minimum_size().y + body.custom_minimum_size.y + foot.get_combined_minimum_size().y
+	var modal_content := 254.0 - 48.0   # Modal.tscn frame 8..262 minus title row, rule and paddings
+	assert_true(fixed <= modal_content, "head + body minimum + foot (%d) fit the modal (%d)" % [int(fixed), int(modal_content)])
+	_dispose(board)

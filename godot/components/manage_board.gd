@@ -14,7 +14,6 @@ const PRICE_STEP := 0.10
 ## that — the list can then never slice a row in half at its boundary (verify round 3 caught it doing
 ## exactly that, and a hand-tuned constant went stale again the moment the font changed).
 const ROW_H := 15
-const ROWS_VISIBLE := 5
 
 ## Restock quantities the player has clicked up this session (UI intent, echoed as `restock` actions).
 var _pending: Dictionary = {}
@@ -56,19 +55,11 @@ func _build_rows(options: Array) -> void:
 		c.queue_free()
 	for entry in options:
 		box.add_child(_row(entry))
-	_fit_scroll_to_whole_rows(box)
 
-## Sizes the scroll window to ROWS_VISIBLE whole rows, measured off a real row rather than guessed.
-func _fit_scroll_to_whole_rows(box: VBoxContainer) -> void:
-	var scroll := get_node_or_null("Scroll") as ScrollContainer
-	if scroll == null or box.get_child_count() == 0:
-		return
-	var first := box.get_child(0) as Control
-	if first == null:
-		return
-	var h := maxi(ROW_H, int(ceilf(first.get_combined_minimum_size().y)))
-	var sep := box.get_theme_constant("separation")
-	scroll.custom_minimum_size = Vector2(0, h * ROWS_VISIBLE + sep * (ROWS_VISIBLE - 1))
+## The board's BODY (rows, modules, standing) is one ScrollContainer that takes whatever height the modal
+## leaves; the foot with "Open up" sits outside it and is therefore always on screen (2026-09-13: with a
+## fixed five-row window and the module list below it, the foot was off the bottom of the frame in the
+## real game, and there was no way out of the Manage hour with a mouse).
 
 func _row(entry: Dictionary) -> HBoxContainer:
 	var sku_id := String(entry.get("sku_id", ""))
@@ -109,21 +100,30 @@ func _build_modules(modules: Array) -> void:
 		box.remove_child(c)
 		c.queue_free()
 	for m in modules:
+		# The read-model's shape (docs/05 §5, Economy.module_options): {def, owned, available, affordable, reason}
+		# — the module's own words live in `def` (id, name, cost, note). 2026-09-13: the board read flat
+		# name/desc/cost keys and drew 27 blank rows at 0,00 € that pushed "Open up" off the modal; the
+		# scripted playthrough never saw it because it presses the button by name.
+		var def: Dictionary = m.get("def", m)
+		var owned := bool(m.get("owned", false))
+		var available := bool(m.get("available", not owned))
+		if not owned and not available:
+			continue   # locked by day / Kiez / prerequisite: not this hour's decision
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", 4)
-		var owned := bool(m.get("owned", false))
 		row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		row.add_child(_label(String(m.get("name", "")), 96, Palette.TEXT_DIM if owned else Palette.TEXT))
+		row.add_child(_label(String(def.get("name", "")), 96, Palette.TEXT_DIM if owned else Palette.TEXT))
 		# The description takes whatever the board has left over: the module strings are the engine's
 		# and any fixed width clipped "...fewer warm-beer balks" mid-word.
-		var desc := _label(String(m.get("desc", "")), 180, Palette.TEXT_DIM)
+		var desc := _label(String(def.get("note", def.get("desc", ""))), 180, Palette.TEXT_DIM)
 		desc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(desc)
 		if owned:
 			row.add_child(_label(Strings.MANAGE_OWNED, 54, Palette.GOOD))
 		else:
-			var buy := _button(Palette.money(float(m.get("cost", 0.0))), _on_buy.bind(String(m.get("id", ""))))
+			var buy := _button(Palette.money(float(def.get("cost", 0.0))), _on_buy.bind(String(def.get("id", ""))))
 			buy.custom_minimum_size = Vector2(58, ROW_H)
+			buy.disabled = not bool(m.get("affordable", true))
 			row.add_child(buy)
 		box.add_child(row)
 

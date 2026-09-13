@@ -270,9 +270,10 @@ static func _restock() -> Array:
 		{"sku_id": "cigarettes", "name": "Kippen", "cost": 6.4, "stock": 6, "price": 8.5, "fair_lo": 7.0, "fair_hi": 8.0, "tier": "high"},
 	]
 
+## The shape Economy.module_options hands the board: the module's own words under `def`.
 static func _modules() -> Array:
 	return [
-		{"id": "fridge_2", "name": "Second fridge", "cost": 120.0, "desc": "+6 cold slots, fewer warm-beer balks", "owned": false},
-		{"id": "coffee_pot", "name": "Filter coffee pot", "cost": 80.0, "desc": "Unlocks Kaffee after midnight", "owned": true},
-		{"id": "awning", "name": "Awning + bench", "cost": 150.0, "desc": "Patience +15% when it rains", "owned": false},
+		{"def": {"id": "fridge_2", "name": "Second fridge", "cost": 120.0, "note": "+6 cold slots, fewer warm-beer balks"}, "owned": false, "available": true, "affordable": false, "reason": ""},
+		{"def": {"id": "coffee_pot", "name": "Filter coffee pot", "cost": 80.0, "note": "Unlocks Kaffee after midnight"}, "owned": true, "available": false, "affordable": true, "reason": ""},
+		{"def": {"id": "awning", "name": "Awning + bench", "cost": 150.0, "note": "Patience +15% when it rains"}, "owned": false, "available": true, "affordable": false, "reason": ""},
 	]
