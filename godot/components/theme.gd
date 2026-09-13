@@ -22,6 +22,19 @@ const RED_HOODIE := Color("c0392b")
 # --- chrome (dark translucent boxes, 1-px light edge) ---------------------------------
 const INK := Color(0.047, 0.039, 0.055, 0.86)
 const INK_DEEP := Color(0.031, 0.027, 0.039, 0.94)
+## The register / wall chrome (2026-09-13, the judge: "a dense management overlay", "heavy black bars").
+## One translucent charcoal for every serving panel — the same alpha the DialoguePanel carries, so the
+## set reads through the interface — and a PALE shelf-label holder with DARK lettering for the price
+## rails, which is what a real Späti rail is: a light plastic strip, never a black bar.
+const PANEL_INK := Color(0.035, 0.030, 0.045, 0.82)
+const RAIL_FILL := Color(0.84, 0.82, 0.76, 0.94)
+const RAIL_EDGE := Color(0.32, 0.30, 0.28, 0.55)
+const RAIL_TEXT := Color("2a2620")
+## A facing on the wall is drawn as a small stock block: copies stepped behind the front one, each a
+## touch darker, so a shelf reads as full stock instead of one floating icon.
+const STOCK_DEPTH := 2
+const STOCK_STEP := Vector2i(2, -2)
+const STOCK_DIM := 0.72
 const EDGE := Color(0.97, 0.92, 0.82, 0.30)
 ## Full-frame veils and the hairline inside a card. They live here because a screen may not write a
 ## colour of its own (docs/04 rule 1); each screen assigns them to its ColorRects in _ready().

@@ -83,7 +83,7 @@ func _boot() -> void:
 	add_to_group(Palette.DROP_TARGETS)
 	var plate := get_node_or_null("%Plate") as PanelContainer
 	if plate != null:
-		plate.add_theme_stylebox_override("panel", Palette.box(Palette.INK_DEEP, Palette.EDGE, 3, 2))
+		plate.add_theme_stylebox_override("panel", Palette.box(Palette.PANEL_INK, Palette.EDGE, 3, 2))
 		plate.size = Vector2(Palette.REGISTER_RECT.size)
 	_place()
 	_text("%Head", Strings.REGISTER)

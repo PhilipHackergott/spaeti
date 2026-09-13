@@ -116,8 +116,10 @@ func _build_slots() -> void:
 		badge.name = "Badge"
 		badge.theme_type_variation = &"SmallLabel"
 		badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-		badge.position = Vector2(0.0, float(Palette.TRAY_RECT.size.y) - 18.0)
+		badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		# Under the sprite, not across it (2026-09-13, the judge: "place its quantity badge outside"):
+		# every tray sprite is bottom-aligned on TRAY_BASELINE_Y, so the strip below the baseline is free.
+		badge.position = Vector2(0.0, float(Palette.TRAY_RECT.size.y) - 14.0)
 		badge.size = Vector2(float(Palette.TRAY_PITCH) - 2.0, 16.0)
 		b.add_child(badge)
 

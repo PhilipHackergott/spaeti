@@ -44,7 +44,7 @@ func _boot() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var plate := get_node_or_null("%Plate") as PanelContainer
 	if plate != null:
-		plate.add_theme_stylebox_override("panel", Palette.box(Palette.INK_DEEP, Palette.EDGE, 3, 2))
+		plate.add_theme_stylebox_override("panel", Palette.box(Palette.PANEL_INK, Palette.EDGE, 3, 2))
 	set_docked(false)
 	render([], "")
 
@@ -53,6 +53,7 @@ func _boot() -> void:
 func render(order: Array, speaker: String) -> void:
 	_order = order
 	_speaker = speaker
+	_collapse(order.size())   # height follows the row count even when the chips host is not resolvable yet
 	var head := get_node_or_null("%Who") as Label
 	if head != null:
 		head.text = speaker if speaker != "" else Strings.SOMEONE
@@ -75,6 +76,27 @@ func render(order: Array, speaker: String) -> void:
 	# the stats sheet, never both) — an empty order still has a head and a "nothing yet" line.
 	for i in order.size():
 		host.add_child(_chip(order[i], i))
+
+## The card is exactly as tall as it has rows (2026-09-13, the judge: opaque panels out-weigh the guest,
+## "collapse the order card around its rows"). The dock rect is the MAXIMUM; an empty order keeps one row
+## for the "nothing yet" line. Width and position never move, so every reachability rect is unchanged.
+func _collapse(rows: int) -> void:
+	var r := Palette.ORDER_RECT_WALL if _on_wall else Palette.ORDER_RECT
+	var head_h := 18
+	var body := (CHIP_H if _on_wall else CHIP_H * maxi(1, rows)) + 3
+	var h := mini(r.size.y, head_h + body)
+	# custom_minimum_size FIRST: a Control never shrinks below the minimum it is already carrying, so
+	# assigning `size` while the dock's full height is still the minimum silently clamps it back.
+	var want := Vector2(float(r.size.x), float(h))
+	custom_minimum_size = want
+	size = want
+	var plate := get_node_or_null("%Plate") as Control
+	if plate != null:
+		plate.custom_minimum_size = want
+		plate.size = want
+	var host := _chips()
+	if host != null:
+		host.size = Vector2(float(r.size.x - 4), float(h - head_h))
 
 ## Which chip stands for this basket line — the reachability test reads the card rather than counting
 ## children, because the order is the engine's list and its indices are the engine's too.

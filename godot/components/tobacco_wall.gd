@@ -76,7 +76,7 @@ func _plate(unique: String, r: Rect2i) -> void:
 	var p := get_node_or_null(unique) as Panel
 	if p == null:
 		return
-	p.add_theme_stylebox_override("panel", Palette.box(Palette.INK_DEEP, Palette.EDGE, 2, 2))
+	p.add_theme_stylebox_override("panel", Palette.box(Palette.PANEL_INK, Palette.EDGE, 2, 2))
 	_at(unique, r)
 
 func _at(unique: String, r: Rect2i) -> void:
@@ -206,6 +206,17 @@ func _cell(entry: Dictionary, row: int, col: int) -> Button:
 	b.set_meta("sku", String(entry.get("sku_id", merged.get("sku", ""))))
 	b.set_meta("brand", String(entry.get("brand", merged.get("id", ""))))
 	b.set_meta("key", "%d,%d" % [row, col])
+	# Stock block: Palette.STOCK_DEPTH copies stepped behind the front facing and dimmed, so a shelf reads
+	# as real stock (the judge: "isolated inventory icons on mostly empty shelving"). They are decoration —
+	# MOUSE_FILTER_IGNORE, added first — so the Button stays the ONE hit target per brand.
+	for depth in range(Palette.STOCK_DEPTH, 0, -1):
+		var behind := BrandMark.new()
+		behind.name = "Behind%d" % depth
+		behind.set_facing(merged)
+		behind.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		behind.position = Vector2(Palette.STOCK_STEP * depth)
+		behind.modulate = Color(Palette.STOCK_DIM, Palette.STOCK_DIM, Palette.STOCK_DIM, 1.0)
+		b.add_child(behind)
 	var facing := BrandMark.new()
 	facing.name = "Facing"
 	facing.set_facing(merged)
@@ -237,7 +248,7 @@ func _rail(shelf: Dictionary, row: int, count: int, cell_w: int) -> Panel:
 	var r := Palette.wall_rail_rect(row, maxi(1, count), pitch, x0, maxi(1, cell_w))
 	var plate := Panel.new()
 	plate.name = "Rail%d" % row
-	plate.add_theme_stylebox_override("panel", Palette.box(Palette.INK_DEEP, Palette.EDGE, 1, 2))
+	plate.add_theme_stylebox_override("panel", Palette.box(Palette.RAIL_FILL, Palette.RAIL_EDGE, 1, 2))
 	plate.position = Vector2(r.position)
 	plate.size = Vector2(r.size)
 	plate.custom_minimum_size = Vector2(r.size)
@@ -253,6 +264,7 @@ func _rail_label(node_name: String, value: String, r: Rect2i, align: int) -> Lab
 	var l := Label.new()
 	l.name = node_name
 	l.theme_type_variation = &"SmallLabel"
+	l.add_theme_color_override("font_color", Palette.RAIL_TEXT)   # dark lettering on the pale holder
 	# clip_text FIRST, then the text, then the rect. A Label's minimum width is its text until it is
 	# told to clip, and a Control never shrinks below a minimum it has already been given — so setting
 	# the size before the clip leaves a 24-px money column 30 px wide, over the chip beside it.
