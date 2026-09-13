@@ -195,7 +195,15 @@ func _seat_portrait() -> void:
 		return
 	var panel := _serve()
 	var serving := panel != null and panel.is_open
-	portrait.place_behind(layers.counter_edge(), Palette.PORTRAIT_CENTRE_X_SERVING if serving else Palette.PORTRAIT_CENTRE_X)
+	var centre_x := Palette.PORTRAIT_CENTRE_X_SERVING if serving else Palette.PORTRAIT_CENTRE_X
+	# A LEANING bust (Assets.staging) goes in front of the counter with its forearms on the laminate; every
+	# other bust keeps the Coffee Talk seat behind it. Re-mounting is idempotent, so this is safe per render.
+	if portrait.staging() == "leaning":
+		layers.mount(portrait, true)
+		portrait.place_on(layers.counter_edge(), centre_x)
+	else:
+		layers.mount(portrait, false)
+		portrait.place_behind(layers.counter_edge(), centre_x)
 
 func apply_capture_preset(preset_name: String) -> void:
 	super.apply_capture_preset(preset_name)
@@ -303,7 +311,9 @@ func _place_chrome(v: Dictionary) -> void:
 		# on the person, and the ID check at the counter is a decision you cannot make blind.
 		bubble.age_flag = not active.is_empty() and bool(active.get("underage", false)) 			and bool((active.get("want", {}) as Dictionary).get("restricted", false))
 		bubble.position = BUBBLE_RIGHT
-		bubble.visible = not active.is_empty() and not serve_open and talk.is_empty() and not queue_shown
+		# Hidden during ANY conversation — a talk or a pending story beat — not only a talk: the judges read the
+		# card over the doorway as competing with the character (v8/v9). The order line at the counter still shows it.
+		bubble.visible = not active.is_empty() and not serve_open and talk.is_empty() and not queue_shown and (v.get("dialogue", {}) as Dictionary).is_empty()
 	var box := _dialogue()
 	if box != null:
 		var r := Palette.DIALOGUE_RECT
