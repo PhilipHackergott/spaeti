@@ -21,13 +21,13 @@ const SIZES := {
 	"char/lena_upset": Vector2i(160, 193),   # leaning busts are drawn a step larger (v10: "enlarge Lena, more intimate presence")
 	"char/juergen_neutral": Vector2i(160, 193),
 	"char/juergen_warm": Vector2i(160, 193),
-	"char/mehmet_neutral": Vector2i(144, 174),
+	"char/mehmet_neutral": Vector2i(160, 193),
 	"char/brandt_neutral": Vector2i(144, 174),
 	"char/tobias_neutral": Vector2i(144, 174),
 	"char/schulz_neutral": Vector2i(144, 174),
 	"char/nadia_neutral": Vector2i(144, 174),
-	"char/mehmet_warm": Vector2i(144, 174),
-	"char/mehmet_wary": Vector2i(144, 174),
+	"char/mehmet_warm": Vector2i(160, 193),
+	"char/mehmet_wary": Vector2i(160, 193),
 	"char/brandt_wary": Vector2i(144, 174),
 	"char/tobias_warm": Vector2i(144, 174),
 	"char/tobias_upset": Vector2i(144, 174),
@@ -78,6 +78,9 @@ const STAGING := {
 	"char/lena_upset": "leaning",
 	"char/juergen_neutral": "leaning",
 	"char/juergen_warm": "leaning",
+	"char/mehmet_neutral": "leaning",
+	"char/mehmet_warm": "leaning",
+	"char/mehmet_wary": "leaning",
 }
 
 ## Staging of a character's bust: by the resolved expression id first, then the character's neutral.
