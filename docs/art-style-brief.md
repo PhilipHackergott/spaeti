@@ -58,3 +58,15 @@ mid-20s, messy wavy brown hair, light stubble, red hoodie under a brown/black ja
 **Absolutely not:** text, watermarks, signatures, borders, frames, UI mockup chrome, multiple panels,
 sprite-sheet grids, isometric/top-down views, chibi/anime-big-head proportions, glossy smooth shading,
 real brands or logos, photographic backgrounds.
+
+## The tobacco wall (user reference photo, 2026-09-13 — the image itself could not be saved from chat)
+
+A real Berlin Späti counter seen from the customer's side. A smiling shopkeeper in a dark fleece stands behind a low
+white laminate counter. **Behind him, floor to ceiling, the tobacco wall:** dense rows of cigarette packs in a metal
+display with a price strip along every row, a backlit brand sign at the top, columns of vape / e-cigarette boxes in
+bright colours to the right with yellow starburst "Sale!" tags and hand-written prices, boxes of rolling papers and
+filters, a "Blättchen nach Maß" rolling-paper stand and paper tubes on the counter, sweets (chewing gum, Mon Chéri,
+Twix, M&Ms, Kinder) in the counter front, a card terminal, a small barcode scanner and a plastic cup of lighters.
+Everything is packed tight, price-tagged and lit cool-white. For the game: **fake brands only** (each with its own
+logo and colour, readable at pack size), real-Späti density, the same laminate/metal/fluorescent materials as the
+rest of the set. The wall is a second VIEW the player turns to (docs/08).
