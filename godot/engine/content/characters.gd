@@ -130,7 +130,7 @@ const DATA: Array[Dictionary] = [
 		"wants": {"water": 3, "coffee": 1}},
 
 	# ── Christa Schulz — the corner's memory, and the last filterless row on the wall ──────────
-	{"id": "schulz", "name": "Frau Schulz", "portrait": "char/schulz", "expressions": ["neutral"],
+	{"id": "schulz", "name": "Frau Schulz", "portrait": "char/schulz", "expressions": ["neutral", "warm", "wary", "surprised", "tired"],
 		"archetype_id": "regular", "colour": "#b8a9c0",
 		"wants": {"schrippe": 3, "chocolate": 1, "milk": 1},
 		"age": 79, "job": "Retired Reichsbahn dispatcher", "strand_id": "schulz",
@@ -158,7 +158,7 @@ const DATA: Array[Dictionary] = [
 	},
 
 	# ── Achim Kolbe — the deepest register order in the game, and a poster already printed ─────
-	{"id": "achim", "name": "Achim", "portrait": "char/achim", "expressions": ["neutral"],
+	{"id": "achim", "name": "Achim", "portrait": "char/achim", "expressions": ["neutral", "warm", "upset", "surprised"],
 		"archetype_id": "insomniac", "colour": "#c2564a",
 		"wants": {"tobacco": 3, "papers": 2, "beer": 2},
 		"age": 57, "job": "Sound engineer, ex-squatter", "strand_id": "achim",
@@ -187,7 +187,7 @@ const DATA: Array[Dictionary] = [
 	},
 
 	# ── Karim Hadid — he orders by pointing at the wall, which is how the wall becomes a way in ─
-	{"id": "karim", "name": "Karim", "portrait": "char/karim", "expressions": ["neutral"],
+	{"id": "karim", "name": "Karim", "portrait": "char/karim", "expressions": ["neutral", "warm", "wary", "surprised"],
 		"archetype_id": "regular", "colour": "#8fae5a",
 		"wants": {"cigarettes": 2, "water": 2, "mate": 1, "chocolate": 1},
 		"age": 31, "job": "Prep cook, trained civil engineer", "strand_id": "karim",
@@ -215,7 +215,7 @@ const DATA: Array[Dictionary] = [
 	},
 
 	# ── Nadia Ferreira — 03:40, and the tobacco wall still argues with her every night ─────────
-	{"id": "nadia", "name": "Nadia", "portrait": "char/nadia", "expressions": ["neutral"],
+	{"id": "nadia", "name": "Nadia", "portrait": "char/nadia", "expressions": ["neutral", "warm", "tired"],
 		"archetype_id": "nurse", "colour": "#7fbfb0",
 		"wants": {"coffee": 3, "schrippe": 2, "painkillers": 1},
 		"age": 34, "job": "ITU night nurse", "strand_id": "nadia",
@@ -244,7 +244,7 @@ const DATA: Array[Dictionary] = [
 	},
 
 	# ── Tobias Lange — your best customer and your worst omen ──────────────────────────────────
-	{"id": "tobias", "name": "Tobias", "portrait": "char/tobias", "expressions": ["neutral"],
+	{"id": "tobias", "name": "Tobias", "portrait": "char/tobias", "expressions": ["neutral", "warm", "upset", "surprised"],
 		"archetype_id": "tourist", "colour": "#c9b07a",
 		"wants": {"beer": 2, "mate": 2, "chips": 1},
 		"age": 33, "job": "Product lead, mobility startup", "strand_id": "tobias",
@@ -271,7 +271,7 @@ const DATA: Array[Dictionary] = [
 	},
 
 	# ── Robin Kessler — the flat opener, which is a test ───────────────────────────────────────
-	{"id": "robin", "name": "Robin", "portrait": "char/robin", "expressions": ["neutral"],
+	{"id": "robin", "name": "Robin", "portrait": "char/robin", "expressions": ["neutral", "warm", "wary", "surprised"],
 		"archetype_id": "student", "colour": "#c07ad8",
 		"wants": {"energy": 2, "gummi": 2, "tobacco": 2, "papers": 1},
 		"age": 19, "job": "Café shift", "strand_id": "robin",
@@ -304,7 +304,7 @@ const DATA: Array[Dictionary] = [
 	},
 
 	# ── Aylin Demir — Sunday, 07:40, glitter, and a lighter. Always a lighter. ─────────────────
-	{"id": "aylin", "name": "Aylin", "portrait": "char/aylin", "expressions": ["neutral"],
+	{"id": "aylin", "name": "Aylin", "portrait": "char/aylin", "expressions": ["neutral", "warm", "surprised", "tired"],
 		"archetype_id": "raver", "colour": "#d6e05e",
 		"wants": {"mate": 3, "water": 1, "cigarettes": 1, "lighter": 1},
 		"age": 29, "job": "Live-sound engineer", "strand_id": "aylinjonas",
@@ -334,7 +334,7 @@ const DATA: Array[Dictionary] = [
 	},
 
 	# ── Rüdiger Bley — 03:10, still water, and a term sheet he read on a Tuesday ───────────────
-	{"id": "bley", "name": "Herr Bley", "portrait": "char/bley", "expressions": ["neutral"],
+	{"id": "bley", "name": "Herr Bley", "portrait": "char/bley", "expressions": ["neutral", "wary"],
 		"archetype_id": "insomniac", "colour": "#8a949c",
 		"wants": {"water": 3, "chocolate": 2, "cigarettes": 1},
 		"age": 61, "job": "Corporate real-estate financing", "strand_id": "bley",
