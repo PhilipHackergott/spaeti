@@ -185,7 +185,7 @@ const DIALOGUE_W_QUEUE := 300
 ## — `test_scenes.gd::test_the_ring_up_columns_do_not_overlap` is what keeps them from colliding.
 ## The customer's words, one RequestChip per basket line. Tab swaps it for the StatsStrip, which is
 ## why the two share the left gutter and never appear together.
-const ORDER_RECT := Rect2i(4, 56, 132, 106)
+const ORDER_RECT := Rect2i(4, 56, 132, 114)   # five rows + the head; the card collapses to what it holds
 ## ...and where it re-docks while you are turned around: the wall has no bust and no HUD, so the card
 ## climbs into the corner and the running total takes the opposite one.
 const ORDER_RECT_WALL := Rect2i(4, 4, 132, 62)
@@ -209,12 +209,12 @@ const REGISTER_HEAD_RECT := Rect2i(344, 32, 62, 18)
 ## reducer), so it belongs beside the word "Register", not under "Ring up".
 const CHECK_ID_RECT := Rect2i(408, 32, 66, 18)
 ## The one free correction, spoken in the reducer's words, over the lines it flagged (docs/08 3.4).
-const REGISTER_BANNER_RECT := Rect2i(344, 50, 130, 18)
-## Four rows of REGISTER_ROW_H: a basket is capped at 4 distinct lines, so the list never scrolls.
+const REGISTER_BANNER_RECT := Rect2i(344, 32, 62, 18)   # shares the title's slot since 2026-09-13  that row is the basket's fifth line
+## FIVE rows of REGISTER_ROW_H: a basket is capped at 5 distinct lines, so the list never scrolls.
 ## 18, not the 16 the first draft assumed: Jersey 10 at 16 px has a 23-px line box, so a 16-px row
 ## printed two lines of the register on top of each other (measured, not eyeballed —
 ## test_scenes.gd::test_a_register_line_fits_the_row_it_is_in).
-const REGISTER_LINES_RECT := Rect2i(344, 70, 130, 72)
+const REGISTER_LINES_RECT := Rect2i(344, 52, 130, 90)   # FIVE rows of REGISTER_ROW_H
 const REGISTER_ROW_H := 18
 const REGISTER_SUBTOTAL_RECT := Rect2i(344, 144, 130, 16)
 ## The deposit is a ROW, not only a button: the crate drags onto it and its -/+ tune the count.

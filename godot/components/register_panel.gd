@@ -179,6 +179,10 @@ func render(r: Dictionary) -> void:
 		# hold "Check that again." and nothing longer, and a truncated apology is worse than none.
 		banner.text = Strings.CORRECTION
 		banner.visible = String(r.get("correction", "")) != "" or int(r.get("corrections", 0)) > 0
+		# The tell and the word "Register" share one slot, so the fifth basket line has a row of its own.
+		var title := get_node_or_null("%Head") as Label
+		if title != null:
+			title.visible = not banner.visible
 		banner.add_theme_color_override("font_color", Palette.WARN)
 	var check := get_node_or_null("%CheckId") as Button
 	if check != null:

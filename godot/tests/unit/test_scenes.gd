@@ -995,7 +995,11 @@ func test_the_ring_up_columns_do_not_overlap() -> void:
 	assert_true(Palette.DIALOGUE_RECT.position.x + Palette.DIALOGUE_W_RING <= Palette.REGISTER_RECT.position.x,
 			"the box narrowed for the ring-up stops short of the register")
 	# Every row of the register column inside the panel, and no two of them stacked on each other.
-	var rows: Array = [Palette.REGISTER_HEAD_RECT, Palette.CHECK_ID_RECT, Palette.REGISTER_BANNER_RECT,
+	# REGISTER_BANNER_RECT is deliberately NOT in this list: since 2026-09-13 the tell shares the title's
+	# slot (the word "Register" stands down while it is up) so the basket's fifth line has a row. The two
+	# are mutually exclusive, which the next assertion pins instead of the overlap rule.
+	assert_eq(Palette.REGISTER_BANNER_RECT, Palette.REGISTER_HEAD_RECT, "the tell stands where the title does")
+	var rows: Array = [Palette.REGISTER_HEAD_RECT, Palette.CHECK_ID_RECT,
 		Palette.REGISTER_LINES_RECT, Palette.REGISTER_SUBTOTAL_RECT, Palette.PFAND_ROW_RECT,
 		Palette.REGISTER_TOTAL_RECT, Palette.TURN_AROUND_RECT, Palette.RING_UP_RECT, Palette.WAVE_OFF_RECT]
 	for i in rows.size():

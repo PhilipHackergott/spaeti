@@ -275,10 +275,23 @@ func _rail(shelf: Dictionary, row: int, count: int, cell_w: int) -> Panel:
 	plate.custom_minimum_size = Vector2(r.size)
 	plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var money_w := 52
-	plate.add_child(_rail_label("Label", String(shelf.get("label", "")),
-		Rect2i(3, 0, maxi(8, r.size.x - money_w - 6), r.size.y), HORIZONTAL_ALIGNMENT_LEFT))
-	plate.add_child(_rail_label("Price", Palette.money(float(shelf.get("price", 0.0))),
-		Rect2i(r.size.x - money_w - 3, 0, money_w, r.size.y), HORIZONTAL_ALIGNMENT_RIGHT))
+	# One SKU: name left, price right. TWO SKUs sharing the rail (papers + filters): half of it each,
+	# carrying its own price, because one number over ten facings is a lie the moment they differ.
+	var labels: Array = shelf.get("labels", [])
+	if labels.size() < 2:
+		plate.add_child(_rail_label("Label", String(shelf.get("label", "")),
+			Rect2i(3, 0, maxi(8, r.size.x - money_w - 6), r.size.y), HORIZONTAL_ALIGNMENT_LEFT))
+		plate.add_child(_rail_label("Price", Palette.money(float(shelf.get("price", 0.0))),
+			Rect2i(r.size.x - money_w - 3, 0, money_w, r.size.y), HORIZONTAL_ALIGNMENT_RIGHT))
+	else:
+		var half := int(r.size.x / labels.size())
+		for i in labels.size():
+			var part: Dictionary = labels[i]
+			var money := mini(money_w, int(half / 2))
+			plate.add_child(_rail_label("Label%d" % i, String(part.get("name", "")),
+				Rect2i(3 + i * half, 0, maxi(8, half - money - 6), r.size.y), HORIZONTAL_ALIGNMENT_LEFT))
+			plate.add_child(_rail_label("Price%d" % i, Palette.money(float(part.get("price", 0.0))),
+				Rect2i(i * half + half - money - 3, 0, money, r.size.y), HORIZONTAL_ALIGNMENT_RIGHT))
 	return plate
 
 func _rail_label(node_name: String, value: String, r: Rect2i, align: int) -> Label:

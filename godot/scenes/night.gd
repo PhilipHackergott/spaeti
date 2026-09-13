@@ -324,6 +324,12 @@ func _unhandled_input(event: InputEvent) -> void:
 	# The register's own verbs come first, and only while it is open: Q turns around (and back), Enter
 	# rings up, Delete and -/+ work the line the focus ring is standing on. Digits are deliberately
 	# left alone — they still pick dialogue choices, which is the one binding this screen prints.
+	# Esc at the wall is "turn back", not "pause": a child sees unhandled input before the shell, so
+	# the pause frame only opens when your back is already to the counter (docs/08 section 4.2).
+	if _on_wall and event.is_action_pressed("ui_cancel"):
+		if _act({"type": "turn_around", "on": false}):
+			get_viewport().set_input_as_handled()
+			return
 	if _ringing and _register_keys(event):
 		get_viewport().set_input_as_handled()
 		return
@@ -619,6 +625,8 @@ func _wire_register() -> void:
 	if tray != null:
 		if not tray.scan_requested.is_connected(_on_scan):
 			tray.scan_requested.connect(_on_scan)
+		if not tray.pfand_requested.is_connected(_on_crate_clicked):
+			tray.pfand_requested.connect(_on_crate_clicked)
 		if not tray.drag_started.is_connected(_on_drag_started):
 			tray.drag_started.connect(_on_drag_started)
 	var scanner := _scanner()
@@ -752,6 +760,11 @@ func _is_dragging() -> bool:
 	return drag != null and drag.is_dragging()
 
 # -- intents become actions ----------------------------------------------------------------------
+
+## Clicking the crate counts its bottles onto the Pfand row  the same action its drag dispatches.
+## Before this it was a focusable, visible control whose click the reducer refused in silence.
+func _on_crate_clicked(bottles: int) -> void:
+	_act({"type": "set_pfand", "bottles": bottles})
 
 func _on_scan(uid: int) -> void:
 	_act({"type": "scan", "uid": uid})

@@ -27,8 +27,8 @@ const TOBACCO_PATIENCE_BONUS_MS := 4000
 ## Reducer caps, not UI caps (docs/08 §3.1): ≤ 4 distinct goods lines, ≤ 6 units, ≤ 3 of them physically
 ## placed on the counter. The tray therefore cannot overflow its 7 slots (3 placed + 3 fetched + 1
 ## crate) and a content mistake cannot break the frame.
-const BASKET_MAX_LINES := 4
-const BASKET_MAX_UNITS := 6
+const BASKET_MAX_LINES := 5   # 2026-09-13: four truncated authored baskets (Lena's filters, Achim's lighter, Robin's gummi bears, Aylin's water)
+const BASKET_MAX_UNITS := 7
 const BASKET_MAX_PLACED := 3
 ## A register line is 1..9 of one thing; past that it is a wholesale order, not a Späti.
 const REGISTER_QTY_MAX := 9
@@ -1518,6 +1518,17 @@ static func _speech_mode(s: Dictionary) -> String:
 ## `view.wall` (docs/08 §3.3) — {} unless your back is actually turned. One shelf per tobacco SKU, in
 ## registry order, each carrying the parent SKU's one price: per-brand stock and per-brand prices are
 ## explicitly out of the slice (docs/08 §7), so every facing on a rail reads the same number.
+## Every SKU a shelf actually shows, with its own name and its own shelf price.
+static func _shelf_labels(s: Dictionary, group: Array) -> Array:
+	var out: Array = []
+	for id in group:
+		var sku_id := String(id)
+		var inv: Dictionary = (s["inventory"] as Dictionary).get(sku_id, {})
+		if inv.is_empty() or Content.brands_for(sku_id).is_empty():
+			continue
+		out.append({"sku_id": sku_id, "name": String(Content.sku(sku_id)["name"]), "price": float(inv["price"])})
+	return out
+
 static func _wall_view(s: Dictionary) -> Dictionary:
 	if String(s.get("view_mode", "counter")) != "wall":
 		return {}
@@ -1559,6 +1570,9 @@ static func _wall_view(s: Dictionary) -> Dictionary:
 			# One price per rail (docs/08 §4.3). A shared rail quotes the SKU that leads it — the
 			# papers, on the bottom shelf — which is what the reference photo does too.
 			"price": float(lead_inv["price"]),
+			# A shelf two SKUs share (papers + filters) carries BOTH names and BOTH prices: one number
+			# over ten facings was only true while the two happened to cost the same (2026-09-13).
+			"labels": _shelf_labels(s, group as Array),
 			"stock": int(lead_inv["stock"]),
 			"row": shelves.size(),
 			"cells": cells,

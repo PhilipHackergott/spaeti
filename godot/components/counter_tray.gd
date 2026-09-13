@@ -17,6 +17,9 @@ extends Control
 
 ## A slot was clicked, pressed or keyed: scan the uid it holds.
 signal scan_requested(uid: int)
+## The crate is not scanned, it is counted: a click puts its bottles on the Pfand row, which is what
+## dragging it there already did (2026-09-13  before this the click was refused in silence).
+signal pfand_requested(bottles: int)
 ## A slot was dragged past the grab threshold. `art` is the read-model row the carried sprite is drawn
 ## from; `payload` is what the drop will MEAN. The scene hands both to the DragLayer.
 signal drag_started(payload: Dictionary, art: Dictionary, from: Vector2)
