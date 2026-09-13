@@ -156,7 +156,9 @@ while (attempts <= retries) {
     continue;
   }
   // Transparency is judged on real pixels after Godot decoded (and possibly keyed) the file — not on the PNG header.
-  if (entry.transparent && snap.transparentFrac < 0.02) {
+  // A rectangular prop trimmed to its own box is ~0 % transparent AFTER the trim while its source had a real
+  // transparent border (the eight packs, 2026-09-13) — judge the background on the SOURCE alpha too.
+  if (entry.transparent && snap.transparentFrac < 0.02 && (snap.srcTransparentFrac ?? 0) < 0.02) {
     feedback = `The background was NOT transparent (under 2% transparent pixels after decoding, and neither the flat #${keyColour} key colour nor a flat/checker backdrop the border flood-fill could remove). Use image_gen's transparent-background option, or a single flat solid #${keyColour} background that no part of the subject touches.`;
     result.error = feedback;
     result.errors.push(`attempt ${attempts}: ${feedback} (kept as ${shelveRaw(raw, attempts)})`);

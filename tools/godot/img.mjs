@@ -23,10 +23,11 @@ export function snapImage(opts) {
   const all = (r.stdout || '') + (r.stderr || '');
   const line = all.split('\n').find((l) => l.startsWith('IMG ')) || '';
   if (r.status !== 0 || !fs.existsSync(out)) throw new Error(`img.gd failed (exit ${r.status}): ${all.slice(-800)}`);
-  const m = line.match(/alpha0=([\d.]+)/);
+  const m = line.match(/ alpha0=([\d.]+)/);
+  const sm = line.match(/src_alpha0=([\d.]+)/);
   const k = line.match(/keyed=(\d+)/);
   const fr = line.match(/fringe=(\d+)/);
-  return { line: line.trim(), out, transparentFrac: m ? Number(m[1]) : 0, keyedPixels: k ? Number(k[1]) : 0, fringe: fr ? Number(fr[1]) : 0, ...pngInfo(out) };
+  return { line: line.trim(), out, transparentFrac: m ? Number(m[1]) : 0, srcTransparentFrac: sm ? Number(sm[1]) : 0, keyedPixels: k ? Number(k[1]) : 0, fringe: fr ? Number(fr[1]) : 0, ...pngInfo(out) };
 }
 
 if (isMain(import.meta.url)) {

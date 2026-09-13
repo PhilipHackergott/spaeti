@@ -27,6 +27,9 @@ func _init() -> void:
 	if img.is_compressed():
 		img.decompress()
 	img.convert(Image.FORMAT_RGBA8)
+	# Transparency of the SOURCE before any trim/key/scale: a rectangular sprite (a cigarette pack) trimmed to
+	# its own bounding box is ~0 % transparent, which is not a failed background — this number says so.
+	var src_alpha0 := _transparent_fraction(img)
 	var keyed := 0
 	if a.has("key"):
 		var raw_alpha0 := _transparent_fraction(img)
@@ -114,7 +117,7 @@ func _init() -> void:
 	if a.has("key"):
 		fringe = _count_near(img, Color.html("#" + String(a["key"]).trim_prefix("#")), float(a.get("key-tol", "0.18")) + 0.12)
 	err = img.save_png(dst)
-	print("IMG err=%d in=%dx%d out=%dx%d mode=%s alpha0=%.4f keyed=%d fringe=%d orphans=%d palette=%d despeckled=%d file=%s" % [err, sw, sh, img.get_width(), img.get_height(), mode, alpha0, keyed, fringe, orphans, quantized, despeckled, dst])
+	print("IMG err=%d in=%dx%d out=%dx%d mode=%s alpha0=%.4f src_alpha0=%.4f keyed=%d fringe=%d orphans=%d palette=%d despeckled=%d file=%s" % [err, sw, sh, img.get_width(), img.get_height(), mode, alpha0, src_alpha0, keyed, fringe, orphans, quantized, despeckled, dst])
 	quit(0 if err == OK else 5)
 
 ## Median-cut palette quantisation to `n` colours (opaque pixels only). Histogram at 5 bits per channel (32768
