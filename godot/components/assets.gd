@@ -12,6 +12,9 @@ const ROOT := "res://assets/"
 ## The mirror is not trusted to stay honest by hand: test_scenes.gd::test_asset_sizes_match_the_spec
 ## reads docs/asset-spec.json and fails the moment this table and the spec disagree.
 const SIZES := {
+	"char/oneoff_lateworker_neutral": Vector2i(160, 193),
+	"char/oneoff_dogwalker_neutral": Vector2i(160, 193),
+	"char/oneoff_kassenkind_neutral": Vector2i(160, 193),
 	"sku/pils": Vector2i(14, 36),
 	"sku/helles": Vector2i(14, 36),
 	"sku/weizen": Vector2i(15, 40),
@@ -136,6 +139,9 @@ const FALLBACK_SIZE := Vector2i(32, 32)
 ## paints only the key colour below the counter line) and is layered IN FRONT of the counter with that line a
 ## few px onto the laminate — the customer visibly leans on it (the judges' first fix, 2026-09-13).
 const STAGING := {
+	"char/oneoff_lateworker_neutral": "leaning",
+	"char/oneoff_dogwalker_neutral": "leaning",
+	"char/oneoff_kassenkind_neutral": "leaning",
 	"char/schulz_warm": "leaning",
 	"char/schulz_wary": "leaning",
 	"char/schulz_surprised": "leaning",

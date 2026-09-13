@@ -1697,6 +1697,54 @@
       ],
       "prompt": "A single bottle of \"Apfelschorle\", a fictional Berlin Späti drink, standing upright, straight-on front view: a 0.5-litre clear PET bottle of apple spritzer, pale golden liquid, ribbed shoulders, a white screw cap and a pale-green label band with one flat apple-red block. Every label carries flat colour blocks ONLY — no lettering of any kind. THIS IS A TINY SHELF SPRITE: in game it is only 15 x 38 pixels on a 480x270 base grid. Draw it as a TRUE 15 x 38 logical-pixel sprite scaled up with nearest neighbour so every logical pixel is one large uniform square block with hard edges. At most 5-6 flat tones plus a 1-block near-black contour all round, ONE warm lighter column down the left and ONE cool darker column down the right. No anti-aliasing, no gradients, no dithering, no speckles, no fine texture, no drop shadow. NO text, NO letters, NO numbers, NO real logos, NO barcodes. The bottle stands CENTRED and fills the canvas height with a clear margin on every side; the flat #00ff00 key colour fills everything else and touches all four canvas edges.",
       "$family": "berlin-drinks"
+    },
+    {
+      "id": "char/oneoff_lateworker_neutral",
+      "kind": "portrait",
+      "w": 160,
+      "h": 193,
+      "stage": "leaning",
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "concept-art/main character target state.png",
+        "art/raw/char/lena_neutral.png"
+      ],
+      "prompt": "A nameless LATE-SHIFT WORKER, late thirties, on the way home at 02:00: a high-vis jacket open over a hoodie, a lanyard, short dark hair flattened by a cap that is now in one hand on the counter line, a thermos in the other. NEUTRAL: worn out, patient, mildly friendly - a person who has been upright for eleven hours. IDENTITY STYLE: the same game as the attached Lena bust (image 2) - same pixel density, palette discipline, contour weight, lean and counter line; a different person, and a NAMELESS one: readable as a type, not as a portrait. FRAMING FOR THE COUNTER: a relaxed forward lean, BOTH forearms resting on one straight horizontal counter line at 74 % of the image height; the forearms' UNDERSIDE is that line. BELOW that line paint NOTHING but the flat #00ff00 key colour. Head top ~6 % of the height, chin ~36 %, shoulders ~70 % of the width, forearms ~85 % of the width, elbows, cuffs and hands fully visible. LIGHT: warm ivory/amber highlight clusters on the forehead, cheekbones, nose, shoulder tops and forearm tops, a narrow cyan rim on the right silhouette from the fridge, cool blue-grey shadows; skin in five desaturated tones, never orange. RENDERING: a true pixel sprite of about 160x193 art pixels - hard-edged flat clusters, 4-6 tones per material, one clean dark contour, deliberate dark pixel clusters for eyelids, brows, nostrils and mouth corners; no gradients, no anti-aliasing, no speckle.",
+      "$note": "one-off archetype bust (docs/09 section 3)"
+    },
+    {
+      "id": "char/oneoff_dogwalker_neutral",
+      "kind": "portrait",
+      "w": 160,
+      "h": 193,
+      "stage": "leaning",
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "concept-art/main character target state.png",
+        "art/raw/char/lena_neutral.png"
+      ],
+      "prompt": "A nameless DOG WALKER, fifties, out with the dog at midnight: a quilted olive coat, a woollen scarf, grey curls under a knitted hat, a loop of red dog lead wound around one hand on the counter line (the dog itself is out of frame below). NEUTRAL: brisk, chatty, faintly amused. IDENTITY STYLE: the same game as the attached Lena bust (image 2) - same pixel density, palette discipline, contour weight, lean and counter line; a different person, and a NAMELESS one: readable as a type, not as a portrait. FRAMING FOR THE COUNTER: a relaxed forward lean, BOTH forearms resting on one straight horizontal counter line at 74 % of the image height; the forearms' UNDERSIDE is that line. BELOW that line paint NOTHING but the flat #00ff00 key colour. Head top ~6 % of the height, chin ~36 %, shoulders ~70 % of the width, forearms ~85 % of the width, elbows, cuffs and hands fully visible. LIGHT: warm ivory/amber highlight clusters on the forehead, cheekbones, nose, shoulder tops and forearm tops, a narrow cyan rim on the right silhouette from the fridge, cool blue-grey shadows; skin in five desaturated tones, never orange. RENDERING: a true pixel sprite of about 160x193 art pixels - hard-edged flat clusters, 4-6 tones per material, one clean dark contour, deliberate dark pixel clusters for eyelids, brows, nostrils and mouth corners; no gradients, no anti-aliasing, no speckle.",
+      "$note": "one-off archetype bust (docs/09 section 3)"
+    },
+    {
+      "id": "char/oneoff_kassenkind_neutral",
+      "kind": "portrait",
+      "w": 160,
+      "h": 193,
+      "stage": "leaning",
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "concept-art/main character target state.png",
+        "art/raw/char/lena_neutral.png"
+      ],
+      "prompt": "A nameless KASSENKIND - a teenager of about fifteen sent to the counter, visibly too young for what they are asking for: an oversized black puffer jacket, a cap pulled low, wireless earbuds, a five-euro note held flat on the counter line. NEUTRAL: trying very hard to look bored and adult, eyes not quite meeting yours. IDENTITY STYLE: the same game as the attached Lena bust (image 2) - same pixel density, palette discipline, contour weight, lean and counter line; a different person, and a NAMELESS one: readable as a type, not as a portrait. FRAMING FOR THE COUNTER: a relaxed forward lean, BOTH forearms resting on one straight horizontal counter line at 74 % of the image height; the forearms' UNDERSIDE is that line. BELOW that line paint NOTHING but the flat #00ff00 key colour. Head top ~6 % of the height, chin ~36 %, shoulders ~70 % of the width, forearms ~85 % of the width, elbows, cuffs and hands fully visible. LIGHT: warm ivory/amber highlight clusters on the forehead, cheekbones, nose, shoulder tops and forearm tops, a narrow cyan rim on the right silhouette from the fridge, cool blue-grey shadows; skin in five desaturated tones, never orange. RENDERING: a true pixel sprite of about 160x193 art pixels - hard-edged flat clusters, 4-6 tones per material, one clean dark contour, deliberate dark pixel clusters for eyelids, brows, nostrils and mouth corners; no gradients, no anti-aliasing, no speckle.",
+      "$note": "one-off archetype bust (docs/09 section 3)"
     }
   ],
   "modelByKind": {

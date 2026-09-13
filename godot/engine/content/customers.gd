@@ -13,7 +13,7 @@ extends RefCounted
 
 const DATA: Array[Dictionary] = [
 	{
-		"id": "regular", "speech": "name", "name": "Kiez regular", "portrait": "char/oneoff_clubber",
+		"id": "regular", "speech": "name", "name": "Kiez regular", "portrait": "char/oneoff_dogwalker",
 		"wants": {"beer": 3, "pils": 2, "mate": 2, "cigarettes": 2, "blitz_kola": 1, "water": 1, "schrippe": 1},
 		"patience_ms": 9000, "budget": 12.0, "price_tolerance": 1.25, "kiez_sensitivity": 1.4, "tip_base": 0.2, "curve": [1.0, 1.0, 0.8],
 	},
@@ -28,7 +28,7 @@ const DATA: Array[Dictionary] = [
 		"patience_ms": 6000, "budget": 14.0, "price_tolerance": 1.5, "kiez_sensitivity": 0.8, "tip_base": 0.4, "curve": [0.0, 0.4, 1.8],
 	},
 	{
-		"id": "nurse", "name": "Night-shift nurse", "portrait": "char/oneoff_clubber",
+		"id": "nurse", "name": "Night-shift nurse", "portrait": "char/oneoff_lateworker",
 		"wants": {"coffee": 3, "water": 2, "apfelschorle": 2, "painkillers": 1, "schrippe": 1, "chocolate": 1},
 		"patience_ms": 8000, "budget": 10.0, "price_tolerance": 1.1, "kiez_sensitivity": 1.1, "tip_base": 0.3, "curve": [0.5, 1.0, 1.0],
 	},
@@ -49,7 +49,7 @@ const DATA: Array[Dictionary] = [
 	},
 	{
 		# Kassenkind: tries to buy a restricted item — the ethics beat at the counter.
-		"id": "kid", "name": "Kassenkind", "portrait": "char/oneoff_clubber",
+		"id": "kid", "name": "Kassenkind", "portrait": "char/oneoff_kassenkind",
 		"wants": {"beer": 3, "pils": 2, "energy": 1},
 		"patience_ms": 7000, "budget": 8.0, "price_tolerance": 1.1, "kiez_sensitivity": 0.6, "tip_base": 0.1, "curve": [1.0, 0.7, 0.2],
 		"underage": true,
