@@ -41,7 +41,8 @@ Godot 4.7.2; every screen is a real `.tscn` you can open in the editor.
 | Lena / Mehmet neutral | 79 / 79 | Lena since regenerated ×3 in the leaning format (composed only) |
 | One-offs (clubber, tourist) | 78 / 78 | |
 | You / Brandt / Tobias / Schulz / Nadia | 73 / 76 / 75 / 74 / 68 | outside the demo path |
-| Register view (composed, real playthrough) | **74** | 68 → 74 after one polish round; character 81, Berlin 85, pixel 79; every SKU now has a sprite |
+| Register view (composed, real playthrough) | **76** | 68 � 74 � 76 after the lighting pass (palette 62 � 69 � 76, character 82, Berlin 83); ui 65 is the last soft axis |
+| *(superseded)* | 74 | 68 → 74 after one polish round; character 81, Berlin 85, pixel 79; every SKU now has a sprite |
 | Tobacco wall view | **72** | 61 → 72 after one polish round; ui 54 → 75, palette 56 → 71 (stock blocks, repeated front row, pale label rails, stronger marks) |
 | **Hero screen (`dialogue_choice`, composed)** | **75** (v11) | trajectory 71 → 74 → 70/74 → 73 → 72 → 73 → 70 → 74 → 75 over eleven rounds; v11 = Lena drawn at 160 px leaning, counter edge 8 px lower (composition 77, character 75, Berlin 89, palette 63, ui 71) |
 
