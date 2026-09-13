@@ -15,7 +15,7 @@ Godot 4.7.2; every screen is a real `.tscn` you can open in the editor.
 | **The line:** guests wait at the register until you take them; patience runs in line | done | `tools/godot/play.mjs` → `PLAY ok steps=13, guests=66`; autosave on every action (Title → Continue) |
 | Register screen: QueueStrip (Talk to them / Next guest), StatsStrip (Tab), DialogueBox with the choices inside the panel, stat tags + locked gates, DiceResult pop | done | `docs/gallery/night-*.png` |
 | Expression portraits driving the Portrait per node | done | lena {neutral, warm, upset} · juergen {neutral, warm} · mehmet {neutral, warm, wary} — `night-talk_result.png` shows the swap |
-| **Leaning staging:** a bust whose sprite ends at the forearms sits in front of the counter with the forearms on the laminate | done (Lena, Jürgen) | `Assets.STAGING`, `SceneLayers` slot `Leaners`, `Portrait.place_on`; Mehmet regenerating in the format |
+| **Leaning staging:** a bust whose sprite ends at the forearms sits in front of the counter with the forearms on the laminate | done (all three regulars) | `Assets.STAGING`, `SceneLayers` slot `Leaners`, `Portrait.place_on`; Lena ×3, Jürgen ×2, Mehmet ×3 regenerated with the key colour below the counter line |
 | Component pool (18 components, one Theme, one string table, measured pixel font, stepped light-pool shader) | done | `docs/04-component-catalog.md`; tests enforce no raw colours / literals |
 | Art pipeline: Codex generates, Codex judges, Godot snaps to the 480×270 grid | done | `docs/00`, `02`; `tools/codex/*.mjs`, `tools/godot/*.mjs` |
 | Review fleet (Opus reviewers → skeptics → one fixer) | done | 30 findings → 24 confirmed → 24 fixed, suite 99 → 108 (docs/03, 02:12) |
@@ -28,7 +28,7 @@ Godot 4.7.2; every screen is a real `.tscn` you can open in the editor.
 | Concept painting r3 (real-Späti set) at game density | 77 | set fidelity 86–94; rendering is the gap |
 | Backdrop r6 (promoted) | 77 | r5 was 74; composition 81, Berlin 87, palette 73, pixel 75 |
 | Counter r7 (promoted) | not scored alone | takeaway cup, newspaper, Pfand crate, prop weights; judged inside the composed frame |
-| Jürgen neutral | **84 pass** | behind-the-counter version |
+| Jürgen neutral | **84 pass** | the behind-the-counter version; the leaning r5 is judged only inside composed frames |
 | Lena / Mehmet neutral | 79 / 79 | Lena since regenerated ×3 in the leaning format (composed only) |
 | One-offs (clubber, tourist) | 78 / 78 | |
 | You / Brandt / Tobias / Schulz / Nadia | 73 / 76 / 75 / 74 / 68 | outside the demo path |
@@ -59,8 +59,8 @@ human pass over the raws; another round of prompt discipline is not going to clo
 - The hero screen has not been judged ≥ 85 and, per the pattern above, will not be with this generator.
 - SKU sprites were parked when the slice refocused on conversation (6 SKUs have sprites, the rest are placeholders);
   HUD icons are real now (sol, 16×16): clock, cash, Pfand, trust, profit.
-- Mehmet still uses the behind-the-counter seat while Lena and Jürgen lean — visible when the queue advances to him;
-  his leaning neutral is generating, warm/wary follow.
+- The one-off guests (clubber, tourist) and the five non-demo portraits still use the behind-the-counter seat; the
+  three regulars lean.
 - No audio, no character-creation screen (stats are defaults), only three regulars have trees.
 - Lena's warm sprite is 9 px taller than neutral, so her head lifts on the expression swap.
 
