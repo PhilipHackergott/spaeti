@@ -405,43 +405,67 @@
     },
     {
       "kind": "portrait",
-      "w": 144,
-      "h": 174,
+      "w": 160,
+      "h": 193,
       "transparent": true,
       "gen": "1024x1536",
       "aspect": "portrait",
       "id": "char/brandt_neutral",
-      "prompt": "Frau Brandt, the property developer's agent (the Lindner Group), late 40s — composed, courteous, unreadable; the machine with a human face. She is NOT a villain and NOT heavy or grim: trim, poised, quietly polite. FACE: a slim oval face, pale cool-peach skin with lifted shadows, small readable grey-blue eyes built from compact flat clusters (sclera block, iris block, one white highlight pixel, a heavy upper-lid line), thin arched brows, a small closed mouth with the faintest courteous lift at one corner, ears exposed. She is turned squarely toward the viewer and her eyes meet the viewer — not glancing off to the side. Her age is told by exactly two or three DELIBERATE one-art-pixel crease lines (one at each outer eye corner, one short muted shadow beside the mouth) and by nothing else — never painterly wrinkle texture, never sagging, never jowls, and never glossy eye detailing. HEAD: a precise chin-length dark-brown bob grouped into only THREE OR FOUR substantial lock shapes, each a broad flat cluster of 4 brown values with a hard silhouette; a single bright grey streak sweeping back from the left temple drawn as ONE clear graphic shape in 2 values. No narrow highlight ribbons, no fine strand highlights. The hair must not fall past the jawline and must not be a long mane. Small silver stud earrings, one bright pixel each. CLOTHES: a sharp charcoal blazer with crisp square shoulders and a clean lapel over a cream blouse buttoned high; folds are angular shadow clusters, not soft creases. The cream blouse is the only bright note; the palette is deliberately cool and corporate against the shop's amber. SIGNATURE PROP: a slim dark tablet held flat against her chest with one hand, reading as a simple rectangle in the lower third — the screen is a plain dark slab with NO text, NO icons, NO logo, NO glow. Head-and-shoulders dialogue bust, facing the viewer, slightly below eye level, the way Coffee Talk customers stand at the counter. RENDERING — this is the axis that failed the previous round (pixel_rendering scored 38–56), so obey it literally. Draw this as a TRUE LOW-RESOLUTION PIXEL SPRITE that has been enlarged with NEAREST-NEIGHBOUR, not as a smooth illustration. Build it mentally on a coarse grid of about 190 by 230 art pixels and then blow each art pixel up into a solid 6x6 square of ONE flat colour. Every diagonal and every curve therefore reads as a visible hard STAIRCASE of those squares. There must be no in-between colour anywhere in the image: no anti-aliased edge pixels, no soft colour ramps, no airbrushed cheeks, no gradient fills, no glossy specular blobs, no blur, no strand-by-strand hair, no narrow highlight ribbons, no speckled noise. Each material gets 4–6 flat tones arranged as contiguous hard-edged clusters, plus a clean one-art-pixel dark contour. The whole image uses at most about 28 colours in total. This is emphatically NOT an anime or manga portrait, NOT clean vector lineart, NOT a polished digital painting shrunk down — it is the deliberate, blocky, hand-placed pixel work of the reference image. LIGHT — restrained: a BROKEN one-art-pixel rim of muted amber along a few right-facing edges of hair, cheek and shoulder, and a dimmer desaturated slate-blue edge on the opposite side. NO outward glow, NO halo, NO bloom, no saturated orange or cobalt line tracing the entire silhouette, and nothing at all painted in the background. Skin is desaturated pale peach with muted rosy midtones and lifted mauve-grey shadows — never salmon, never orange, never tan, never crushed to black. Dark garments are dark plum-charcoal resolved into three readable planes (sleeve, chest, fold); near-black is reserved for contours and small occlusions only. FRAMING: the whole bust sits fully inside the canvas with clear empty space on every side except the bottom — the widest point (the shoulders and upper arms, and anything held) must stop at least 8% of the canvas width short of the left and right edges, and the hair must stop well short of the top edge. The figure is cut ONLY by the bottom edge. BACKGROUND: the PNG must have a REAL alpha channel around the bust — do NOT paint a grey-and-white checkerboard and do NOT paint a dark room or a glow behind the character; if alpha is impossible, fill the whole background with ONE flat solid #00ff00. No text, no watermark, no signature, no frame, no border, no UI chrome, no brand marks or logos on any garment or object. THE BACKGROUND MUST BE COMPLETELY EMPTY AND COMPLETELY FLAT: fill the ENTIRE canvas behind the character with ONE single solid #00ff00 — no glow, no gradient, no vignette, no lamp light, no coloured haze, no dark room, nothing. The character must meet that flat colour with a HARD one-pixel edge; no soft, feathered or semi-transparent halo of any kind may surround the silhouette, because the pipeline keys this colour out and any haze survives as a dirty fringe."
+      "prompt": "Frau Brandt, 45, the property developer's agent: a sleek dark bob, a tailored camel blazer over a black top, a thin gold necklace, a slim LEATHER FOLDER resting on the counter line under one hand (signature prop). NEUTRAL: professional warmth that does not reach the eyes. IDENTITY STYLE: the same game as the attached Lena bust (image 2) — same pixel density, palette discipline, contour weight, lean and counter line; a different person. FRAMING FOR THE COUNTER: a relaxed forward lean, BOTH forearms resting on one straight horizontal counter line at 74 % of the image height; the forearms' UNDERSIDE is that line. BELOW that line paint NOTHING but the flat #00ff00 key colour — no torso, no counter. Head top ~6 % of the height, chin ~36 %, shoulders ~70 % of the width, forearms ~85 % of the width, elbows, cuffs and hands fully visible. LIGHT: warm ivory/amber highlight clusters on the forehead, cheekbones, nose, shoulder tops and forearm tops (warm fluorescent from above-left), a narrow cyan rim on the right silhouette from the fridge, cool blue-grey shadows; skin in five desaturated tones, never orange. RENDERING: a true pixel sprite of about 160x193 art pixels — hard-edged flat clusters, 4-6 tones per material, one clean dark contour, deliberate dark pixel clusters for eyelids, brows, nostrils and mouth corners; no gradients, no anti-aliasing, no speckle.",
+      "stage": "leaning",
+      "refs": [
+        "concept-art/main character target state.png",
+        "art/raw/char/lena_neutral.png"
+      ],
+      "$card": "docs/09 section 2"
     },
     {
       "kind": "portrait",
-      "w": 144,
-      "h": 174,
+      "w": 160,
+      "h": 193,
       "transparent": true,
       "gen": "1024x1536",
       "aspect": "portrait",
       "id": "char/tobias_neutral",
-      "prompt": "Tobias, the new-money startup transplant who moved into the Kiez last year, early 30s — friendly, over-eager, a little oblivious; comic and slightly poignant, never smug, and NOT a glossy handsome-man illustration. FACE: a youthful open face with a rounded jaw, small readable warm-brown eyes built from compact flat clusters (sclera block, iris block, one white highlight pixel, a clean upper-lid line), thin brows lifted a touch in eager friendliness, and a simple smile made of one crisp mouth line plus a single light plane — no glossy lips, no sparkle. HEAD: a neat undercut — the sides ONE flat dark cluster shaved close, the top grouped into three or four BROAD ANGULAR LOCKS in four brown values with a clean one-art-pixel contour; no narrow highlight ribbons, no strand noise. His short beard is a clean stepped silhouette with exactly two interior tones — never speckled dots, never individual hairs, never smudged stubble. One small white wireless earbud in the visible ear, a two-pixel rounded blob. CLOTHES: a heather-grey hoodie, hood bunched behind the neck, under a slim matte bomber jacket in dark plum-charcoal resolved into three readable planes (sleeve, chest, fold) with near-black used only for contours; a small smart watch on the raised wrist as a dark band with one pale screen block. Everything is unbranded — NO logos, NO wordmarks, NO text on the cup, watch, hoodie or jacket. SIGNATURE PROP: a pale cream takeaway coffee cup with a plain sleeve and a small dark lid, held near the chest in one hand in the lower-left, small enough never to crowd the face; one short flat steam wisp of two or three pixels above the lid. ACCENT: the cream cup plus a single saturated mint-teal hood drawstring are the only bright notes. Head-and-shoulders dialogue bust, facing the viewer, slightly below eye level, the way Coffee Talk customers stand at the counter. RENDERING — this is the axis that failed the previous round (pixel_rendering scored 38–56), so obey it literally. Draw this as a TRUE LOW-RESOLUTION PIXEL SPRITE that has been enlarged with NEAREST-NEIGHBOUR, not as a smooth illustration. Build it mentally on a coarse grid of about 190 by 230 art pixels and then blow each art pixel up into a solid 6x6 square of ONE flat colour. Every diagonal and every curve therefore reads as a visible hard STAIRCASE of those squares. There must be no in-between colour anywhere in the image: no anti-aliased edge pixels, no soft colour ramps, no airbrushed cheeks, no gradient fills, no glossy specular blobs, no blur, no strand-by-strand hair, no narrow highlight ribbons, no speckled noise. Each material gets 4–6 flat tones arranged as contiguous hard-edged clusters, plus a clean one-art-pixel dark contour. The whole image uses at most about 28 colours in total. This is emphatically NOT an anime or manga portrait, NOT clean vector lineart, NOT a polished digital painting shrunk down — it is the deliberate, blocky, hand-placed pixel work of the reference image. LIGHT — restrained: a BROKEN one-art-pixel rim of muted amber along a few right-facing edges of hair, cheek and shoulder, and a dimmer desaturated slate-blue edge on the opposite side. NO outward glow, NO halo, NO bloom, no saturated orange or cobalt line tracing the entire silhouette, and nothing at all painted in the background. Skin is desaturated pale peach with muted rosy midtones and lifted mauve-grey shadows — never salmon, never orange, never tan, never crushed to black. Dark garments are dark plum-charcoal resolved into three readable planes (sleeve, chest, fold); near-black is reserved for contours and small occlusions only. FRAMING: the whole bust sits fully inside the canvas with clear empty space on every side except the bottom — the widest point (the shoulders and upper arms, and anything held) must stop at least 8% of the canvas width short of the left and right edges, and the hair must stop well short of the top edge. The figure is cut ONLY by the bottom edge. BACKGROUND: the PNG must have a REAL alpha channel around the bust — do NOT paint a grey-and-white checkerboard and do NOT paint a dark room or a glow behind the character; if alpha is impossible, fill the whole background with ONE flat solid #00ff00. No text, no watermark, no signature, no frame, no border, no UI chrome, no brand marks or logos on any garment or object. THE BACKGROUND MUST BE COMPLETELY EMPTY AND COMPLETELY FLAT: fill the ENTIRE canvas behind the character with ONE single solid #00ff00 — no glow, no gradient, no vignette, no lamp light, no coloured haze, no dark room, nothing. The character must meet that flat colour with a HARD one-pixel edge; no soft, feathered or semi-transparent halo of any kind may surround the silhouette, because the pipeline keys this colour out and any haze survives as a dirty fringe."
+      "prompt": "Tobias Lange, 33, product lead at a mobility startup from Düsseldorf: clean-cut, short styled brown hair, a light-grey quarter-zip fleece over a white T-shirt, a company lanyard, a bank CARD held between two fingers on the counter line (signature prop). NEUTRAL: open, friendly, a little too eager — the smile not quite arrived yet. IDENTITY STYLE: the same game as the attached Lena bust (image 2) — same pixel density, palette discipline, contour weight, lean and counter line; a different person. FRAMING FOR THE COUNTER: a relaxed forward lean, BOTH forearms resting on one straight horizontal counter line at 74 % of the image height; the forearms' UNDERSIDE is that line. BELOW that line paint NOTHING but the flat #00ff00 key colour — no torso, no counter. Head top ~6 % of the height, chin ~36 %, shoulders ~70 % of the width, forearms ~85 % of the width, elbows, cuffs and hands fully visible. LIGHT: warm ivory/amber highlight clusters on the forehead, cheekbones, nose, shoulder tops and forearm tops (warm fluorescent from above-left), a narrow cyan rim on the right silhouette from the fridge, cool blue-grey shadows; skin in five desaturated tones, never orange. RENDERING: a true pixel sprite of about 160x193 art pixels — hard-edged flat clusters, 4-6 tones per material, one clean dark contour, deliberate dark pixel clusters for eyelids, brows, nostrils and mouth corners; no gradients, no anti-aliasing, no speckle.",
+      "stage": "leaning",
+      "refs": [
+        "concept-art/main character target state.png",
+        "art/raw/char/lena_neutral.png"
+      ],
+      "$card": "docs/09 section 2"
     },
     {
       "kind": "portrait",
-      "w": 144,
-      "h": 174,
+      "w": 160,
+      "h": 193,
       "transparent": true,
       "gen": "1024x1536",
       "aspect": "portrait",
       "id": "char/schulz_neutral",
-      "prompt": "Frau Schulz, a regular customer of the Spaeti: an East-Berlin Oma in her late seventies, drawn as a dialogue-portrait bust in exactly the same style, proportions and outline weight as the protagonist in the reference image.\n\nFACE: a small, round, softly creased face with full cheeks and a short chin - realistic-ish Coffee Talk proportions, never a caricature, never a witch nose, never chibi. Pale peach-pink skin with lifted shadows (never orange, never half-buried in black). A few deliberate 1-pixel wrinkle marks only: two at the outer eye corners, one pair of smile lines, one forehead line - no crosshatching, no stipple. SHARP alert small eyes behind LARGE round-rectangular glasses with thin dark frames, the lenses a barely-tinted flat pale tone with one small hard highlight cluster each (no glassy gradient, no glare star). Thin pale brows, a small nose, and a small dry closed half-smile lifted more on one side - amused, unbowed, quietly sizing you up. Not stern, not sad.\n\nHAIR AND HEADSCARF: short silver-grey curls just visible at the temples and in front of the ears, under a patterned headscarf tied under the chin. The scarf is a muted dusty rose with a simple repeated geometric pattern drawn as deliberate 2-3 pixel blocks in two extra tones - a pattern, never noise, and never a floral scribble.\n\nCLOTHES AND SIGNATURE PROP: a chunky knitted mustard-yellow cardigan whose knit is suggested by short horizontal 1-pixel dashes in one darker tone (not a texture), worn open over a muted floral blouse whose print is a handful of simple 2-3 pixel flower clusters in two colours. The signature prop: the chrome handle and the top rim of a wheeled tartan shopping trolley entering the very bottom-left of the frame at chest height - just the handle bar and a sliver of the bag, small, simple, clearly outlined, never dominating the bust.\n\nLIGHT: soft and mostly even; a narrow warm amber rim along the upper left of the scarf and shoulder, a faint cool-blue edge on the right, cool charcoal shadows, nothing saturated.\n\nPIXEL GRID - THE SINGLE HARDEST REQUIREMENT AND THE ONE THE JUDGE KEEPS FAILING: do not draw a smooth portrait. Draw a SPRITE that is only about 180 art pixels wide and 230 art pixels tall, then enlarge it with nearest-neighbour to fill this canvas - so every art pixel is a solid uniform SQUARE BLOCK roughly 6x6 canvas pixels across, there are only about 180 such blocks across the whole image width, and every curve and diagonal is an obvious visible staircase of those blocks. Nothing - no eyelash, no wrinkle, no knit stitch, no pattern motif, no fold, no outline - may be thinner than ONE block. Every material gets 4-6 FLAT tones arranged as large connected clusters with hard boundaries; there are NO intermediate blend colours, NO soft tonal fringes, NO mottled transitions, NO airbrushed or concentric shading, NO gradual light falloff inside the figure - light and shadow meet at a hard cluster edge. One clean single-block dark contour runs around the figure and around each major shape, thickening only where shapes overlap.\n\nSIMPLIFY TO MATCH THE CAST: her face carries no more detail than the protagonist in the reference image - 4-6 skin tones laid out as distinct forehead, nose, cheek and chin planes, eyelids and pupils each a compact cluster, and age shown by only a few deliberate single-block crow-feet and mouth creases, never by modelled wrinkles or stipple. The lenses stay almost clear with ONE short straight highlight each, no blended reflection over the eyes. Clothing is BROAD READABLE SHAPES FIRST: lay down large flat mustard areas with exactly two stepped shadow levels before any pattern, keep knit marks to a few grouped rows, and draw the blouse flowers and the scarf diamonds as clean separated motifs of 3-4 blocks each - remove all scattered low-contrast flecks. The hair is four grey tones grouped into a few interlocking curl masses, each with a hard-edged shadow wedge and one short highlight cluster - never soft concentric shading. Amber highlights sit on the upper-left facing planes, lower-right shadows go muted plum-brown, cool accents only on selected right-facing edges. The trolley handle is a dark contour, a steel-grey body, one dark underside band and a narrow cream highlight; the tartan is crisp intersecting colour bands with flat intersection colours.\n\nFRAMING: head-and-shoulders bust, centred, facing the viewer at a slight three-quarter, seen slightly below eye level, cut cleanly across the mid-torso at chest height with both shoulders resolving evenly inside the canvas; no stray forearm wedge in a corner; leave clear space above the head so nothing touches the top edge.\n\nBACKGROUND: the PNG must have a REAL alpha channel around the bust - do NOT paint a grey-and-white checkerboard pattern to fake transparency, that is a hard rejection; if image_gen cannot give you alpha, fill the whole background with ONE flat solid #00ff00 instead. No floor shadow, no backdrop, no text, no watermark, no border, no frame, no second panel."
+      "prompt": "Christa Schulz, 79, retired Reichsbahn night dispatcher from East Berlin: small and upright, a short grey perm under a knitted hat, large glasses with a thin frame, a quilted dark-plum coat over a patterned cardigan, a string NET BAG with a bread and a milk carton resting on the counter line in one hand (signature prop). NEUTRAL: sharp, level gaze, mouth a straight line — she is about to correct a price. IDENTITY STYLE: the same game as the attached Lena bust (image 2) — same pixel density, palette discipline, contour weight, lean and counter line; a different person. FRAMING FOR THE COUNTER: a relaxed forward lean, BOTH forearms resting on one straight horizontal counter line at 74 % of the image height; the forearms' UNDERSIDE is that line. BELOW that line paint NOTHING but the flat #00ff00 key colour — no torso, no counter. Head top ~6 % of the height, chin ~36 %, shoulders ~70 % of the width, forearms ~85 % of the width, elbows, cuffs and hands fully visible. LIGHT: warm ivory/amber highlight clusters on the forehead, cheekbones, nose, shoulder tops and forearm tops (warm fluorescent from above-left), a narrow cyan rim on the right silhouette from the fridge, cool blue-grey shadows; skin in five desaturated tones, never orange. RENDERING: a true pixel sprite of about 160x193 art pixels — hard-edged flat clusters, 4-6 tones per material, one clean dark contour, deliberate dark pixel clusters for eyelids, brows, nostrils and mouth corners; no gradients, no anti-aliasing, no speckle.",
+      "stage": "leaning",
+      "refs": [
+        "concept-art/main character target state.png",
+        "art/raw/char/lena_neutral.png"
+      ],
+      "$card": "docs/09 section 2"
     },
     {
       "kind": "portrait",
-      "w": 144,
-      "h": 174,
+      "w": 160,
+      "h": 193,
       "transparent": true,
       "gen": "1024x1536",
       "aspect": "portrait",
       "id": "char/nadia_neutral",
-      "prompt": "Nadia, a regular customer of the Spaeti: a night-shift nurse and single mother in her mid thirties, drawn as a dialogue-portrait bust in exactly the same style, proportions and outline weight as the protagonist in the reference image.\n\nFACE: an oval face with soft rounded features and slim cheeks - realistic-ish Coffee Talk proportions, boyish-simple rendering, never large glossy anime eyes. Warm light-brown skin with lifted shadows (never orange, never half-buried in black). Small calm dark eyes with one white highlight pixel each and a faint cool-blue shadow cluster under each eye reading as tiredness - two or three flat pixels, not a bruise and not smudged shading. Thin dark brows set level, a small nose, a small closed mouth with a faint warm upward curve at one corner. She is warm but running on empty: gentle, a little far away, not sad, not stern.\n\nHAIR: dark brown hair pulled back TIGHTLY into a low bun - a smooth compact silhouette hugging the skull with a clean 1-pixel contour, a few short loose strands drawn as two or three deliberate chunky tufts at the temple. Built from 4 flat tones with one restrained warm highlight cluster on the lit side; no strand-by-strand painting, no flyaway noise.\n\nCLOTHES AND SIGNATURE PROP: teal hospital scrubs with a simple V-neck and a visible breast pocket, worn under an open dark navy parka with a slightly bulky collar - the colour blocking is simple and flat: teal chest panel, navy shoulders and sleeves, one darker navy edge where they meet. A plain lanyard of narrow woven strap in a muted colour hangs around her neck with a small blank rounded ID card - the card is a featureless light rectangle, no photo, no lettering, no logo. Her signature prop: a plain white paper coffee cup with a beige lid held low at chest height in ONE simply drawn hand - the hand is a few flat clusters with no finger detail, entirely inside the canvas, well below and clear of her chin so it never overlaps her face.\n\nLIGHT: soft and mostly even; a narrow warm amber rim along the upper left of her hair and shoulder, a restrained cool-blue edge down the right side, cool charcoal shadows; the teal stays muted, nothing saturated.\n\nPIXEL GRID - THE SINGLE HARDEST REQUIREMENT AND THE ONE THE JUDGE KEEPS FAILING: do not draw a smooth portrait. Draw a SPRITE that is only about 180 art pixels wide and 230 art pixels tall, then enlarge it with nearest-neighbour to fill this canvas - so every art pixel is a solid uniform SQUARE BLOCK roughly 6x6 canvas pixels across, there are only about 180 such blocks across the whole image width, and every curve and diagonal is an obvious visible staircase of those blocks. Nothing - no eyelash, no wrinkle, no knit stitch, no pattern motif, no fold, no outline - may be thinner than ONE block. Every material gets 4-6 FLAT tones arranged as large connected clusters with hard boundaries; there are NO intermediate blend colours, NO soft tonal fringes, NO mottled transitions, NO airbrushed or concentric shading, NO gradual light falloff inside the figure - light and shadow meet at a hard cluster edge. One clean single-block dark contour runs around the figure and around each major shape, thickening only where shapes overlap.\n\nSIMPLIFY TO MATCH THE CAST: make the head about 15 percent SMALLER relative to the shoulders than a portrait would be, so she reads at the same scale as the protagonist in the reference image standing behind the counter. Each eye is just a dark upper lid, a compact white cluster, an iris cluster and ONE highlight block - no lashes, no glossy modelling. Nose and lips are a few decisive blocks, not blended modelling. Hair is a handful of broad locks with stepped shadow boundaries and sparse amber highlight clusters; the darkest value is reserved for the bun attachment, the collar cavity and the sleeve overlaps. The parka is broad angular navy planes, not narrow fold streaks. Split every surface into a warm lit plane and a cool shadow plane that meet at a hard edge: bounded amber highlight clusters on the upper-left forehead and cheek, deeper cool shadow under the jaw and inside the parka, the scrubs divided into a lit teal and a shadow teal, and a narrow crisp cool rim on the right shoulder. Keep her tired: lower the upper lids slightly and put a restrained 1-2 block muted shadow cluster under each eye, plus one small smile crease - no extra wrinkles, no glossy eyes.\n\nFRAMING: head-and-shoulders bust, centred, facing the viewer at a slight three-quarter, seen slightly below eye level, cut cleanly across the mid-torso at chest height with both shoulders resolving evenly inside the canvas; no stray forearm wedge in a corner; leave clear space above the head so nothing touches the top edge.\n\nBACKGROUND: the PNG must have a REAL alpha channel around the bust - do NOT paint a grey-and-white checkerboard pattern to fake transparency, that is a hard rejection; if image_gen cannot give you alpha, fill the whole background with ONE flat solid #00ff00 instead. No floor shadow, no backdrop, no text, no watermark, no border, no frame, no second panel."
+      "prompt": "Nadia Ferreira, 34, ICU night nurse and single mother: dark hair pulled into a low bun, teal SCRUBS collar under an open padded navy parka, a hospital lanyard tucked away, a paper COFFEE cup on the counter line in one hand (signature prop). NEUTRAL: the flat calm of 03:40 — level eyes, faint shadows under them, mouth relaxed. IDENTITY STYLE: the same game as the attached Lena bust (image 2) — same pixel density, palette discipline, contour weight, lean and counter line; a different person. FRAMING FOR THE COUNTER: a relaxed forward lean, BOTH forearms resting on one straight horizontal counter line at 74 % of the image height; the forearms' UNDERSIDE is that line. BELOW that line paint NOTHING but the flat #00ff00 key colour — no torso, no counter. Head top ~6 % of the height, chin ~36 %, shoulders ~70 % of the width, forearms ~85 % of the width, elbows, cuffs and hands fully visible. LIGHT: warm ivory/amber highlight clusters on the forehead, cheekbones, nose, shoulder tops and forearm tops (warm fluorescent from above-left), a narrow cyan rim on the right silhouette from the fridge, cool blue-grey shadows; skin in five desaturated tones, never orange. RENDERING: a true pixel sprite of about 160x193 art pixels — hard-edged flat clusters, 4-6 tones per material, one clean dark contour, deliberate dark pixel clusters for eyelids, brows, nostrils and mouth corners; no gradients, no anti-aliasing, no speckle.",
+      "stage": "leaning",
+      "refs": [
+        "concept-art/main character target state.png",
+        "art/raw/char/lena_neutral.png"
+      ],
+      "$card": "docs/09 section 2"
     },
     {
       "id": "char/mehmet_warm",
@@ -478,8 +502,8 @@
     {
       "id": "char/brandt_wary",
       "kind": "portrait",
-      "w": 144,
-      "h": 174,
+      "w": 160,
+      "h": 193,
       "transparent": true,
       "gen": "1024x1536",
       "aspect": "portrait",
@@ -488,13 +512,14 @@
         "art/raw/char/brandt_neutral.png"
       ],
       "$resumeNote": "Generate only after char/brandt_neutral is final (its raw is the second reference image).",
-      "prompt": "Frau Brandt, the developer's agent (the Lindner Group), late 40s: a sharp, expensive charcoal blazer over a cream blouse, a precise dark bob with a grey streak, small silver earrings, a tablet held against her chest as her signature prop. Composed, courteous, unreadable — the machine with a human face. Image 2 is THIS character — reproduce the exact face, hair, colours and clothes; change ONLY the expression. This is the WARY expression: narrowed eyes, one brow up, lips pressed, chin slightly lowered, guarded. Head-and-shoulders bust for a dialogue portrait, Coffee Talk proportions and outline weight, real alpha background."
+      "prompt": "Frau Brandt, the developer's agent (the Lindner Group), late 40s: a sharp, expensive charcoal blazer over a cream blouse, a precise dark bob with a grey streak, small silver earrings, a tablet held against her chest as her signature prop. Composed, courteous, unreadable — the machine with a human face. Image 2 is THIS character — reproduce the exact face, hair, colours and clothes; change ONLY the expression. This is the WARY expression: narrowed eyes, one brow up, lips pressed, chin slightly lowered, guarded. Head-and-shoulders bust for a dialogue portrait, Coffee Talk proportions and outline weight, real alpha background.",
+      "stage": "leaning"
     },
     {
       "id": "char/tobias_warm",
       "kind": "portrait",
-      "w": 144,
-      "h": 174,
+      "w": 160,
+      "h": 193,
       "transparent": true,
       "gen": "1024x1536",
       "aspect": "portrait",
@@ -503,13 +528,14 @@
         "art/raw/char/tobias_neutral.png"
       ],
       "$resumeNote": "Generate only after char/tobias_neutral is final (its raw is the second reference image).",
-      "prompt": "Tobias, the new-money startup transplant, early 30s: an undercut with a neat beard, a premium grey hoodie under a slim black bomber jacket, one wireless earbud in, a smart watch, an oat-milk coffee cup held up as his signature prop. Friendly, over-eager, a little oblivious. Image 2 is THIS character — reproduce the exact face, hair, colours and clothes; change ONLY the expression. This is the WARM expression: a genuine small smile, eyes softened, head tilted a touch. Head-and-shoulders bust for a dialogue portrait, Coffee Talk proportions and outline weight, real alpha background."
+      "prompt": "Tobias, the new-money startup transplant, early 30s: an undercut with a neat beard, a premium grey hoodie under a slim black bomber jacket, one wireless earbud in, a smart watch, an oat-milk coffee cup held up as his signature prop. Friendly, over-eager, a little oblivious. Image 2 is THIS character — reproduce the exact face, hair, colours and clothes; change ONLY the expression. This is the WARM expression: a genuine small smile, eyes softened, head tilted a touch. Head-and-shoulders bust for a dialogue portrait, Coffee Talk proportions and outline weight, real alpha background.",
+      "stage": "leaning"
     },
     {
       "id": "char/tobias_upset",
       "kind": "portrait",
-      "w": 144,
-      "h": 174,
+      "w": 160,
+      "h": 193,
       "transparent": true,
       "gen": "1024x1536",
       "aspect": "portrait",
@@ -518,13 +544,14 @@
         "art/raw/char/tobias_neutral.png"
       ],
       "$resumeNote": "Generate only after char/tobias_neutral is final (its raw is the second reference image).",
-      "prompt": "Tobias, the new-money startup transplant, early 30s: an undercut with a neat beard, a premium grey hoodie under a slim black bomber jacket, one wireless earbud in, a smart watch, an oat-milk coffee cup held up as his signature prop. Friendly, over-eager, a little oblivious. Image 2 is THIS character — reproduce the exact face, hair, colours and clothes; change ONLY the expression. This is the UPSET expression: jaw set, brows drawn together, mouth flat, eyes cut to the side, shoulders tense. Head-and-shoulders bust for a dialogue portrait, Coffee Talk proportions and outline weight, real alpha background."
+      "prompt": "Tobias, the new-money startup transplant, early 30s: an undercut with a neat beard, a premium grey hoodie under a slim black bomber jacket, one wireless earbud in, a smart watch, an oat-milk coffee cup held up as his signature prop. Friendly, over-eager, a little oblivious. Image 2 is THIS character — reproduce the exact face, hair, colours and clothes; change ONLY the expression. This is the UPSET expression: jaw set, brows drawn together, mouth flat, eyes cut to the side, shoulders tense. Head-and-shoulders bust for a dialogue portrait, Coffee Talk proportions and outline weight, real alpha background.",
+      "stage": "leaning"
     },
     {
       "id": "char/schulz_wary",
       "kind": "portrait",
-      "w": 144,
-      "h": 174,
+      "w": 160,
+      "h": 193,
       "transparent": true,
       "gen": "1024x1536",
       "aspect": "portrait",
@@ -533,13 +560,14 @@
         "art/raw/char/schulz_neutral.png"
       ],
       "$resumeNote": "Generate only after char/schulz_neutral is final (its raw is the second reference image).",
-      "prompt": "Frau Schulz, an East-Berlin Oma in her late 70s: a patterned headscarf, large glasses, a knitted mustard cardigan over a floral blouse, a wheeled shopping trolley handle visible at the bottom of frame as her signature prop. Sharp eyes, a small dry smile, unbowed. Image 2 is THIS character — reproduce the exact face, hair, colours and clothes; change ONLY the expression. This is the WARY expression: narrowed eyes, one brow up, lips pressed, chin slightly lowered, guarded. Head-and-shoulders bust for a dialogue portrait, Coffee Talk proportions and outline weight, real alpha background."
+      "prompt": "Frau Schulz, an East-Berlin Oma in her late 70s: a patterned headscarf, large glasses, a knitted mustard cardigan over a floral blouse, a wheeled shopping trolley handle visible at the bottom of frame as her signature prop. Sharp eyes, a small dry smile, unbowed. Image 2 is THIS character — reproduce the exact face, hair, colours and clothes; change ONLY the expression. This is the WARY expression: narrowed eyes, one brow up, lips pressed, chin slightly lowered, guarded. Head-and-shoulders bust for a dialogue portrait, Coffee Talk proportions and outline weight, real alpha background.",
+      "stage": "leaning"
     },
     {
       "id": "char/nadia_warm",
       "kind": "portrait",
-      "w": 144,
-      "h": 174,
+      "w": 160,
+      "h": 193,
       "transparent": true,
       "gen": "1024x1536",
       "aspect": "portrait",
@@ -548,13 +576,14 @@
         "art/raw/char/nadia_neutral.png"
       ],
       "$resumeNote": "Generate only after char/nadia_neutral is final (its raw is the second reference image).",
-      "prompt": "Nadia, a night-shift nurse and single mum, mid 30s: teal scrubs under an open dark parka, hair tied back tightly, tired-kind eyes with faint shadows, a lanyard, a paper coffee cup held near her chin as her signature prop. Warm but running on empty. Image 2 is THIS character — reproduce the exact face, hair, colours and clothes; change ONLY the expression. This is the WARM expression: a genuine small smile, eyes softened, head tilted a touch. Head-and-shoulders bust for a dialogue portrait, Coffee Talk proportions and outline weight, real alpha background."
+      "prompt": "Nadia, a night-shift nurse and single mum, mid 30s: teal scrubs under an open dark parka, hair tied back tightly, tired-kind eyes with faint shadows, a lanyard, a paper coffee cup held near her chin as her signature prop. Warm but running on empty. Image 2 is THIS character — reproduce the exact face, hair, colours and clothes; change ONLY the expression. This is the WARM expression: a genuine small smile, eyes softened, head tilted a touch. Head-and-shoulders bust for a dialogue portrait, Coffee Talk proportions and outline weight, real alpha background.",
+      "stage": "leaning"
     },
     {
       "id": "char/nadia_upset",
       "kind": "portrait",
-      "w": 144,
-      "h": 174,
+      "w": 160,
+      "h": 193,
       "transparent": true,
       "gen": "1024x1536",
       "aspect": "portrait",
@@ -563,7 +592,8 @@
         "art/raw/char/nadia_neutral.png"
       ],
       "$resumeNote": "Generate only after char/nadia_neutral is final (its raw is the second reference image).",
-      "prompt": "Nadia, a night-shift nurse and single mum, mid 30s: teal scrubs under an open dark parka, hair tied back tightly, tired-kind eyes with faint shadows, a lanyard, a paper coffee cup held near her chin as her signature prop. Warm but running on empty. Image 2 is THIS character — reproduce the exact face, hair, colours and clothes; change ONLY the expression. This is the UPSET expression: jaw set, brows drawn together, mouth flat, eyes cut to the side, shoulders tense. Head-and-shoulders bust for a dialogue portrait, Coffee Talk proportions and outline weight, real alpha background."
+      "prompt": "Nadia, a night-shift nurse and single mum, mid 30s: teal scrubs under an open dark parka, hair tied back tightly, tired-kind eyes with faint shadows, a lanyard, a paper coffee cup held near her chin as her signature prop. Warm but running on empty. Image 2 is THIS character — reproduce the exact face, hair, colours and clothes; change ONLY the expression. This is the UPSET expression: jaw set, brows drawn together, mouth flat, eyes cut to the side, shoulders tense. Head-and-shoulders bust for a dialogue portrait, Coffee Talk proportions and outline weight, real alpha background.",
+      "stage": "leaning"
     },
     {
       "id": "sku/energy",
@@ -707,6 +737,474 @@
       "aspect": "portrait",
       "filter": "lanczos",
       "prompt": "A single generic disposable vape pen, matte purple body with a small black mouthpiece and no text, standing upright, front view, Coffee Talk material shading."
+    },
+    {
+      "id": "tob/pack_adler",
+      "kind": "prop",
+      "w": 26,
+      "h": 34,
+      "transparent": true,
+      "filter": "lanczos",
+      "gen": "1024x1024",
+      "aspect": "square",
+      "prompt": "An upright flip-top cigarette pack for the fictional brand \"Adler\", straight-on front view, 26x34 blocks. Flat #b2372f deep red body, a broad flat #efe6d2 cream band across the lower third, and ONE flat two-tone emblem — a blunt white chevron wedge made of 3 blocks — occupying exactly a 16x16-block window whose top-left corner sits at block (4,6). No other marking of any kind. A TRUE pixel sprite drawn on a strict block grid at exactly the stated block size, every block one flat colour, every edge on a block boundary, at most 6 flat colours plus one near-black #160f14 1-block contour all round, one warm lighter column on the left and one cool darker column on the right, no anti-aliasing, no gradients, no dithering, no sub-block detail, and absolutely NO text, letters, numbers, logos with letters, barcodes, health warnings or seals. Flat #00ff00 background.",
+      "refs": [],
+      "$family": "tobacco-wall"
+    },
+    {
+      "id": "tob/pack_nordstern",
+      "kind": "prop",
+      "w": 26,
+      "h": 34,
+      "transparent": true,
+      "filter": "lanczos",
+      "gen": "1024x1024",
+      "aspect": "square",
+      "prompt": "An upright flip-top cigarette pack for the fictional brand \"Nordstern\", straight-on front view, 26x34 blocks. Flat #1e3a63 navy body, a broad flat #ffffff white band across the lower third, and ONE flat two-tone emblem — an 8-point star: one core block and four arms — occupying exactly a 16x16-block window whose top-left corner sits at block (4,6). No other marking of any kind. A TRUE pixel sprite drawn on a strict block grid at exactly the stated block size, every block one flat colour, every edge on a block boundary, at most 6 flat colours plus one near-black #160f14 1-block contour all round, one warm lighter column on the left and one cool darker column on the right, no anti-aliasing, no gradients, no dithering, no sub-block detail, and absolutely NO text, letters, numbers, logos with letters, barcodes, health warnings or seals. Flat #00ff00 background.",
+      "refs": [
+        "godot/assets/tob/pack_adler.png"
+      ],
+      "$family": "tobacco-wall"
+    },
+    {
+      "id": "tob/pack_kranich",
+      "kind": "prop",
+      "w": 26,
+      "h": 34,
+      "transparent": true,
+      "filter": "lanczos",
+      "gen": "1024x1024",
+      "aspect": "square",
+      "prompt": "An upright flip-top cigarette pack for the fictional brand \"Kranich\", straight-on front view, 26x34 blocks. Flat #2f7a5f jade green body, a broad flat #efe6d2 cream band across the lower third, and ONE flat two-tone emblem — an S-hook crane neck of 2 blocks — occupying exactly a 16x16-block window whose top-left corner sits at block (4,6). No other marking of any kind. A TRUE pixel sprite drawn on a strict block grid at exactly the stated block size, every block one flat colour, every edge on a block boundary, at most 6 flat colours plus one near-black #160f14 1-block contour all round, one warm lighter column on the left and one cool darker column on the right, no anti-aliasing, no gradients, no dithering, no sub-block detail, and absolutely NO text, letters, numbers, logos with letters, barcodes, health warnings or seals. Flat #00ff00 background.",
+      "refs": [
+        "godot/assets/tob/pack_adler.png"
+      ],
+      "$family": "tobacco-wall"
+    },
+    {
+      "id": "tob/pack_luxor",
+      "kind": "prop",
+      "w": 26,
+      "h": 34,
+      "transparent": true,
+      "filter": "lanczos",
+      "gen": "1024x1024",
+      "aspect": "square",
+      "prompt": "An upright flip-top cigarette pack for the fictional brand \"Luxor\", straight-on front view, 26x34 blocks. Flat #c9a227 gold body, a broad flat #3a2a12 dark brown band across the lower third, and ONE flat two-tone emblem — a stepped pyramid of 3 rows — occupying exactly a 16x16-block window whose top-left corner sits at block (4,6). No other marking of any kind. A TRUE pixel sprite drawn on a strict block grid at exactly the stated block size, every block one flat colour, every edge on a block boundary, at most 6 flat colours plus one near-black #160f14 1-block contour all round, one warm lighter column on the left and one cool darker column on the right, no anti-aliasing, no gradients, no dithering, no sub-block detail, and absolutely NO text, letters, numbers, logos with letters, barcodes, health warnings or seals. Flat #00ff00 background.",
+      "refs": [
+        "godot/assets/tob/pack_adler.png"
+      ],
+      "$family": "tobacco-wall"
+    },
+    {
+      "id": "tob/pack_elbe",
+      "kind": "prop",
+      "w": 26,
+      "h": 34,
+      "transparent": true,
+      "filter": "lanczos",
+      "gen": "1024x1024",
+      "aspect": "square",
+      "prompt": "An upright flip-top cigarette pack for the fictional brand \"Elbe\", straight-on front view, 26x34 blocks. Flat #2e7d8c teal body, a broad flat #efe6d2 cream band across the lower third, and ONE flat two-tone emblem — two stacked ripples — occupying exactly a 16x16-block window whose top-left corner sits at block (4,6). No other marking of any kind. A TRUE pixel sprite drawn on a strict block grid at exactly the stated block size, every block one flat colour, every edge on a block boundary, at most 6 flat colours plus one near-black #160f14 1-block contour all round, one warm lighter column on the left and one cool darker column on the right, no anti-aliasing, no gradients, no dithering, no sub-block detail, and absolutely NO text, letters, numbers, logos with letters, barcodes, health warnings or seals. Flat #00ff00 background.",
+      "refs": [
+        "godot/assets/tob/pack_adler.png"
+      ],
+      "$family": "tobacco-wall"
+    },
+    {
+      "id": "tob/pack_bergmann",
+      "kind": "prop",
+      "w": 26,
+      "h": 34,
+      "transparent": true,
+      "filter": "lanczos",
+      "gen": "1024x1024",
+      "aspect": "square",
+      "prompt": "An upright flip-top cigarette pack for the fictional brand \"Bergmann\", straight-on front view, 26x34 blocks. Flat #5a6b8c slate blue body, a broad flat #d8d2c4 pale grey band across the lower third, and ONE flat two-tone emblem — a notched triangle peak — occupying exactly a 16x16-block window whose top-left corner sits at block (4,6). No other marking of any kind. A TRUE pixel sprite drawn on a strict block grid at exactly the stated block size, every block one flat colour, every edge on a block boundary, at most 6 flat colours plus one near-black #160f14 1-block contour all round, one warm lighter column on the left and one cool darker column on the right, no anti-aliasing, no gradients, no dithering, no sub-block detail, and absolutely NO text, letters, numbers, logos with letters, barcodes, health warnings or seals. Flat #00ff00 background.",
+      "refs": [
+        "godot/assets/tob/pack_adler.png"
+      ],
+      "$family": "tobacco-wall"
+    },
+    {
+      "id": "tob/pack_fuchs",
+      "kind": "prop",
+      "w": 26,
+      "h": 34,
+      "transparent": true,
+      "filter": "lanczos",
+      "gen": "1024x1024",
+      "aspect": "square",
+      "prompt": "An upright flip-top cigarette pack for the fictional brand \"Fuchs\", straight-on front view, 26x34 blocks. Flat #d2691e orange body, a broad flat #2a1a12 near-black brown band across the lower third, and ONE flat two-tone emblem — two ear triangles over a muzzle block — occupying exactly a 16x16-block window whose top-left corner sits at block (4,6). No other marking of any kind. A TRUE pixel sprite drawn on a strict block grid at exactly the stated block size, every block one flat colour, every edge on a block boundary, at most 6 flat colours plus one near-black #160f14 1-block contour all round, one warm lighter column on the left and one cool darker column on the right, no anti-aliasing, no gradients, no dithering, no sub-block detail, and absolutely NO text, letters, numbers, logos with letters, barcodes, health warnings or seals. Flat #00ff00 background.",
+      "refs": [
+        "godot/assets/tob/pack_adler.png"
+      ],
+      "$family": "tobacco-wall"
+    },
+    {
+      "id": "tob/pack_perle",
+      "kind": "prop",
+      "w": 26,
+      "h": 34,
+      "transparent": true,
+      "filter": "lanczos",
+      "gen": "1024x1024",
+      "aspect": "square",
+      "prompt": "An upright flip-top cigarette pack for the fictional brand \"Perle\", straight-on front view, 26x34 blocks. Flat #c8c3bb pearl grey body, a broad flat #4a4238 dark taupe band across the lower third, and ONE flat two-tone emblem — a filled circle with one highlight block — occupying exactly a 16x16-block window whose top-left corner sits at block (4,6). No other marking of any kind. A TRUE pixel sprite drawn on a strict block grid at exactly the stated block size, every block one flat colour, every edge on a block boundary, at most 6 flat colours plus one near-black #160f14 1-block contour all round, one warm lighter column on the left and one cool darker column on the right, no anti-aliasing, no gradients, no dithering, no sub-block detail, and absolutely NO text, letters, numbers, logos with letters, barcodes, health warnings or seals. Flat #00ff00 background.",
+      "refs": [
+        "godot/assets/tob/pack_adler.png"
+      ],
+      "$family": "tobacco-wall"
+    },
+    {
+      "id": "tob/pouch_dreiringe",
+      "kind": "prop",
+      "w": 28,
+      "h": 26,
+      "transparent": true,
+      "filter": "lanczos",
+      "gen": "1024x1024",
+      "aspect": "square",
+      "prompt": "A soft rolling-tobacco pouch for the fictional brand \"Drei Ringe\", face-on, 28x26 blocks, with a folded flap and rounded corners. Flat #6b7a3a olive body, a #efe6d2 cream foot strip, and ONE flat two-tone emblem — three rings in a row — in a 16x16-block window with its top-left corner at block (4,6). No other marking. A TRUE pixel sprite drawn on a strict block grid at exactly the stated block size, every block one flat colour, every edge on a block boundary, at most 6 flat colours plus one near-black #160f14 1-block contour all round, one warm lighter column on the left and one cool darker column on the right, no anti-aliasing, no gradients, no dithering, no sub-block detail, and absolutely NO text, letters, numbers, logos with letters, barcodes, health warnings or seals. Flat #00ff00 background.",
+      "refs": [
+        "godot/assets/tob/pack_adler.png"
+      ],
+      "$family": "tobacco-wall"
+    },
+    {
+      "id": "tob/pouch_altepost",
+      "kind": "prop",
+      "w": 28,
+      "h": 26,
+      "transparent": true,
+      "filter": "lanczos",
+      "gen": "1024x1024",
+      "aspect": "square",
+      "prompt": "A soft rolling-tobacco pouch for the fictional brand \"Alte Post\", face-on, 28x26 blocks, with a folded flap and rounded corners. Flat #7a4a26 brown body, a #e8dcc0 parchment foot strip, and ONE flat two-tone emblem — a posthorn spiral — in a 16x16-block window with its top-left corner at block (4,6). No other marking. A TRUE pixel sprite drawn on a strict block grid at exactly the stated block size, every block one flat colour, every edge on a block boundary, at most 6 flat colours plus one near-black #160f14 1-block contour all round, one warm lighter column on the left and one cool darker column on the right, no anti-aliasing, no gradients, no dithering, no sub-block detail, and absolutely NO text, letters, numbers, logos with letters, barcodes, health warnings or seals. Flat #00ff00 background.",
+      "refs": [
+        "godot/assets/tob/pack_adler.png"
+      ],
+      "$family": "tobacco-wall"
+    },
+    {
+      "id": "tob/pouch_zunder",
+      "kind": "prop",
+      "w": 28,
+      "h": 26,
+      "transparent": true,
+      "filter": "lanczos",
+      "gen": "1024x1024",
+      "aspect": "square",
+      "prompt": "A soft rolling-tobacco pouch for the fictional brand \"Zunder\", face-on, 28x26 blocks, with a folded flap and rounded corners. Flat #2a2a30 charcoal body, a #d8712c ember orange foot strip, and ONE flat two-tone emblem — a 4-block flint spark — in a 16x16-block window with its top-left corner at block (4,6). No other marking. A TRUE pixel sprite drawn on a strict block grid at exactly the stated block size, every block one flat colour, every edge on a block boundary, at most 6 flat colours plus one near-black #160f14 1-block contour all round, one warm lighter column on the left and one cool darker column on the right, no anti-aliasing, no gradients, no dithering, no sub-block detail, and absolutely NO text, letters, numbers, logos with letters, barcodes, health warnings or seals. Flat #00ff00 background.",
+      "refs": [
+        "godot/assets/tob/pack_adler.png"
+      ],
+      "$family": "tobacco-wall"
+    },
+    {
+      "id": "tob/pouch_kiezgold",
+      "kind": "prop",
+      "w": 28,
+      "h": 26,
+      "transparent": true,
+      "filter": "lanczos",
+      "gen": "1024x1024",
+      "aspect": "square",
+      "prompt": "A soft rolling-tobacco pouch for the fictional brand \"Kiez Gold\", face-on, 28x26 blocks, with a folded flap and rounded corners. Flat #5e1b2c maroon body, a #d8a83c old gold foot strip, and ONE flat two-tone emblem — a 3-block crown — in a 16x16-block window with its top-left corner at block (4,6). No other marking. A TRUE pixel sprite drawn on a strict block grid at exactly the stated block size, every block one flat colour, every edge on a block boundary, at most 6 flat colours plus one near-black #160f14 1-block contour all round, one warm lighter column on the left and one cool darker column on the right, no anti-aliasing, no gradients, no dithering, no sub-block detail, and absolutely NO text, letters, numbers, logos with letters, barcodes, health warnings or seals. Flat #00ff00 background.",
+      "refs": [
+        "godot/assets/tob/pack_adler.png"
+      ],
+      "$family": "tobacco-wall"
+    },
+    {
+      "id": "tob/paper_feder_lang",
+      "kind": "prop",
+      "w": 20,
+      "h": 30,
+      "transparent": true,
+      "filter": "lanczos",
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "prompt": "A slim TALL booklet of rolling papers standing face-on, 20x30 blocks: a cream, ultra-thin cover, one thin darker band at the foot, a faint lighter top edge where the papers peek out. No text. A TRUE pixel sprite drawn on a strict block grid at exactly the stated block size, every block one flat colour, every edge on a block boundary, at most 6 flat colours plus one near-black #160f14 1-block contour all round, one warm lighter column on the left and one cool darker column on the right, no anti-aliasing, no gradients, no dithering, no sub-block detail, and absolutely NO text, letters, numbers, logos with letters, barcodes, health warnings or seals. Flat #00ff00 background.",
+      "refs": [],
+      "$family": "tobacco-wall"
+    },
+    {
+      "id": "tob/paper_feder_kurz",
+      "kind": "prop",
+      "w": 20,
+      "h": 24,
+      "transparent": true,
+      "filter": "lanczos",
+      "gen": "1024x1024",
+      "aspect": "square",
+      "prompt": "A slim SHORT booklet of rolling papers standing face-on, 20x24 blocks — visibly shorter than the tall one; the length is the silhouette, never a label: a cream, ultra-thin cover, one thin darker band at the foot. No text. A TRUE pixel sprite drawn on a strict block grid at exactly the stated block size, every block one flat colour, every edge on a block boundary, at most 6 flat colours plus one near-black #160f14 1-block contour all round, one warm lighter column on the left and one cool darker column on the right, no anti-aliasing, no gradients, no dithering, no sub-block detail, and absolutely NO text, letters, numbers, logos with letters, barcodes, health warnings or seals. Flat #00ff00 background.",
+      "refs": [
+        "godot/assets/tob/paper_feder_lang.png"
+      ],
+      "$family": "tobacco-wall"
+    },
+    {
+      "id": "tob/paper_braun_lang",
+      "kind": "prop",
+      "w": 20,
+      "h": 30,
+      "transparent": true,
+      "filter": "lanczos",
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "prompt": "A slim TALL booklet of rolling papers standing face-on, 20x30 blocks: a kraft brown, unbleached cover, one thin darker band at the foot, a faint lighter top edge where the papers peek out. No text. A TRUE pixel sprite drawn on a strict block grid at exactly the stated block size, every block one flat colour, every edge on a block boundary, at most 6 flat colours plus one near-black #160f14 1-block contour all round, one warm lighter column on the left and one cool darker column on the right, no anti-aliasing, no gradients, no dithering, no sub-block detail, and absolutely NO text, letters, numbers, logos with letters, barcodes, health warnings or seals. Flat #00ff00 background.",
+      "refs": [
+        "godot/assets/tob/paper_feder_lang.png"
+      ],
+      "$family": "tobacco-wall"
+    },
+    {
+      "id": "tob/paper_braun_kurz",
+      "kind": "prop",
+      "w": 20,
+      "h": 24,
+      "transparent": true,
+      "filter": "lanczos",
+      "gen": "1024x1024",
+      "aspect": "square",
+      "prompt": "A slim SHORT booklet of rolling papers standing face-on, 20x24 blocks — visibly shorter than the tall one; the length is the silhouette, never a label: a kraft brown, unbleached cover, one thin darker band at the foot. No text. A TRUE pixel sprite drawn on a strict block grid at exactly the stated block size, every block one flat colour, every edge on a block boundary, at most 6 flat colours plus one near-black #160f14 1-block contour all round, one warm lighter column on the left and one cool darker column on the right, no anti-aliasing, no gradients, no dithering, no sub-block detail, and absolutely NO text, letters, numbers, logos with letters, barcodes, health warnings or seals. Flat #00ff00 background.",
+      "refs": [
+        "godot/assets/tob/paper_feder_lang.png"
+      ],
+      "$family": "tobacco-wall"
+    },
+    {
+      "id": "tob/paper_kohle_lang",
+      "kind": "prop",
+      "w": 20,
+      "h": 30,
+      "transparent": true,
+      "filter": "lanczos",
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "prompt": "A slim TALL booklet of rolling papers standing face-on, 20x30 blocks: a matte black, charcoal cover, one thin darker band at the foot, a faint lighter top edge where the papers peek out. No text. A TRUE pixel sprite drawn on a strict block grid at exactly the stated block size, every block one flat colour, every edge on a block boundary, at most 6 flat colours plus one near-black #160f14 1-block contour all round, one warm lighter column on the left and one cool darker column on the right, no anti-aliasing, no gradients, no dithering, no sub-block detail, and absolutely NO text, letters, numbers, logos with letters, barcodes, health warnings or seals. Flat #00ff00 background.",
+      "refs": [
+        "godot/assets/tob/paper_feder_lang.png"
+      ],
+      "$family": "tobacco-wall"
+    },
+    {
+      "id": "tob/paper_kohle_kurz",
+      "kind": "prop",
+      "w": 20,
+      "h": 24,
+      "transparent": true,
+      "filter": "lanczos",
+      "gen": "1024x1024",
+      "aspect": "square",
+      "prompt": "A slim SHORT booklet of rolling papers standing face-on, 20x24 blocks — visibly shorter than the tall one; the length is the silhouette, never a label: a matte black, charcoal cover, one thin darker band at the foot. No text. A TRUE pixel sprite drawn on a strict block grid at exactly the stated block size, every block one flat colour, every edge on a block boundary, at most 6 flat colours plus one near-black #160f14 1-block contour all round, one warm lighter column on the left and one cool darker column on the right, no anti-aliasing, no gradients, no dithering, no sub-block detail, and absolutely NO text, letters, numbers, logos with letters, barcodes, health warnings or seals. Flat #00ff00 background.",
+      "refs": [
+        "godot/assets/tob/paper_feder_lang.png"
+      ],
+      "$family": "tobacco-wall"
+    },
+    {
+      "id": "tob/filter_slim",
+      "kind": "prop",
+      "w": 22,
+      "h": 22,
+      "transparent": true,
+      "filter": "lanczos",
+      "gen": "1024x1024",
+      "aspect": "square",
+      "prompt": "A small flip-top box of cigarette filters (slim gauge, plain), face-on, 22x22 blocks: a flat #e8e2d4 off-white body, a cream lid, three round filter ends showing at the top edge. No text. A TRUE pixel sprite drawn on a strict block grid at exactly the stated block size, every block one flat colour, every edge on a block boundary, at most 6 flat colours plus one near-black #160f14 1-block contour all round, one warm lighter column on the left and one cool darker column on the right, no anti-aliasing, no gradients, no dithering, no sub-block detail, and absolutely NO text, letters, numbers, logos with letters, barcodes, health warnings or seals. Flat #00ff00 background.",
+      "refs": [],
+      "$family": "tobacco-wall"
+    },
+    {
+      "id": "tob/filter_slim_kohle",
+      "kind": "prop",
+      "w": 22,
+      "h": 22,
+      "transparent": true,
+      "filter": "lanczos",
+      "gen": "1024x1024",
+      "aspect": "square",
+      "prompt": "A small flip-top box of cigarette filters (slim gauge, charcoal), face-on, 22x22 blocks: a flat #3a3a40 charcoal grey body, a cream lid, three round filter ends showing at the top edge. No text. A TRUE pixel sprite drawn on a strict block grid at exactly the stated block size, every block one flat colour, every edge on a block boundary, at most 6 flat colours plus one near-black #160f14 1-block contour all round, one warm lighter column on the left and one cool darker column on the right, no anti-aliasing, no gradients, no dithering, no sub-block detail, and absolutely NO text, letters, numbers, logos with letters, barcodes, health warnings or seals. Flat #00ff00 background.",
+      "refs": [
+        "godot/assets/tob/filter_slim.png"
+      ],
+      "$family": "tobacco-wall"
+    },
+    {
+      "id": "tob/filter_reg",
+      "kind": "prop",
+      "w": 22,
+      "h": 22,
+      "transparent": true,
+      "filter": "lanczos",
+      "gen": "1024x1024",
+      "aspect": "square",
+      "prompt": "A small flip-top box of cigarette filters (regular gauge, plain), face-on, 22x22 blocks: a flat #d9c9a8 sand body, a cream lid, three round filter ends showing at the top edge. No text. A TRUE pixel sprite drawn on a strict block grid at exactly the stated block size, every block one flat colour, every edge on a block boundary, at most 6 flat colours plus one near-black #160f14 1-block contour all round, one warm lighter column on the left and one cool darker column on the right, no anti-aliasing, no gradients, no dithering, no sub-block detail, and absolutely NO text, letters, numbers, logos with letters, barcodes, health warnings or seals. Flat #00ff00 background.",
+      "refs": [
+        "godot/assets/tob/filter_slim.png"
+      ],
+      "$family": "tobacco-wall"
+    },
+    {
+      "id": "tob/filter_reg_kohle",
+      "kind": "prop",
+      "w": 22,
+      "h": 22,
+      "transparent": true,
+      "filter": "lanczos",
+      "gen": "1024x1024",
+      "aspect": "square",
+      "prompt": "A small flip-top box of cigarette filters (regular gauge, charcoal), face-on, 22x22 blocks: a flat #2e2a30 near-black body, a cream lid, three round filter ends showing at the top edge. No text. A TRUE pixel sprite drawn on a strict block grid at exactly the stated block size, every block one flat colour, every edge on a block boundary, at most 6 flat colours plus one near-black #160f14 1-block contour all round, one warm lighter column on the left and one cool darker column on the right, no anti-aliasing, no gradients, no dithering, no sub-block detail, and absolutely NO text, letters, numbers, logos with letters, barcodes, health warnings or seals. Flat #00ff00 background.",
+      "refs": [
+        "godot/assets/tob/filter_slim.png"
+      ],
+      "$family": "tobacco-wall"
+    },
+    {
+      "id": "prop/scanner",
+      "kind": "prop",
+      "w": 44,
+      "h": 40,
+      "transparent": true,
+      "filter": "lanczos",
+      "gen": "1024x1024",
+      "aspect": "square",
+      "prompt": "A squat counter barcode scanner seen slightly from above, 44x40 blocks: a dark grey wedge body, a dark-red glass window across the top face, one cable stub at the back. No text. A TRUE pixel sprite drawn on a strict block grid at exactly the stated block size, every block one flat colour, every edge on a block boundary, at most 6 flat colours plus one near-black #160f14 1-block contour all round, one warm lighter column on the left and one cool darker column on the right, no anti-aliasing, no gradients, no dithering, no sub-block detail, and absolutely NO text, letters, numbers, logos with letters, barcodes, health warnings or seals. Flat #00ff00 background."
+    },
+    {
+      "id": "prop/pfand_crate",
+      "kind": "prop",
+      "w": 30,
+      "h": 34,
+      "transparent": true,
+      "filter": "lanczos",
+      "gen": "1024x1024",
+      "aspect": "square",
+      "prompt": "A low plastic Pfand crate holding three stubby empty green bottles, front view, 30x34 blocks: a dark green crate with a lighter rim, bottle necks and shoulders showing above it. No text. A TRUE pixel sprite drawn on a strict block grid at exactly the stated block size, every block one flat colour, every edge on a block boundary, at most 6 flat colours plus one near-black #160f14 1-block contour all round, one warm lighter column on the left and one cool darker column on the right, no anti-aliasing, no gradients, no dithering, no sub-block detail, and absolutely NO text, letters, numbers, logos with letters, barcodes, health warnings or seals. Flat #00ff00 background."
+    },
+    {
+      "id": "ui/icon_scan",
+      "kind": "icon",
+      "w": 16,
+      "h": 16,
+      "mode": "exact",
+      "transparent": true,
+      "filter": "nearest",
+      "gen": "1024x1024",
+      "aspect": "square",
+      "prompt": "A 16x16 HUD icon: four thick vertical barcode bars in cream crossed by one red horizontal scan line. Hard pixel blocks, no anti-aliasing, flat #00ff00 background."
+    },
+    {
+      "id": "sku/filters",
+      "kind": "prop",
+      "w": 16,
+      "h": 16,
+      "mode": "exact",
+      "transparent": true,
+      "filter": "lanczos",
+      "gen": "1024x1024",
+      "aspect": "square",
+      "prompt": "A 16x16 shelf icon of a small box of cigarette filters: an off-white box with three round filter ends at the top edge. Hard pixel blocks, no text, flat #00ff00 background."
+    },
+    {
+      "id": "scene/tobacco_wall",
+      "kind": "scene",
+      "w": 480,
+      "h": 270,
+      "mode": "cover",
+      "crop": "16:9",
+      "filter": "nearest",
+      "transparent": false,
+      "gen": "1536x1024",
+      "aspect": "landscape",
+      "refs": [
+        "art/raw/scene/title.png",
+        "godot/assets/scene/backdrop.png"
+      ],
+      "prompt": "The tobacco wall of a REAL Berlin Späti seen straight-on from the SHOPKEEPER'S side, eye level, shallow depth, filling the whole frame: floor-to-ceiling white/grey metal display rails in three broad shelf bands (a tall band for cigarette packs at the top, a band for pouches in the middle, a low band for papers and filters near the bottom), each band with an empty flat price strip along its front edge; a backlit BLANK brand board above the top band (no text, no letters); a column of empty vape/e-cig display rails on the right; cool-white fluorescent light with a faint green-cyan cast; the same laminate, metal and fluorescent materials as the attached backdrop and title. LEAVE EVERY RAIL EMPTY — the packs, pouches, papers and filters are separate sprites placed by the game. NO people, NO counter, NO text anywhere. Hard-clustered pixel construction, 4-6 tones per material, one consistent pixel grid, no gradients, no anti-aliasing, no speckle.",
+      "$status": "docs/08 section 4.3 grid: shelf 1 y 66 (26x34 facings, pitch 52, x0 32, rail 102-118); shelf 2 y 130 (28x26, pitch 72, x0 118, rail 152-168); shelf 3 bottom-aligned y 208 (rail 210-226)."
+    },
+    {
+      "id": "char/achim_neutral",
+      "kind": "portrait",
+      "w": 160,
+      "h": 193,
+      "stage": "leaning",
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "concept-art/main character target state.png",
+        "art/raw/char/lena_neutral.png"
+      ],
+      "prompt": "Achim Kolbe, 57, sound engineer and ex-squatter: tall and rangy, grey-flecked stubble, long greying hair tied back, a faded black band T-shirt under a worn black leather jacket with pins, a fistful of GIG FLYERS in one hand on the counter line (signature prop). NEUTRAL: amused, one brow up, mouth about to start a five-clause sentence. IDENTITY STYLE: the same game as the attached Lena bust (image 2) — same pixel density, palette discipline, contour weight, lean and counter line; a different person. FRAMING FOR THE COUNTER: a relaxed forward lean, BOTH forearms resting on one straight horizontal counter line at 74 % of the image height; the forearms' UNDERSIDE is that line. BELOW that line paint NOTHING but the flat #00ff00 key colour — no torso, no counter. Head top ~6 % of the height, chin ~36 %, shoulders ~70 % of the width, forearms ~85 % of the width, elbows, cuffs and hands fully visible. LIGHT: warm ivory/amber highlight clusters on the forehead, cheekbones, nose, shoulder tops and forearm tops (warm fluorescent from above-left), a narrow cyan rim on the right silhouette from the fridge, cool blue-grey shadows; skin in five desaturated tones, never orange. RENDERING: a true pixel sprite of about 160x193 art pixels — hard-edged flat clusters, 4-6 tones per material, one clean dark contour, deliberate dark pixel clusters for eyelids, brows, nostrils and mouth corners; no gradients, no anti-aliasing, no speckle.",
+      "$card": "docs/09 section 2"
+    },
+    {
+      "id": "char/karim_neutral",
+      "kind": "portrait",
+      "w": 160,
+      "h": 193,
+      "stage": "leaning",
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "concept-art/main character target state.png",
+        "art/raw/char/lena_neutral.png"
+      ],
+      "prompt": "Karim Hadid, 31, late-shift prep cook and trained civil engineer from Aleppo via Beirut: neat, close-cropped dark hair and a trimmed beard, a grey kitchen jacket collar showing under an open dark-green parka, a clear PLASTIC SLEEVE with letters held flat on the counter line (signature prop). NEUTRAL: attentive, polite, building a sentence — a small readiness to laugh first. IDENTITY STYLE: the same game as the attached Lena bust (image 2) — same pixel density, palette discipline, contour weight, lean and counter line; a different person. FRAMING FOR THE COUNTER: a relaxed forward lean, BOTH forearms resting on one straight horizontal counter line at 74 % of the image height; the forearms' UNDERSIDE is that line. BELOW that line paint NOTHING but the flat #00ff00 key colour — no torso, no counter. Head top ~6 % of the height, chin ~36 %, shoulders ~70 % of the width, forearms ~85 % of the width, elbows, cuffs and hands fully visible. LIGHT: warm ivory/amber highlight clusters on the forehead, cheekbones, nose, shoulder tops and forearm tops (warm fluorescent from above-left), a narrow cyan rim on the right silhouette from the fridge, cool blue-grey shadows; skin in five desaturated tones, never orange. RENDERING: a true pixel sprite of about 160x193 art pixels — hard-edged flat clusters, 4-6 tones per material, one clean dark contour, deliberate dark pixel clusters for eyelids, brows, nostrils and mouth corners; no gradients, no anti-aliasing, no speckle.",
+      "$card": "docs/09 section 2"
+    },
+    {
+      "id": "char/robin_neutral",
+      "kind": "portrait",
+      "w": 160,
+      "h": 193,
+      "stage": "leaning",
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "concept-art/main character target state.png",
+        "art/raw/char/lena_neutral.png"
+      ],
+      "prompt": "Robin Kessler, 19, café shift worker eleven months in Berlin: cropped hair dyed a washed violet, a silver ear cuff, an oversized black hoodie with the sleeves over the hands, a small metal ROLLING TIN open on the counter line (signature prop). NEUTRAL: deadpan, guarded, chin slightly up — testing you. IDENTITY STYLE: the same game as the attached Lena bust (image 2) — same pixel density, palette discipline, contour weight, lean and counter line; a different person. FRAMING FOR THE COUNTER: a relaxed forward lean, BOTH forearms resting on one straight horizontal counter line at 74 % of the image height; the forearms' UNDERSIDE is that line. BELOW that line paint NOTHING but the flat #00ff00 key colour — no torso, no counter. Head top ~6 % of the height, chin ~36 %, shoulders ~70 % of the width, forearms ~85 % of the width, elbows, cuffs and hands fully visible. LIGHT: warm ivory/amber highlight clusters on the forehead, cheekbones, nose, shoulder tops and forearm tops (warm fluorescent from above-left), a narrow cyan rim on the right silhouette from the fridge, cool blue-grey shadows; skin in five desaturated tones, never orange. RENDERING: a true pixel sprite of about 160x193 art pixels — hard-edged flat clusters, 4-6 tones per material, one clean dark contour, deliberate dark pixel clusters for eyelids, brows, nostrils and mouth corners; no gradients, no anti-aliasing, no speckle.",
+      "$card": "docs/09 section 2"
+    },
+    {
+      "id": "char/aylin_neutral",
+      "kind": "portrait",
+      "w": 160,
+      "h": 193,
+      "stage": "leaning",
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "concept-art/main character target state.png",
+        "art/raw/char/lena_neutral.png"
+      ],
+      "prompt": "Aylin Demir, 29, live-sound engineer, Sunday 07:40 straight from a club: dark hair in a messy half-up knot with GLITTER still on the cheekbones and collarbones, a shiny black bomber jacket over a cropped top, hoop earrings, a LIGHTER standing on the counter line under one hand (signature prop). NEUTRAL: bright-eyed, buzzing, about to talk at one and a half speed. IDENTITY STYLE: the same game as the attached Lena bust (image 2) — same pixel density, palette discipline, contour weight, lean and counter line; a different person. FRAMING FOR THE COUNTER: a relaxed forward lean, BOTH forearms resting on one straight horizontal counter line at 74 % of the image height; the forearms' UNDERSIDE is that line. BELOW that line paint NOTHING but the flat #00ff00 key colour — no torso, no counter. Head top ~6 % of the height, chin ~36 %, shoulders ~70 % of the width, forearms ~85 % of the width, elbows, cuffs and hands fully visible. LIGHT: warm ivory/amber highlight clusters on the forehead, cheekbones, nose, shoulder tops and forearm tops (warm fluorescent from above-left), a narrow cyan rim on the right silhouette from the fridge, cool blue-grey shadows; skin in five desaturated tones, never orange. RENDERING: a true pixel sprite of about 160x193 art pixels — hard-edged flat clusters, 4-6 tones per material, one clean dark contour, deliberate dark pixel clusters for eyelids, brows, nostrils and mouth corners; no gradients, no anti-aliasing, no speckle.",
+      "$card": "docs/09 section 2"
+    },
+    {
+      "id": "char/bley_neutral",
+      "kind": "portrait",
+      "w": 160,
+      "h": 193,
+      "stage": "leaning",
+      "transparent": true,
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "concept-art/main character target state.png",
+        "art/raw/char/lena_neutral.png"
+      ],
+      "prompt": "Rüdiger Bley, 61, corporate real-estate financier at 03:10: silver hair combed back, a long good charcoal wool coat with a dark scarf, a signet ring, a small STILL-WATER bottle on the counter line by one hand (signature prop). NEUTRAL: composed, faintly weary, the look of a man who considers you staff and is beginning not to. IDENTITY STYLE: the same game as the attached Lena bust (image 2) — same pixel density, palette discipline, contour weight, lean and counter line; a different person. FRAMING FOR THE COUNTER: a relaxed forward lean, BOTH forearms resting on one straight horizontal counter line at 74 % of the image height; the forearms' UNDERSIDE is that line. BELOW that line paint NOTHING but the flat #00ff00 key colour — no torso, no counter. Head top ~6 % of the height, chin ~36 %, shoulders ~70 % of the width, forearms ~85 % of the width, elbows, cuffs and hands fully visible. LIGHT: warm ivory/amber highlight clusters on the forehead, cheekbones, nose, shoulder tops and forearm tops (warm fluorescent from above-left), a narrow cyan rim on the right silhouette from the fridge, cool blue-grey shadows; skin in five desaturated tones, never orange. RENDERING: a true pixel sprite of about 160x193 art pixels — hard-edged flat clusters, 4-6 tones per material, one clean dark contour, deliberate dark pixel clusters for eyelids, brows, nostrils and mouth corners; no gradients, no anti-aliasing, no speckle.",
+      "$card": "docs/09 section 2"
     }
   ],
   "modelByKind": {
