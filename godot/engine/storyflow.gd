@@ -17,7 +17,14 @@ const VIGNETTE_CHANCE: int = 60
 ## not a visual novel: a night carries one cast encounter and the rest of the queue is the parade.
 ## It was 2 until the arcs landed; with seven steps per guest the pacing is the ROTATION in
 ## `_sorts_before`, not the number of beats crammed into one night.
-const MAX_STORY_ARRIVALS: int = 1
+const MAX_STORY_ARRIVALS: int = 1   # the FALLBACK when a save predates `config.story_slots` (2026-09-14)
+
+## How many story guests may be scheduled into one night. A CONFIG value, not a constant, because the
+## pacing question ("can a 28-night season carry seven-step arcs?") is answered by arithmetic:
+## reachable encounters = season_days x story_slots, and fourteen strands x seven steps need ~90 of
+## them. Old saves carry no `story_slots` and keep the original one-at-a-time feel.
+static func story_slots(s: Dictionary) -> int:
+	return maxi(1, int((s.get("config", {}) as Dictionary).get("story_slots", MAX_STORY_ARRIVALS)))
 
 ## Deterministic 32-bit hash: vignette selection is keyed on seed+day only, so it never disturbs the
 ## rng stream that places customers (the prototype's trick — keep it).
@@ -103,7 +110,7 @@ static func schedule_beats(s: Dictionary, rng: Rng) -> void:
 	# cap later must not quietly reintroduce the double.
 	var tonight: Dictionary = {}
 	for entry in eligible_beats(s):
-		if scheduled >= MAX_STORY_ARRIVALS:
+		if scheduled >= story_slots(s):
 			break
 		var strand: Dictionary = entry["strand"]
 		var beat: Dictionary = entry["beat"]

@@ -17,7 +17,8 @@ const DEFAULT_CONFIG := {
 	"difficulty": "normal",
 	"seed": 1,
 	"night_len_ms": 300000,  # 5 compressed minutes of night; maps onto 20:00 → 06:00 in the view
-	"season_days": 28,
+	"season_days": 56,       # TESTBUILD PACING (2026-09-14): with `story_slots: 2` a 56-night year fits all fourteen strands (docs/06 section 8.7)
+	"story_slots": 2,        # story guests a night; old saves fall back to 1 (StoryFlow.story_slots reads it with .get)
 	"start_cash": 420.0,
 	"rent_per_day": 48.0,
 }
@@ -44,6 +45,8 @@ static func make_config(overrides: Dictionary = {}) -> Dictionary:
 	cfg["seed"] = int(cfg["seed"])
 	cfg["night_len_ms"] = int(cfg["night_len_ms"])
 	cfg["season_days"] = int(cfg["season_days"])
+	if cfg.has("story_slots"):
+		cfg["story_slots"] = int(cfg["story_slots"])   # optional: saves from before the testbuild pacing carry no such key
 	cfg["start_cash"] = float(cfg["start_cash"])
 	cfg["rent_per_day"] = float(cfg["rent_per_day"])
 	return cfg
@@ -197,6 +200,8 @@ static func _normalise(s: Dictionary) -> Dictionary:
 	cfg["seed"] = int(cfg["seed"])
 	cfg["night_len_ms"] = int(cfg["night_len_ms"])
 	cfg["season_days"] = int(cfg["season_days"])
+	if cfg.has("story_slots"):
+		cfg["story_slots"] = int(cfg["story_slots"])   # optional: saves from before the testbuild pacing carry no such key
 	cfg["start_cash"] = float(cfg["start_cash"])
 	cfg["rent_per_day"] = float(cfg["rent_per_day"])
 	s["day"] = int(s["day"])

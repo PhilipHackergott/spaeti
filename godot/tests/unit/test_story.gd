@@ -41,7 +41,9 @@ func test_story_arrivals_are_capped() -> void:
 	for a in s["arrivals"]:
 		if a["beat_id"] != "":
 			story_arrivals += 1
-	assert_eq(story_arrivals, StoryFlow.MAX_STORY_ARRIVALS, "one story guest at a time (docs/06 §8)")
+	# 2026-09-14: the cap is config (`story_slots`, testbuild default 2)  the night must fill it
+	# when enough beats are eligible, and never exceed it.
+	assert_eq(story_arrivals, StoryFlow.story_slots(s), "the night fills the configured story slots (docs/06 section 8)")
 
 func test_gating_holds_beats_back() -> void:
 	var s := _fresh()

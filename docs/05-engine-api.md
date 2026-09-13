@@ -31,6 +31,7 @@ godot/sim/auto_player.gd    class_name AutoPlayer  the headless competent-shopke
 
 ```
 config:  { difficulty:"cozy"|"normal"|"tight", seed:int, night_len_ms:int, season_days:int, start_cash:float, rent_per_day:float,
+`story_slots` (optional, default 2; saves from before it fall back to 1)  how many story guests StoryFlow may schedule into one night. Testbuild pacing: 56-day season x 2 slots fits all fourteen strands (docs/06 section 8.7).
            auto_take_next:bool }   (default false, and absent from SpatiState.DEFAULT_CONFIG — true makes `tick` promote the head of the queue instead of waiting for `talk_next`; serve-loop sims/tests only, docs/06 §7)
 day:int (1-based)   weekday:int (0=Mon…6=Sun)   phase:"manage"|"night"|"summary"|"end"   clock_ms:int (within the night)
 cash:float   pfand_held:int (bottles awaiting wholesaler credit)

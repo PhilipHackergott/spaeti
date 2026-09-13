@@ -15,18 +15,14 @@ extends "res://tests/TestCase.gd"
 const GUESTS := ["lena", "juergen", "mehmet", "schulz", "achim", "karim", "nadia", "tobias",
 	"robin", "aylin", "bley"]
 const SEASONS := ["summer", "autumn", "winter", "spring"]
-## The shipped season is 28 nights, which at one story guest a night is not enough calendar for eleven
-## seven-step arcs (measured: the cast lands on step 2-4). The harness therefore drives a LONG year —
-## the machinery is what is under test here, not the shipped pacing.
-##
-## Why 112 and not the 56 this started at: `Season.step_is_due` lets a strand take AT MOST TWO steps
-## per season (summer opens 1-2, autumn 3-4, winter 5-6), so a seven-step arc needs two encounters in
-## each of three seasons, and `MAX_STORY_ARRIVALS` is 1 — one strand-encounter a night, full stop.
-## Fourteen strands wanting two nights of a season each need 28 nights in it, i.e. 112 in the year.
-## At 56 the cast simply ran out of calendar and every long chain stalled one step short of the
+## TESTBUILD PACING (2026-09-14): the shipped defaults are `season_days 56, story_slots 2`  capacity
+## 112 strand-encounters against the ~90 that fourteen strands x seven steps ask for, so a DEFAULT
+## year reaches every spring. The year harness therefore runs at the SHIPPED defaults: the acceptance
+## test and the product now make the same claim. (28 nights at one slot was measured at step 2-4 
+## the arithmetic and the old numbers live in docs/06 section 8.7.)
 ## spring. The number is a property of (strands x steps / arrivals per night), not a magic constant:
 ## if the cap ever goes back to 2, half of this is recoverable. (See the PACING seam in docs/06 §8.4.)
-const FULL_SEASON_DAYS := 112
+const FULL_SEASON_DAYS := 56   # = SpatiState.DEFAULT_CONFIG.season_days; test_the_year_runs_at_the_shipped_defaults pins the equality
 
 func _fresh(days: int = 28, seed_value: int = 5) -> Dictionary:
 	return SpatiState.new_game({"seed": seed_value, "season_days": days})
@@ -388,8 +384,8 @@ func _assert_schedule_is_sane(s: Dictionary, where: String) -> void:
 		assert_false(faces.has(character_id),
 			"%s: %s is in the queue once, not twice" % [where, character_id])
 		faces[character_id] = true
-	assert_true(story_arrivals <= StoryFlow.MAX_STORY_ARRIVALS,
-		"%s: %d story arrivals, cap is %d" % [where, story_arrivals, StoryFlow.MAX_STORY_ARRIVALS])
+	assert_true(story_arrivals <= StoryFlow.story_slots(s),
+		"%s: %d story arrivals, cap is %d" % [where, story_arrivals, StoryFlow.story_slots(s)])
 
 # ───────────────────────────── 6. the worked example ─────────────────────────────
 
@@ -531,9 +527,9 @@ func _play_story_season(s0: Dictionary, days: int) -> Dictionary:
 		# ONE STORY GUEST AT A TIME, asserted on the night as played. Fourteen strands compete for a
 		# single slot now, so this is the invariant that would rot first if `MAX_STORY_ARRIVALS` or the
 		# `tonight` set in `schedule_beats` were ever loosened.
-		assert_true(faces_tonight.size() <= StoryFlow.MAX_STORY_ARRIVALS,
+		assert_true(faces_tonight.size() <= StoryFlow.story_slots(s),
 			"%s: %d named guests reached the counter, cap is %d (%s)"
-			% [where, faces_tonight.size(), StoryFlow.MAX_STORY_ARRIVALS, str(faces_tonight.keys())])
+			% [where, faces_tonight.size(), StoryFlow.story_slots(s), str(faces_tonight.keys())])
 		s = Rules.apply(s, {"type": "close_night"})
 		s["log"] = []
 		# THE SAVE SEAM, every night of the year rather than once at the end. The arc ledger added two
@@ -1966,3 +1962,13 @@ func test_a_headless_four_season_year_reaches_every_guests_spring() -> void:
 			"%s is in `met`, so the Finale can compose them" % person)
 	assert_eq(SpatiState.to_json(SpatiState.from_json(SpatiState.to_json(final))), SpatiState.to_json(final),
 		"and the finished year round-trips byte for byte")
+
+## The year harness and the shipped product must keep making the SAME claim (2026-09-14): if a tuner
+## moves `season_days` without re-measuring reachability, this is the test that says so out loud.
+func test_the_year_runs_at_the_shipped_defaults() -> void:
+	assert_eq(FULL_SEASON_DAYS, int(SpatiState.DEFAULT_CONFIG["season_days"]),
+		"the acceptance year runs at the shipped season length")
+	assert_eq(StoryFlow.story_slots(SpatiState.new_game({})), 2,
+		"a fresh testbuild game schedules two story guests a night")
+	assert_eq(StoryFlow.story_slots({}), 1,
+		"a save from before `story_slots` keeps the one-at-a-time cap")
