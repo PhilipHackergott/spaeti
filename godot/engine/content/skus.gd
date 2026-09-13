@@ -14,6 +14,17 @@ const DATA: Array[Dictionary] = [
 	{"id": "cola", "name": "Cola", "category": "drinks", "cost": 0.5, "base_price": 1.5, "fair_lo": 1.2, "fair_hi": 2.4, "demand": 1.0, "deposit": 0.25, "icon": "sku/cola"},
 	{"id": "water", "name": "Water", "category": "drinks", "cost": 0.2, "base_price": 0.9, "fair_lo": 0.7, "fair_hi": 1.6, "demand": 1.1, "deposit": 0.25, "icon": "sku/water"},
 	{"id": "energy", "name": "Energy drink", "category": "drinks", "cost": 0.7, "base_price": 1.8, "fair_lo": 1.5, "fair_hi": 2.9, "demand": 0.7, "icon": "sku/energy"},
+	# — Berlin drinks (2026-09-13): five more beers and the Blitz soft-drink family. Every name is
+	# FICTIONAL and sayable — it is substituted into "%s, please." and into the conversation graphs.
+	{"id": "pils", "name": "Spree Pils", "category": "drinks", "cost": 0.55, "base_price": 1.4, "fair_lo": 1.1, "fair_hi": 2, "demand": 1.3, "deposit": 0.08, "restricted": true, "icon": "sku/pils"},
+	{"id": "helles", "name": "Bärenhell", "category": "drinks", "cost": 0.6, "base_price": 1.5, "fair_lo": 1.2, "fair_hi": 2.2, "demand": 1, "deposit": 0.08, "restricted": true, "icon": "sku/helles"},
+	{"id": "weizen", "name": "Weissbier", "category": "drinks", "cost": 0.75, "base_price": 1.9, "fair_lo": 1.5, "fair_hi": 2.8, "demand": 0.8, "deposit": 0.08, "restricted": true, "icon": "sku/weizen"},
+	{"id": "radler", "name": "Radler", "category": "drinks", "cost": 0.55, "base_price": 1.4, "fair_lo": 1.1, "fair_hi": 2, "demand": 0.9, "deposit": 0.08, "restricted": true, "icon": "sku/radler"},
+	{"id": "ipa", "name": "Hopfenkult IPA", "category": "drinks", "cost": 1.6, "base_price": 3.5, "fair_lo": 3, "fair_hi": 4.8, "demand": 0.5, "deposit": 0.08, "restricted": true, "icon": "sku/ipa"},
+	{"id": "blitz_kola", "name": "Blitz-Kola", "category": "drinks", "cost": 0.65, "base_price": 1.8, "fair_lo": 1.4, "fair_hi": 2.6, "demand": 1.2, "deposit": 0.15, "icon": "sku/blitz_kola"},
+	{"id": "blitz_mix", "name": "Blitz Mischmasch", "category": "drinks", "cost": 0.65, "base_price": 1.8, "fair_lo": 1.4, "fair_hi": 2.6, "demand": 0.8, "deposit": 0.15, "icon": "sku/blitz_mix"},
+	{"id": "blitz_zitrone", "name": "Blitz Zitrone", "category": "drinks", "cost": 0.65, "base_price": 1.8, "fair_lo": 1.4, "fair_hi": 2.6, "demand": 0.7, "deposit": 0.15, "icon": "sku/blitz_zitrone"},
+	{"id": "apfelschorle", "name": "Apfelschorle", "category": "drinks", "cost": 0.45, "base_price": 1.3, "fair_lo": 1, "fair_hi": 2, "demand": 0.9, "deposit": 0.25, "icon": "sku/apfelschorle"},
 	# — Snacks —
 	{"id": "chips", "name": "Chips", "category": "snacks", "cost": 0.7, "base_price": 1.8, "fair_lo": 1.5, "fair_hi": 2.7, "demand": 0.9, "icon": "sku/chips"},
 	{"id": "chocolate", "name": "Chocolate", "category": "snacks", "cost": 0.55, "base_price": 1.4, "fair_lo": 1.1, "fair_hi": 2.2, "demand": 0.8, "icon": "sku/chocolate"},

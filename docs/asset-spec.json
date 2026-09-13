@@ -1562,6 +1562,141 @@
       ],
       "prompt": "IDENTITY + POSE + FRAMING REFERENCE: the attached neutral portrait (image 2) is the CANONICAL Herr Bley — copy it EXACTLY except the expression: the same person, hair, clothes, signature prop, palette, the same forward lean with BOTH forearms resting on one straight horizontal counter line at 74 % of the image height (the forearms' underside is that line; BELOW it paint NOTHING but the flat #00ff00 key colour — no torso, no counter), the same framing and scale, the same warm ivory/amber highlight clusters and cyan rim on the right. Change ONLY the expression to TIRED: upper lids low and heavy, shadow blocks under the eyes, mouth slack and slightly open, head and shoulders dropped two pixels, one forearm taking real weight on the laminate. PROP STATE: an untouched chocolate bar lies on the counter beside the water bottle. Same 160x193-art-pixel hard-clustered rendering: flat clusters, 4-6 tones per material, one clean dark contour, no gradients, no anti-aliasing, no speckle.",
       "$wave": "expressions wave 2 (docs/09 §3)"
+    },
+    {
+      "id": "sku/pils",
+      "kind": "prop",
+      "w": 14,
+      "h": 36,
+      "transparent": true,
+      "filter": "lanczos",
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "godot/assets/sku/beer.png"
+      ],
+      "prompt": "A single bottle of \"Spree Pils\", a fictional Berlin Späti drink, standing upright, straight-on front view: a 0.5-litre GREEN glass pilsner bottle, long neck, gold crown cap, a cream paper label band across the middle with one flat dark-green square emblem on it and a thin gold line under it. Every label carries flat colour blocks ONLY — no lettering of any kind. THIS IS A TINY SHELF SPRITE: in game it is only 14 x 36 pixels on a 480x270 base grid. Draw it as a TRUE 14 x 36 logical-pixel sprite scaled up with nearest neighbour so every logical pixel is one large uniform square block with hard edges. At most 5-6 flat tones plus a 1-block near-black contour all round, ONE warm lighter column down the left and ONE cool darker column down the right. No anti-aliasing, no gradients, no dithering, no speckles, no fine texture, no drop shadow. NO text, NO letters, NO numbers, NO real logos, NO barcodes. The bottle stands CENTRED and fills the canvas height with a clear margin on every side; the flat #00ff00 key colour fills everything else and touches all four canvas edges.",
+      "$family": "berlin-drinks"
+    },
+    {
+      "id": "sku/helles",
+      "kind": "prop",
+      "w": 14,
+      "h": 36,
+      "transparent": true,
+      "filter": "lanczos",
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "godot/assets/sku/beer.png"
+      ],
+      "prompt": "A single bottle of \"Bärenhell\", a fictional Berlin Späti drink, standing upright, straight-on front view: a 0.5-litre BROWN glass Helles bottle, long neck, red crown cap, a warm cream label band with one flat dark-red emblem block and a thin red rule. Every label carries flat colour blocks ONLY — no lettering of any kind. THIS IS A TINY SHELF SPRITE: in game it is only 14 x 36 pixels on a 480x270 base grid. Draw it as a TRUE 14 x 36 logical-pixel sprite scaled up with nearest neighbour so every logical pixel is one large uniform square block with hard edges. At most 5-6 flat tones plus a 1-block near-black contour all round, ONE warm lighter column down the left and ONE cool darker column down the right. No anti-aliasing, no gradients, no dithering, no speckles, no fine texture, no drop shadow. NO text, NO letters, NO numbers, NO real logos, NO barcodes. The bottle stands CENTRED and fills the canvas height with a clear margin on every side; the flat #00ff00 key colour fills everything else and touches all four canvas edges.",
+      "$family": "berlin-drinks"
+    },
+    {
+      "id": "sku/weizen",
+      "kind": "prop",
+      "w": 15,
+      "h": 40,
+      "transparent": true,
+      "filter": "lanczos",
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "godot/assets/sku/beer.png"
+      ],
+      "prompt": "A single bottle of \"Weissbier\", a fictional Berlin Späti drink, standing upright, straight-on front view: a TALL 0.5-litre wheat-beer bottle, visibly taller and slimmer than a pilsner, cloudy pale-amber glass, blue crown cap, a white label band with two flat blue bands. Every label carries flat colour blocks ONLY — no lettering of any kind. THIS IS A TINY SHELF SPRITE: in game it is only 15 x 40 pixels on a 480x270 base grid. Draw it as a TRUE 15 x 40 logical-pixel sprite scaled up with nearest neighbour so every logical pixel is one large uniform square block with hard edges. At most 5-6 flat tones plus a 1-block near-black contour all round, ONE warm lighter column down the left and ONE cool darker column down the right. No anti-aliasing, no gradients, no dithering, no speckles, no fine texture, no drop shadow. NO text, NO letters, NO numbers, NO real logos, NO barcodes. The bottle stands CENTRED and fills the canvas height with a clear margin on every side; the flat #00ff00 key colour fills everything else and touches all four canvas edges.",
+      "$family": "berlin-drinks"
+    },
+    {
+      "id": "sku/radler",
+      "kind": "prop",
+      "w": 14,
+      "h": 36,
+      "transparent": true,
+      "filter": "lanczos",
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "godot/assets/sku/beer.png"
+      ],
+      "prompt": "A single bottle of \"Radler\", a fictional Berlin Späti drink, standing upright, straight-on front view: a 0.5-litre pale-lemon glass bottle of shandy, green-gold crown cap, a bright yellow label band with one flat white wedge. Every label carries flat colour blocks ONLY — no lettering of any kind. THIS IS A TINY SHELF SPRITE: in game it is only 14 x 36 pixels on a 480x270 base grid. Draw it as a TRUE 14 x 36 logical-pixel sprite scaled up with nearest neighbour so every logical pixel is one large uniform square block with hard edges. At most 5-6 flat tones plus a 1-block near-black contour all round, ONE warm lighter column down the left and ONE cool darker column down the right. No anti-aliasing, no gradients, no dithering, no speckles, no fine texture, no drop shadow. NO text, NO letters, NO numbers, NO real logos, NO barcodes. The bottle stands CENTRED and fills the canvas height with a clear margin on every side; the flat #00ff00 key colour fills everything else and touches all four canvas edges.",
+      "$family": "berlin-drinks"
+    },
+    {
+      "id": "sku/ipa",
+      "kind": "prop",
+      "w": 14,
+      "h": 38,
+      "transparent": true,
+      "filter": "lanczos",
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "godot/assets/sku/beer.png"
+      ],
+      "prompt": "A single bottle of \"Hopfenkult IPA\", a fictional Berlin Späti drink, standing upright, straight-on front view: a slim 0.33-litre craft-beer bottle, dark amber glass, matte-black label covering the lower two thirds with one flat pale-teal hop-cone block and a thin white rule — expensive-looking, the newcomer bottle on the shelf. Every label carries flat colour blocks ONLY — no lettering of any kind. THIS IS A TINY SHELF SPRITE: in game it is only 14 x 38 pixels on a 480x270 base grid. Draw it as a TRUE 14 x 38 logical-pixel sprite scaled up with nearest neighbour so every logical pixel is one large uniform square block with hard edges. At most 5-6 flat tones plus a 1-block near-black contour all round, ONE warm lighter column down the left and ONE cool darker column down the right. No anti-aliasing, no gradients, no dithering, no speckles, no fine texture, no drop shadow. NO text, NO letters, NO numbers, NO real logos, NO barcodes. The bottle stands CENTRED and fills the canvas height with a clear margin on every side; the flat #00ff00 key colour fills everything else and touches all four canvas edges.",
+      "$family": "berlin-drinks"
+    },
+    {
+      "id": "sku/blitz_kola",
+      "kind": "prop",
+      "w": 14,
+      "h": 30,
+      "transparent": true,
+      "filter": "lanczos",
+      "gen": "1024x1024",
+      "aspect": "square",
+      "refs": [
+        "godot/assets/sku/beer.png"
+      ],
+      "prompt": "A single bottle of \"Blitz-Kola\", a fictional Berlin Späti drink, standing upright, straight-on front view: a STUBBY 0.33-litre glass cola bottle with a short thick neck and a silver crown cap, near-black cola liquid, a flat matte-black label with TWO small round pale dots side by side as the brand mark. Every label carries flat colour blocks ONLY — no lettering of any kind. THIS IS A TINY SHELF SPRITE: in game it is only 14 x 30 pixels on a 480x270 base grid. Draw it as a TRUE 14 x 30 logical-pixel sprite scaled up with nearest neighbour so every logical pixel is one large uniform square block with hard edges. At most 5-6 flat tones plus a 1-block near-black contour all round, ONE warm lighter column down the left and ONE cool darker column down the right. No anti-aliasing, no gradients, no dithering, no speckles, no fine texture, no drop shadow. NO text, NO letters, NO numbers, NO real logos, NO barcodes. The bottle stands CENTRED and fills the canvas height with a clear margin on every side; the flat #00ff00 key colour fills everything else and touches all four canvas edges.",
+      "$family": "berlin-drinks"
+    },
+    {
+      "id": "sku/blitz_mix",
+      "kind": "prop",
+      "w": 14,
+      "h": 30,
+      "transparent": true,
+      "filter": "lanczos",
+      "gen": "1024x1024",
+      "aspect": "square",
+      "refs": [
+        "godot/assets/sku/beer.png"
+      ],
+      "prompt": "A single bottle of \"Blitz Mischmasch\", a fictional Berlin Späti drink, standing upright, straight-on front view: the same stubby 0.33-litre glass bottle, orange-brown liquid, a flat ORANGE label with two small round pale dots. Every label carries flat colour blocks ONLY — no lettering of any kind. THIS IS A TINY SHELF SPRITE: in game it is only 14 x 30 pixels on a 480x270 base grid. Draw it as a TRUE 14 x 30 logical-pixel sprite scaled up with nearest neighbour so every logical pixel is one large uniform square block with hard edges. At most 5-6 flat tones plus a 1-block near-black contour all round, ONE warm lighter column down the left and ONE cool darker column down the right. No anti-aliasing, no gradients, no dithering, no speckles, no fine texture, no drop shadow. NO text, NO letters, NO numbers, NO real logos, NO barcodes. The bottle stands CENTRED and fills the canvas height with a clear margin on every side; the flat #00ff00 key colour fills everything else and touches all four canvas edges.",
+      "$family": "berlin-drinks"
+    },
+    {
+      "id": "sku/blitz_zitrone",
+      "kind": "prop",
+      "w": 14,
+      "h": 30,
+      "transparent": true,
+      "filter": "lanczos",
+      "gen": "1024x1024",
+      "aspect": "square",
+      "refs": [
+        "godot/assets/sku/beer.png"
+      ],
+      "prompt": "A single bottle of \"Blitz Zitrone\", a fictional Berlin Späti drink, standing upright, straight-on front view: the same stubby 0.33-litre glass bottle, pale yellow liquid, a flat LEMON-YELLOW label with two small round dark dots. Every label carries flat colour blocks ONLY — no lettering of any kind. THIS IS A TINY SHELF SPRITE: in game it is only 14 x 30 pixels on a 480x270 base grid. Draw it as a TRUE 14 x 30 logical-pixel sprite scaled up with nearest neighbour so every logical pixel is one large uniform square block with hard edges. At most 5-6 flat tones plus a 1-block near-black contour all round, ONE warm lighter column down the left and ONE cool darker column down the right. No anti-aliasing, no gradients, no dithering, no speckles, no fine texture, no drop shadow. NO text, NO letters, NO numbers, NO real logos, NO barcodes. The bottle stands CENTRED and fills the canvas height with a clear margin on every side; the flat #00ff00 key colour fills everything else and touches all four canvas edges.",
+      "$family": "berlin-drinks"
+    },
+    {
+      "id": "sku/apfelschorle",
+      "kind": "prop",
+      "w": 15,
+      "h": 38,
+      "transparent": true,
+      "filter": "lanczos",
+      "gen": "1024x1536",
+      "aspect": "portrait",
+      "refs": [
+        "godot/assets/sku/beer.png"
+      ],
+      "prompt": "A single bottle of \"Apfelschorle\", a fictional Berlin Späti drink, standing upright, straight-on front view: a 0.5-litre clear PET bottle of apple spritzer, pale golden liquid, ribbed shoulders, a white screw cap and a pale-green label band with one flat apple-red block. Every label carries flat colour blocks ONLY — no lettering of any kind. THIS IS A TINY SHELF SPRITE: in game it is only 15 x 38 pixels on a 480x270 base grid. Draw it as a TRUE 15 x 38 logical-pixel sprite scaled up with nearest neighbour so every logical pixel is one large uniform square block with hard edges. At most 5-6 flat tones plus a 1-block near-black contour all round, ONE warm lighter column down the left and ONE cool darker column down the right. No anti-aliasing, no gradients, no dithering, no speckles, no fine texture, no drop shadow. NO text, NO letters, NO numbers, NO real logos, NO barcodes. The bottle stands CENTRED and fills the canvas height with a clear margin on every side; the flat #00ff00 key colour fills everything else and touches all four canvas edges.",
+      "$family": "berlin-drinks"
     }
   ],
   "modelByKind": {

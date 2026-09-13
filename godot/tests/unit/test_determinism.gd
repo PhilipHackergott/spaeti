@@ -148,3 +148,19 @@ func test_from_json_rejects_a_save_it_cannot_normalise() -> void:
 	var s := Rules.apply(SpatiState.new_game({"seed": 5}), {"type": "open_night"})
 	s = Rules.tick(s, 60000)
 	assert_false(SpatiState.from_json(SpatiState.to_json(s)).is_empty(), "so does a save taken mid-night")
+
+## 2026-09-13: nine Berlin drinks joined the catalogue and this seam broke — Godot's JSON sorts keys, so a
+## reloaded save iterated its shelf alphabetically while the live one iterated it in catalogue order, and
+## the AutoPlayer's restock (which spends until the cash runs out) then bought different SKUs. The fix is
+## in `_normalise`; this is the test that keeps it fixed without playing a whole night to find out.
+func test_a_reloaded_shelf_keeps_the_catalogue_order() -> void:
+	var s := SpatiState.new_game({})
+	var reloaded := SpatiState.from_json(SpatiState.to_json(s))
+	var live: Array = (s["inventory"] as Dictionary).keys()
+	var back: Array = (reloaded["inventory"] as Dictionary).keys()
+	assert_eq(back, live, "the reloaded shelf iterates in the same order as the live one")
+	var catalogue: Array = []
+	for sku in Content.SKUS:
+		if (reloaded["inventory"] as Dictionary).has(String(sku["id"])):
+			catalogue.append(String(sku["id"]))
+	assert_eq(back, catalogue, "and that order is the catalogue's")

@@ -12,6 +12,15 @@ const ROOT := "res://assets/"
 ## The mirror is not trusted to stay honest by hand: test_scenes.gd::test_asset_sizes_match_the_spec
 ## reads docs/asset-spec.json and fails the moment this table and the spec disagree.
 const SIZES := {
+	"sku/pils": Vector2i(14, 36),
+	"sku/helles": Vector2i(14, 36),
+	"sku/weizen": Vector2i(15, 40),
+	"sku/radler": Vector2i(14, 36),
+	"sku/ipa": Vector2i(14, 38),
+	"sku/blitz_kola": Vector2i(14, 30),
+	"sku/blitz_mix": Vector2i(14, 30),
+	"sku/blitz_zitrone": Vector2i(14, 30),
+	"sku/apfelschorle": Vector2i(15, 38),
 	"char/schulz_warm": Vector2i(160, 193),
 	"char/schulz_surprised": Vector2i(160, 193),
 	"char/schulz_tired": Vector2i(160, 193),

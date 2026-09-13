@@ -201,6 +201,20 @@ static func _normalise(s: Dictionary) -> Dictionary:
 	s["rng_state"] = int(s["rng_state"])
 	s["cash"] = float(s["cash"])
 	s["ordnungsamt_heat"] = float(s["ordnungsamt_heat"])
+	# The shelf is rebuilt in the CATALOGUE's order, not the order the file happened to carry: Godot's
+	# JSON sorts keys alphabetically on the way out, so a reloaded save iterated its inventory in a
+	# different order from the live one  and any loop that spends until the cash runs out (the
+	# AutoPlayer's restock) then bought different things. Re-integering alone is not enough to make a
+	# save/load seam invisible; the ORDER has to be canonical too (2026-09-13).
+	var shelf := {}
+	for sku in Content.SKUS:
+		var sid := String(sku["id"])
+		if (s["inventory"] as Dictionary).has(sid):
+			shelf[sid] = s["inventory"][sid]
+	for sku_id in s["inventory"]:
+		if not shelf.has(sku_id):
+			shelf[sku_id] = s["inventory"][sku_id]   # a SKU the catalogue no longer lists still loads
+	s["inventory"] = shelf
 	for sku_id in s["inventory"]:
 		var inv: Dictionary = s["inventory"][sku_id]
 		inv["stock"] = int(inv["stock"])
