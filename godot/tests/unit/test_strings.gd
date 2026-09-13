@@ -42,12 +42,13 @@ func _code_lines(path: String) -> Array[String]:
 ## `Strings` is a constants-only RefCounted, so there is no dictionary to iterate — and naming them
 ## means a constant that is deleted breaks this test instead of silently emptying a button.)
 func test_the_table_holds_the_words_the_ui_needs() -> void:
-	for value in [Strings.NEW_GAME, Strings.CONTINUE, Strings.SETTINGS, Strings.QUIT, Strings.SERVE,
+	for value in [Strings.NEW_GAME, Strings.CONTINUE, Strings.SETTINGS, Strings.QUIT, Strings.SERVE, Strings.CLOSE,
 			Strings.SERVE_PANEL, Strings.RING_UP, Strings.WAVE_OFF, Strings.PFAND, Strings.TOTAL,
 			Strings.TILL_EMPTY, Strings.OPEN_UP, Strings.CASH, Strings.NEXT_DAY, Strings.SUMMARY_TITLE,
 			Strings.TALLY_REVENUE, Strings.TALLY_TIPS, Strings.TALLY_PURCHASES, Strings.TALLY_BILLS,
 			Strings.TALLY_PFAND, Strings.TALLY_PROFIT, Strings.ORDER_LINE, Strings.NOBODY_WAITING,
-			Strings.MANAGE_SECTION, Strings.MANAGE_MODULES, Strings.MANAGE_OWNED, Strings.WHOLESALE]:
+			Strings.MANAGE_SECTION, Strings.MANAGE_MODULES, Strings.MANAGE_OWNED, Strings.MANAGE_STANDING,
+			Strings.WHOLESALE]:
 		assert_true(String(value).strip_edges() != "", "the table has a word here, not an empty string")
 	# The format strings must still have their slot, or the caller's `%` silently drops the number.
 	assert_true(Strings.CASH.contains("%s"), "CASH takes the amount")

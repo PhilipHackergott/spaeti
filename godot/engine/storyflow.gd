@@ -77,6 +77,9 @@ static func schedule_beats(s: Dictionary, rng: Rng) -> void:
 			"character_id": character_id,
 			"beat_id": beat["id"],
 			"vignette_id": "",
+			# The cast carry empties like anyone else (Jürgen especially) — same draw, same seeded rng,
+			# and the arrival shape stays identical to the parade's so `from_json` cannot re-shape it.
+			"bottles": rng.randi_below(Rules.PFAND_MAX_RETURN + 1),
 		})
 		scheduled += 1
 	if scheduled == 0:

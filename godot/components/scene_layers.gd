@@ -29,7 +29,13 @@ extends Control
 
 @export var rain_drops: int = 16:
 	set(v):
-		rain_drops = clampi(v, 0, 64)
+		var n := clampi(v, 0, 64)
+		# `Night.render()` re-assigns this every frame (Session ticks -> `changed` -> refresh) and a
+		# GDScript setter fires on every assignment, equal value or not: without this guard the whole
+		# shower was freed and re-seeded per frame, so the rain never actually fell.
+		if n == rain_drops:
+			return
+		rain_drops = n
 		_rebuild_rain()
 
 @export var neon: bool = true
@@ -165,25 +171,39 @@ func _rebuild_rain() -> void:
 	var rain := get_node_or_null("%Rain") as Node2D
 	if rain == null:
 		return
-	for c in rain.get_children():
-		rain.remove_child(c)
-		c.queue_free()
-	_speeds.clear()
 	if not raining:
+		for c in rain.get_children():
+			rain.remove_child(c)
+			c.queue_free()
+		_speeds.clear()
 		return
 	# Seeded so a capture of the same preset always has the same streaks. They fall inside
 	# `Palette.RAIN_RECT` — the door/window opening on the right of the backdrop — and nowhere else.
+	# Streak i's start, tail and speed depend only on i (the same draws in the same order), so a fresh
+	# build is byte-identical to before — but streaks already on the glass are LEFT WHERE THEY ARE and
+	# only the delta is built or freed. The count steps 8 -> 24 over a night; without this, every step
+	# teleported the whole shower back to its seeded start.
 	_rng.seed = 1337
+	_speeds.clear()
 	var r := Palette.RAIN_RECT
 	for i in rain_drops:
+		var tail := _rng.randf_range(4.0, 9.0)
+		var x := float(_rng.randi_range(r.position.x, r.end.x - 1))
+		var y := float(_rng.randi_range(r.position.y - 40, r.end.y))
+		_speeds.append(_rng.randf_range(0.7, 1.4))
+		if i < rain.get_child_count():
+			continue   # already falling
 		var streak := Line2D.new()
 		streak.width = 1.0
 		streak.default_color = Palette.RAIN
 		streak.add_point(Vector2.ZERO)
-		streak.add_point(Vector2(-1, _rng.randf_range(4.0, 9.0)))
-		streak.position = Vector2(float(_rng.randi_range(r.position.x, r.end.x - 1)), float(_rng.randi_range(r.position.y - 40, r.end.y)))
+		streak.add_point(Vector2(-1, tail))
+		streak.position = Vector2(x, y)
 		rain.add_child(streak)
-		_speeds.append(_rng.randf_range(0.7, 1.4))
+	while rain.get_child_count() > rain_drops:
+		var extra := rain.get_child(rain.get_child_count() - 1)
+		rain.remove_child(extra)
+		extra.queue_free()
 	set_process(not Palette.reduce_motion)
 
 func _process(delta: float) -> void:

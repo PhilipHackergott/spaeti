@@ -57,6 +57,10 @@ func _ready() -> void:
 		queue.talk_next.connect(_on_talk_next)
 	if box != null and not box.finished.is_connected(_on_dialogue_finished):
 		box.finished.connect(_on_dialogue_finished)
+	# The box settles its HEIGHT on its own (and a frame late, deferred), so the sheet cannot be placed
+	# from `_place_chrome` alone - it follows the box's real edge.
+	if box != null and not box.resized.is_connected(_place_stats):
+		box.resized.connect(_place_stats)
 	_connect_events()
 
 ## The FX/SFX stream: every new log entry, in order (docs/05 §7). Visual only for now. It is routed
@@ -133,10 +137,16 @@ func render(v: Dictionary) -> void:
 		# `legal_actions` offers no serve at all while the story (or a conversation) holds the counter,
 		# docs/05 §4 + docs/06 §4 — the button says so instead of dispatching something illegal.
 		var can_serve := not active.is_empty() and dialogue.is_empty() and talk.is_empty()
-		toggle.disabled = not can_serve
+		var panel_open := panel != null and panel.is_open
+		# It doubles as the panel's close (docs/06 §5), so an open panel always keeps it live: greyed
+		# only when it is neither a serve nor a close — which is also when it is hidden. (It used to
+		# grey out in the one state the visible-while-open branch existed for, leaving "Wave off" —
+		# a button naming a different action — as the only working mouse close.)
+		toggle.disabled = not (can_serve or panel_open)
 		# The judge (2026-09-13): a greyed "Serve" in the corner read as a leftover control. It is shown only
 		# when serving is actually on offer — or while the panel is open, since it doubles as its close.
-		toggle.visible = can_serve or (panel != null and panel.is_open)
+		toggle.visible = can_serve or panel_open
+		toggle.text = Strings.CLOSE if panel_open else Strings.SERVE
 
 ## Closes the night when the clock has run out and nobody is left waiting, and hands over to the
 ## summary screen once the reducer has moved on. Returns true when the screen is in transition and
@@ -236,8 +246,13 @@ func _input(event: InputEvent) -> void:
 ## Space / click advances the conversation; with nothing being said it opens the shelf.
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_accept"):
+		# The BOX is not the state: a guest at the counter always has their order line on screen
+		# (`render`'s `active` fallback), so `box.visible` was true in exactly the moment Space should
+		# open the shelf — and `advance()` on a one-line order only emits `finished` into a no-op.
+		var v := view()
+		var speaking := not (v.get("talk", {}) as Dictionary).is_empty() 			or not (v.get("dialogue", {}) as Dictionary).is_empty()
 		var box := _dialogue()
-		if box != null and box.visible:
+		if speaking and box != null and box.visible:
 			box.advance()
 		else:
 			toggle_serve()
@@ -271,17 +286,22 @@ func _place_chrome(v: Dictionary) -> void:
 	var strip := _queue()
 	if strip != null:
 		# Mirrors `legal_actions` (docs/06 section 4): `talk_next` is on offer whenever no conversation
-		# is open and there is somebody to talk to - at the counter or in the line, since the reducer
-		# pulls the head of the queue up on its own tick. The strip hides entirely under the serve panel.
+		# is open and there is somebody to talk to - at the counter or in the line, since `talk_next`
+		# also opens the conversation with whoever is already at the counter (Rules.apply -> talk_next);
+		# the reducer promotes the head of the line only under `config.auto_take_next`, otherwise waiting
+		# guests age out (Rules._age_queue). The strip hides entirely under the serve panel.
 		# A pending beat that never opened as a talk blocks it too (docs/05 section 4: while it is
 		# pending, legal_actions offers only resolve_beat/resolve_vignette) - and its choices are drawn
 		# full-width, so a live button under them would sit inside the choice stack.
 		var beat: Dictionary = v.get("dialogue", {})
 		var can_start: bool = talk.is_empty() and beat.is_empty() and (not active.is_empty() or not queue.is_empty())
-		strip.set_queue(([] if serve_open else queue), can_start and not serve_open)
+		strip.set_queue(([] if serve_open else queue), can_start and not serve_open, not active.is_empty())
 	var bubble := get_node_or_null("%WantBubble") as WantBubble
 	if bubble != null:
 		bubble.set_want(active.get("want", {}) if not active.is_empty() else {})
+		# The one place the frame says the guest is a minor: the shelf's "18" badge is on the SKU, not
+		# on the person, and the ID check at the counter is a decision you cannot make blind.
+		bubble.age_flag = not active.is_empty() and bool(active.get("underage", false)) 			and bool((active.get("want", {}) as Dictionary).get("restricted", false))
 		bubble.position = BUBBLE_RIGHT
 		bubble.visible = not active.is_empty() and not serve_open and talk.is_empty() and not queue_shown
 	var box := _dialogue()
@@ -293,12 +313,27 @@ func _place_chrome(v: Dictionary) -> void:
 		elif queue_shown:
 			w = Palette.DIALOGUE_W_QUEUE
 		box.set_width(float(w))   # the box owns its height (it grows upward for a choice list)
+	_place_stats()
 	var hud := get_node_or_null("%Hud") as Hud
 	if hud != null:
 		hud.set_compact(serve_open)
 		# A conversation — a talk OR a pending story beat/vignette with its lines — gets Coffee Talk's minimal HUD.
 		hud.set_focus(not talk.is_empty() or not (v.get("dialogue", {}) as Dictionary).is_empty())
 	_seat_portrait()
+
+## The sheet and the dialogue box share the left column, and the box is drawn over it (Night.tscn
+## sibling order). A choice list grows the box upward into the sheet's last rows — so the sheet steps
+## up out of the way while that lasts, and drops back the moment the choices are gone.
+func _place_stats() -> void:
+	var stats := _stats()
+	if stats == null:
+		return
+	var box := _dialogue()
+	# Derived from the box's FIXED bottom edge and its current height, never from `position.y`: the box
+	# emits `resized` between setting its size and moving its top, so the node's own y is one step stale.
+	var bottom := float(Palette.DIALOGUE_RECT.position.y + Palette.DIALOGUE_RECT.size.y)
+	var box_top := bottom - box.size.y if box != null and box.visible else float(Palette.DIALOGUE_RECT.position.y)
+	stats.position = Palette.snap(Vector2(float(Palette.STATS_RECT.position.x), Palette.stats_top(box_top)))
 
 ## The plain order a customer speaks when no story beat is pending. Presentation only — the engine
 ## read-model carries `dialogue` just for beats and vignettes (docs/05 §4).

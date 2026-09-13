@@ -2,9 +2,10 @@ class_name QueueStrip
 extends Control
 ## The line at the register (docs/06-dialogue-and-stats.md section 5): the guests who are waiting,
 ## FIFO, lined up at the right end of the counter with the first one highlighted. Clicking the strip
-## — or the "Next guest" button that appears when nobody is at the counter — is `talk_next`.
+## — or the button under them — is `talk_next`: "Next guest" with a clear counter, "Talk to them" when
+## somebody is already standing there (the reducer promotes nobody on tick unless `auto_take_next`).
 ##
-## The chips are code-drawn busts, not shrunken portraits: a 190x230 bust cannot be put in a 28-px
+## The chips are code-drawn busts, not shrunken portraits: a 144x174 bust cannot be put in a 28-px
 ## slot without either scaling it (which kills the pixel grid, docs/01) or cropping it down to a
 ## nostril. So a chip is a silhouette in the speaker's own colour — the same colour the DialogueBox
 ## prints their name in — and the first guest's NAME is spelled out above the line.
@@ -16,6 +17,9 @@ signal talk_next()
 
 var _queue: Array = []
 var _can_start: bool = false
+## Somebody is already standing at the counter, so `talk_next` means "talk to THEM", not "take the head
+## of the line" — the same action, two meanings, and the strip has to print the one it will do.
+var _at_counter: bool = false
 
 func _ready() -> void:
 	Palette.prepare()
@@ -38,16 +42,24 @@ func _ready() -> void:
 
 ## `queue` is `view.queue` (FIFO, first = next to be served). `can_start` mirrors `legal_actions`:
 ## true when `talk_next` is on offer, which is whenever no conversation is open and there is anybody
-## to talk to - at the counter OR in the line, because the reducer pulls the head of the queue up by
-## itself on the tick (Rules._take_next). So the button and the line are shown independently: the
+## to talk to - at the counter OR in the line, because `talk_next` also opens the conversation with
+## whoever is already at the counter (Rules.apply -> talk_next -> _open_talk); the reducer promotes
+## the head of the line by itself only under `config.auto_take_next`, otherwise they age out in the
+## line (Rules._age_queue, docs/06 section 7). So the button and the line are shown independently: the
 ## strip can be a button with nobody behind it, or a line with the counter busy, or both.
-func set_queue(queue: Array, can_start: bool) -> void:
+##
+## `at_counter` is which of the two `talk_next` means right now, and the button says so: a button
+## labelled "Next guest" that starts THIS guest's conversation and leaves the line untouched is the
+## same word for two different things.
+func set_queue(queue: Array, can_start: bool, at_counter: bool = false) -> void:
 	_queue = queue
 	_can_start = can_start
+	_at_counter = at_counter
 	visible = not queue.is_empty() or can_start
 	var btn := _next_button()
 	if btn != null:
 		btn.visible = can_start
+		btn.text = Strings.TALK_TO_GUEST if at_counter else Strings.NEXT_GUEST
 	var plate := get_node_or_null("Plate") as Control
 	if plate != null:
 		plate.visible = not queue.is_empty()
@@ -141,6 +153,11 @@ func _colour_of(guest: Variant) -> Color:
 func _gui_input(event: InputEvent) -> void:
 	var mb := event as InputEventMouseButton
 	if mb != null and mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
+		# Clicking the LINE while somebody is at the counter would talk to the person at the counter and
+		# leave the line exactly where it was — the one thing the click cannot be allowed to mean. The
+		# button is still there and still says what it does.
+		if _at_counter and not _queue.is_empty():
+			return
 		_on_next()
 		accept_event()
 

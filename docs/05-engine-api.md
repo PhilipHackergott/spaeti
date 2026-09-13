@@ -26,20 +26,21 @@ godot/sim/auto_player.gd    class_name AutoPlayer  the headless competent-shopke
 ## 2. State (`Dictionary`) — keys and types
 
 ```
-config:  { difficulty:"cozy"|"normal"|"tight", seed:int, night_len_ms:int, season_days:int, start_cash:float, rent_per_day:float }
+config:  { difficulty:"cozy"|"normal"|"tight", seed:int, night_len_ms:int, season_days:int, start_cash:float, rent_per_day:float,
+           auto_take_next:bool }   (default false, and absent from SpatiState.DEFAULT_CONFIG — true makes `tick` promote the head of the queue instead of waiting for `talk_next`; serve-loop sims/tests only, docs/06 §7)
 day:int (1-based)   weekday:int (0=Mon…6=Sun)   phase:"manage"|"night"|"summary"|"end"   clock_ms:int (within the night)
 cash:float   pfand_held:int (bottles awaiting wholesaler credit)
 inventory: { sku_id: { stock:int, price:float } }        upgrades: Array[String]
 reputation: { kiez:float 0..100, profit:float 0..100, integrity:float 0..100 }
 open_sunday:bool   ordnungsamt_heat:float
-arrivals: Array[{ time_ms:int, archetype_id:String, want:String, character_id:String|"" , beat_id:String|"", vignette_id:String|"" }]  (sorted by time_ms)
+arrivals: Array[{ time_ms:int, archetype_id:String, want:String, character_id:String|"" , beat_id:String|"", vignette_id:String|"", bottles:int }]  (sorted by time_ms)
 next_arrival:int   queue: Array[Customer]   active: Customer|null   next_customer_id:int
 tally: { revenue, cogs, tips, pfand_paid, sales:int, lost:int }
 summaries: Array[{ day, revenue, cogs, tips, bills_due, pfand_paid, profit, cash_after, sales, lost, kiez_delta }]
 story: { flags:Array[String], met:Array[String], strands:{ id:{ cur:String|"", outcome:String|"", last_day:int } },
          main_outcome:String|"", pending:{ strand:String, beat:String }|{}, seen_vignettes:Array[String], pending_vignette:String|"" }
 rng_state:int   log: Array[{ ts:int, kind:String, text:String, data:Dictionary }]
-Customer = { id:int, archetype_id:String, want:String, patience_left_ms:int, character_id:String|"", beat_id:String|"", vignette_id:String|"", expression:String ("neutral"|"warm"|"wary"|"upset") }
+Customer = { id:int, archetype_id:String, want:String, patience_left_ms:int, character_id:String|"", beat_id:String|"", vignette_id:String|"", expression:String ("neutral"|"warm"|"wary"|"upset"), bottles:int (empties THEY carried in — 0..Rules.PFAND_MAX_RETURN; `serve_active` clamps `pfand_bottles` to it. NOT `pfand_held`, which is the shop's crate) }
 ```
 Use `""`/`{}` for "none" (JSON-safe; never `null` inside arrays). Money is float euros rounded to cents by the reducer.
 
@@ -52,7 +53,9 @@ Use `""`/`{}` for "none" (JSON-safe; never `null` inside arrays). Money is float
 Semantics = `app/src/engine/rules.ts` (port it function by function, including the Sunday/Ordnungsamt roll, the
 illegal "extra menu" bleed/raid, perishables, `cash < -200 → end`). `legal_actions(s)` returns the action
 dictionaries the UI may offer *right now* (e.g. no `serve_active` while a beat is pending; no `restock` you
-cannot afford). `tick` is the only action the render loop sends on its own; everything else is a player intent.
+cannot afford). `set_price` / `restock` / `buy_upgrade` / `set_sunday_open` are manage-only; the reducer rejects
+them in night/summary/end. `tick` is the only action the render loop sends on its own; everything else is a player intent. It ages the waiting
+line (`_age_queue`) rather than advancing it, unless `config.auto_take_next` is true (§2).
 
 ## 4. Story at the counter (the one design change)
 
@@ -74,7 +77,7 @@ cannot afford). `tick` is the only action the render loop sends on its own; ever
 ```
 { phase, day, weekday_name, clock_ms, night_progress:float 0..1, time_label:"22:40", cash, pfand_held, pfand_rate:float (= Rules.PFAND_PER_BOTTLE — the Till quotes this, never a literal),
   reputation, hud:{ kiez_label, profit_label },
-  active: {} | { customer, archetype:{id,name}, want:{sku_id,name,price,stock,icon:"sku/beer"}, portrait:"char/lena", expression, patience:float 0..1, is_story:bool },
+  active: {} | { customer, archetype:{id,name}, want:{sku_id,name,price,stock,icon:"sku/beer"}, portrait:"char/lena", expression, patience:float 0..1, is_story:bool, underage:bool, bottles:int },
   queue_len:int,
   queue: Array[{ customer_id, character_id, name, portrait, expression, is_story:bool }],   (FIFO — §8 / docs/06 §4)
   talk: {} | { speaker, portrait, expression, lines, line:int, choices:[{label, check:{stat,dc,mod,chance}|{}, locked, reason}], last_check },
@@ -96,7 +99,7 @@ expression falls back to `_neutral`; a missing portrait falls back to the archet
 
 ```
 var state: Dictionary            signal changed(prev: Dictionary, next: Dictionary)
-signal event(entry: Dictionary)   # every new `log` entry, in order — the FX/SFX stream (kinds: open, arrive, serve, tip, balk, pfand, ethics, beat, upgrade, ordnungsamt, raid, close)
+signal event(entry: Dictionary)   # every new `log` entry, in order — the FX/SFX stream (kinds: open, arrive, serve, tip, balk, pfand, ethics, beat, check, upgrade, ordnungsamt, raid, close; `check` is the only kind with TWO listeners — `Fx` and the `DiceResult` pop, fanned out in `scenes/night.gd::_on_log_event`)
 var paused: bool                  # when true, _process does not tick
 func new_game(config := {}) -> void     func dispatch(action: Dictionary) -> bool   # false = illegal (state unchanged)
 func view() -> Dictionary               # Rules.view(state), memoised per state

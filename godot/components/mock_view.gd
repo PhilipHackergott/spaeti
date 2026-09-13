@@ -24,16 +24,13 @@ static func view(preset: String) -> Dictionary:
 			v["phase"] = "title"
 		"empty_counter":
 			_set_clock(v, "20:15", 0.04)
-			v["queue_len"] = 0
 		"customer_at_counter":
 			_set_clock(v, "22:40", 0.33)
 			v["active"] = _lena("neutral", 0.72)
-			v["queue_len"] = 2
 		"dialogue_choice":
 			_set_clock(v, "22:41", 0.34)
 			v["active"] = _lena("neutral", 0.66)
 			v["active"]["is_story"] = true
-			v["queue_len"] = 2
 			v["dialogue"] = {
 				"speaker": "Lena",
 				"portrait": "char/lena",
@@ -51,17 +48,14 @@ static func view(preset: String) -> Dictionary:
 		"serving":
 			_set_clock(v, "23:05", 0.39)
 			v["active"] = _clubber(0.51)
-			v["queue_len"] = 3
 		"pfand":
 			_set_clock(v, "00:20", 0.54)
 			v["active"] = _juergen(0.83)
 			v["pfand_held"] = 34
-			v["queue_len"] = 1
 		"late_night":
 			_set_clock(v, "02:30", 0.81)
 			v["cash"] = 143.7
 			v["pfand_held"] = 41
-			v["queue_len"] = 0
 		"manage":
 			v["phase"] = "manage"
 			_set_clock(v, "19:45", 0.0)
@@ -88,14 +82,12 @@ static func view(preset: String) -> Dictionary:
 			# preset where the six stats are on screen without being asked for (docs/06 section 5).
 			_set_clock(v, "21:10", 0.18)
 			v["queue"] = [_waiting(21, "lena"), _waiting(22, "juergen"), _waiting(23, "mehmet")]
-			v["queue_len"] = 3
 		"talk_lines":
 			# Lena is talking and has not reached her choices yet: lines only, the queue still waiting.
 			_set_clock(v, "21:24", 0.22)
 			v["active"] = _lena("neutral", 0.78)
 			v["active"]["is_story"] = true
 			v["queue"] = [_waiting(22, "juergen"), _waiting(24, "")]
-			v["queue_len"] = 2
 			v["talk"] = _lena_talk(1, [], {})
 		"talk_choice":
 			# The decision: a plain line, a Charisma 12 ROLL, and a Strength 12 GATE she cannot pass.
@@ -103,7 +95,6 @@ static func view(preset: String) -> Dictionary:
 			v["active"] = _lena("neutral", 0.74)
 			v["active"]["is_story"] = true
 			v["queue"] = [_waiting(22, "juergen"), _waiting(24, "")]
-			v["queue_len"] = 2
 			v["talk"] = _lena_talk(2, _lena_choices(), {})
 		"talk_result":
 			# The roll landed: 14 + 2 = 16 against DC 12. Lena warms up and the pop says why.
@@ -111,13 +102,16 @@ static func view(preset: String) -> Dictionary:
 			v["active"] = _lena("warm", 0.74)
 			v["active"]["is_story"] = true
 			v["queue"] = [_waiting(22, "juergen"), _waiting(24, "")]
-			v["queue_len"] = 2
 			var talk := _lena_talk(0, [], {"stat": "cha", "roll": 14, "mod": 2, "dc": 12, "success": true})
 			talk["expression"] = "warm"
 			talk["lines"] = ["Ha. Fine — one sketch, one Mate. Don't tell Jürgen."]
 			v["talk"] = talk
 		_:
 			pass
+	# ONE source, exactly as the engine builds it (rules.gd: both fields come off `s["queue"]`), so a
+	# capture can never print "2 waiting" over a frame with nobody in the line. The old serve-screen
+	# presets keep an EMPTY line on purpose (see _base) and therefore read 0 waiting.
+	v["queue_len"] = (v["queue"] as Array).size()
 	return v
 
 # --- pieces --------------------------------------------------------------------------------
@@ -141,14 +135,19 @@ static func _base() -> Dictionary:
 		"active": {},
 		"queue_len": 0,
 		# docs/06 section 4. Empty on the old presets on purpose: they are the SERVE screen's captures
-		# and predate the register, so adding a line to them would silently change nine reference shots.
+		# and predate the register, so adding a line to them would silently change nine reference shots
+		# — and since `view()` derives `queue_len` from this, those presets read "0 waiting" too.
 		"queue": [],
 		"talk": {},
 		"player": _player(),
 		"dialogue": {},
 		"shelf": _shelf(),
 		"summary": {},
-		"manage": {"restock_options": _restock(), "modules": _modules()},
+		# `status` is the standing roll-up (Economy.corner_status). Empty on purpose: the manage capture
+		# is a fresh corner, so the "your corner" panel stands down and the shot is unchanged.
+		"manage": {"restock_options": _restock(), "modules": _modules(),
+			"status": {"kiez_per_night": 0.0, "traffic_mult": 1.0, "systems": [], "flags": [],
+				"illegal": false, "has_security": false, "heat": 0.0}},
 		"ending": {},
 	}
 
@@ -166,6 +165,8 @@ static func _lena(expression: String, patience: float) -> Dictionary:
 		"expression": expression,
 		"patience": patience,
 		"is_story": false,
+		# Empties THEY brought in — `view.active.bottles`, never the shop's `pfand_held` crate.
+		"bottles": 0,   # a student carries no crate
 	}
 
 static func _juergen(patience: float) -> Dictionary:
@@ -177,6 +178,8 @@ static func _juergen(patience: float) -> Dictionary:
 		"expression": "neutral",
 		"patience": patience,
 		"is_story": false,
+		# Empties THEY brought in — `view.active.bottles`, never the shop's `pfand_held` crate.
+		"bottles": 6,   # the Pfandsammler's whole evening, on the counter
 	}
 
 static func _clubber(patience: float) -> Dictionary:
@@ -188,6 +191,8 @@ static func _clubber(patience: float) -> Dictionary:
 		"expression": "warm",
 		"patience": patience,
 		"is_story": false,
+		# Empties THEY brought in — `view.active.bottles`, never the shop's `pfand_held` crate.
+		"bottles": 2,   # two empties out of a coat pocket
 	}
 
 ## docs/06 section 1: 8..18, the defaults SpatiState.new_game seeds, with the 5e modifier alongside.

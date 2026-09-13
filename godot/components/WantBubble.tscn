@@ -61,6 +61,19 @@ layout_mode = 2
 mouse_filter = 2
 theme_type_variation = &"SmallLabel"
 
+[node name="AgeWrap" type="CenterContainer" parent="Box/Row"]
+custom_minimum_size = Vector2(12, 0)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Age" type="Label" parent="Box/Row/AgeWrap"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"SmallLabel"
+text = "18"
+
 [node name="Tail" type="Polygon2D" parent="."]
 unique_name_in_owner = true
 position = Vector2(12, 39)

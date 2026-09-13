@@ -2,7 +2,7 @@ extends Node
 ## The `Session` autoload (docs/05-engine-api.md §7) — the ONLY mutable game object.
 ## Scenes never touch `state`: they `dispatch()` actions and re-render from `view()`.
 ## `event` replays every new log entry in order, which is the FX/SFX stream (kinds: open, arrive,
-## serve, tip, balk, pfand, ethics, beat, upgrade, ordnungsamt, raid, close).
+## serve, tip, balk, pfand, ethics, beat, check, upgrade, ordnungsamt, raid, close).
 
 signal changed(prev: Dictionary, next: Dictionary)
 signal event(entry: Dictionary)

@@ -28,7 +28,7 @@ func _ready() -> void:
 ## it sit BEHIND the counter layer (docs/02 "Night framing"), with the top clamped to
 ## `Palette.PORTRAIT_TOP_MIN` so a bust taller than the table assumes keeps its hair inside the frame.
 ## Bottom-centre, never a spec rectangle: the shipped art is narrower than its placeholder box
-## (`char/you_neutral` is 155 px against a 190-px spec), so a left-anchored bust drifts off centre.
+## (`char/you_neutral` is 118 px against a 144-px spec), so a left-anchored bust drifts off centre.
 ## Call it with `SceneLayers.counter_edge()`; it is idempotent and safe outside the tree.
 func place_behind(counter_edge_y: int, centre_x: int = Palette.PORTRAIT_CENTRE_X) -> void:
 	var bust := get_node_or_null("%Bust") as TextureRect

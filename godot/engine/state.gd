@@ -105,7 +105,8 @@ static func new_story() -> Dictionary:
 
 ## A customer instance at (or heading for) the counter.
 static func new_customer(id: int, archetype_id: String, want: String, patience_ms: int,
-		character_id: String = "", beat_id: String = "", vignette_id: String = "") -> Dictionary:
+		character_id: String = "", beat_id: String = "", vignette_id: String = "",
+		bottles: int = 0) -> Dictionary:
 	return {
 		"id": id,
 		"archetype_id": archetype_id,
@@ -115,6 +116,9 @@ static func new_customer(id: int, archetype_id: String, want: String, patience_m
 		"beat_id": beat_id,
 		"vignette_id": vignette_id,
 		"expression": "neutral",
+		# Empties THEY carried in — the Pfand you can pay out for them. Not `pfand_held`, which is the
+		# shop's own crate waiting on wholesaler credit.
+		"bottles": bottles,
 	}
 
 static func clone(s: Dictionary) -> Dictionary:
@@ -153,6 +157,7 @@ static func _normalise(s: Dictionary) -> Dictionary:
 		inv["price"] = float(inv["price"])
 	for arrival in s["arrivals"]:
 		arrival["time_ms"] = int(arrival["time_ms"])
+		arrival["bottles"] = int(arrival.get("bottles", 0))
 	for customer in s["queue"]:
 		_normalise_customer(customer)
 	if not (s["active"] as Dictionary).is_empty():
@@ -194,6 +199,7 @@ static func _normalise_data(data: Dictionary) -> void:
 static func _normalise_customer(c: Dictionary) -> void:
 	c["id"] = int(c["id"])
 	c["patience_left_ms"] = int(c["patience_left_ms"])
+	c["bottles"] = int(c.get("bottles", 0))
 
 ## Act/season label from the calendar (Summer → Autumn → Winter thirds).
 static func act_of(s: Dictionary) -> String:

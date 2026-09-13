@@ -16,6 +16,20 @@ func _talking(character_id: String, seed_value: int = 5, want: String = "mate") 
 	s["active"] = SpatiState.new_customer(1, archetype_id, want, 10000, character_id)
 	return Rules.apply(s, {"type": "talk_next"})
 
+## A NAMELESS guest (no character graph) already at the counter, conversation open — the parade.
+func _nameless(archetype_id: String, want: String, seed_value: int = 5) -> Dictionary:
+	var s := _fresh(seed_value)
+	s["phase"] = "night"
+	s["active"] = SpatiState.new_customer(1, archetype_id, want, 10000)
+	return Rules.apply(s, {"type": "talk_next"})
+
+func _log_kinds(s: Dictionary, kind: String) -> Array:
+	var out: Array = []
+	for entry in s["log"]:
+		if String(entry["kind"]) == kind:
+			out.append(String(entry["text"]))
+	return out
+
 func _types(actions: Array) -> Array:
 	var out: Array = []
 	for a in actions:
@@ -307,6 +321,51 @@ func test_a_save_taken_mid_conversation_comes_back_whole() -> void:
 	assert_eq(typeof(back["player"]["stats"]["cha"]), TYPE_INT, "the stats are ints")
 	assert_eq(JSON.stringify(Rules.view(back)["talk"]), JSON.stringify(Rules.view(s)["talk"]),
 		"and the box renders the same thing after the seam")
+
+## The Kassenkind's ethics beat used to be unreachable: `oneoff` offered "Here you go.", the counter's
+## blanket refusal swallowed it, and the player paid an unexplained -0.1 Kiez with no log line. The ID
+## check IS the conversation now, and the sale routes through the same `_serve` as `serve_active`.
+func test_a_minor_asking_for_a_restricted_sku_gets_the_id_check() -> void:
+	var kid := _nameless("kid", "beer")
+	assert_eq(String(kid["talk"]["dialogue_id"]), Talk.DIALOGUE_PREFIX + Content.DIALOGUE_MINOR,
+		"beer + a minor opens the ID check")
+	var fine := _nameless("kid", "energy")
+	assert_eq(String(fine["talk"]["dialogue_id"]), Talk.DIALOGUE_PREFIX + Content.DIALOGUE_FALLBACK,
+		"an energy drink is just an energy drink")
+	var grown := _nameless("regular", "beer")
+	assert_eq(String(grown["talk"]["dialogue_id"]), Talk.DIALOGUE_PREFIX + Content.DIALOGUE_FALLBACK,
+		"and a grown-up buying beer is the ordinary parade")
+
+func test_refusing_the_minor_costs_nothing_but_says_so() -> void:
+	var s := _nameless("kid", "beer")
+	var stock := int(s["inventory"]["beer"]["stock"])
+	var kiez := float(s["reputation"]["kiez"])
+	var integrity := float(s["reputation"]["integrity"])
+	var after := Rules.apply(s, {"type": "talk_choose", "choice": 0})   # "Ausweis, bitte."
+	assert_eq(int(after["inventory"]["beer"]["stock"]), stock, "nothing left the shelf")
+	assert_eq(int(after["tally"]["sales"]), int(s["tally"]["sales"]), "and nothing was rung up")
+	assert_almost(float(after["reputation"]["integrity"]), integrity, 0.001, "Integrity is untouched")
+	assert_almost(float(after["reputation"]["kiez"]), kiez, 0.001, "the house rule is not a snub — no Kiez hit")
+	assert_eq(_log_kinds(after, "ethics").size(), _log_kinds(s, "ethics").size() + 1,
+		"but it goes on the record, so the player can see WHY the kid left")
+	assert_true((after["active"] as Dictionary).is_empty(), "and the counter is clear")
+
+func test_selling_to_the_minor_costs_exactly_what_serving_them_costs() -> void:
+	var s := _nameless("kid", "beer")
+	var stock := int(s["inventory"]["beer"]["stock"])
+	var sold := Rules.apply(s, {"type": "talk_choose", "choice": 1})   # "Ring up the Sterni anyway."
+	assert_eq(int(sold["inventory"]["beer"]["stock"]), stock - 1, "the bottle left the shelf")
+	assert_eq(int(sold["tally"]["sales"]), int(s["tally"]["sales"]) + 1, "and it was a sale")
+	assert_almost(float(sold["reputation"]["integrity"]), float(s["reputation"]["integrity"]) - 8.0, 0.001,
+		"the Integrity hit is the reducer's one path, not a second rule")
+	# The same words as the till route, because it is literally the same `_serve` call. (Rung up from a
+	# state with no talk open — `serve_active` stands down while somebody is mid-sentence.)
+	var counter := _fresh()
+	counter["phase"] = "night"
+	counter["active"] = SpatiState.new_customer(1, "kid", "beer", 10000)
+	var over_the_counter := Rules.apply(counter, {"type": "serve_active", "give": ["beer"], "pfand_bottles": 0})
+	assert_eq(JSON.stringify(_log_kinds(sold, "ethics")), JSON.stringify(_log_kinds(over_the_counter, "ethics")),
+		"and it reads the same in the night log")
 
 func test_every_graph_is_playable() -> void:
 	for id in Content.DIALOGUES:

@@ -3,10 +3,13 @@ extends RefCounted
 ## `deposit` = Pfand on returnable bottles. `unlocked_by` gates a SKU behind an upgrade module.
 ## Real-brand stand-ins throughout (see docs/legal: no real trademarks).
 ## Optional keys (`perishable`, `restricted`, `deposit`, `unlocked_by`) are read with .get(k, default).
+## `name` is SPOKEN: it is substituted into `{want}` in the conversation graphs (talk.gd) and into
+## `Strings.ORDER_LINE` ("%s, please.") on the plain order — so every name is a sayable noun phrase.
+## No parentheticals, no glosses, no unit suffixes; shelf-only detail belongs in the icon or category.
 
 const DATA: Array[Dictionary] = [
 	# — Drinks —
-	{"id": "beer", "name": "Sterni (beer)", "category": "drinks", "cost": 0.45, "base_price": 1.2, "fair_lo": 1.0, "fair_hi": 1.9, "demand": 1.6, "deposit": 0.08, "restricted": true, "icon": "sku/beer"},
+	{"id": "beer", "name": "Sterni", "category": "drinks", "cost": 0.45, "base_price": 1.2, "fair_lo": 1.0, "fair_hi": 1.9, "demand": 1.6, "deposit": 0.08, "restricted": true, "icon": "sku/beer"},
 	{"id": "mate", "name": "Mate", "category": "drinks", "cost": 0.85, "base_price": 1.8, "fair_lo": 1.5, "fair_hi": 2.8, "demand": 1.4, "deposit": 0.15, "icon": "sku/mate"},
 	{"id": "cola", "name": "Cola", "category": "drinks", "cost": 0.5, "base_price": 1.5, "fair_lo": 1.2, "fair_hi": 2.4, "demand": 1.0, "deposit": 0.25, "icon": "sku/cola"},
 	{"id": "water", "name": "Water", "category": "drinks", "cost": 0.2, "base_price": 0.9, "fair_lo": 0.7, "fair_hi": 1.6, "demand": 1.1, "deposit": 0.25, "icon": "sku/water"},

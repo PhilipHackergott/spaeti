@@ -17,7 +17,9 @@ extends RefCounted
 ##          effects_success / effects_fail              — extra effects for a check's two branches,
 ##          next:String             — "" ends the conversation (the guest leaves),
 ##          next_fail:String        — where a failed check lands (defaults to `next`),
-##          serve:bool              — false = they leave WITHOUT the auto-serve (you turned them away) }
+##          serve:bool              — false = they leave WITHOUT the auto-serve (you turned them away),
+##          sell_restricted:bool    — this line knowingly sells a restricted SKU to a minor: it goes
+##                                    through the ordinary serve, Integrity hit and `ethics` log and all }
 ##
 ## Authoring rule the tests enforce: choice 0 of every node is never gated, so the headless
 ## AutoPlayer (and any "just take the top line" player) can always get through a night.
@@ -217,6 +219,26 @@ const DATA: Dictionary = {
 				"choices": [
 					{"label": "Here you go.", "next": ""},
 					{"label": "\"{want}? We are out, sorry.\"", "effects": {"kiez": -0.5}, "next": "", "serve": false},
+				],
+			},
+		},
+	},
+	# ── The same parade, under age, asking for something restricted. The counter used to refuse this
+	#    silently, which turned "Here you go." into an unexplained Kiez tick; now the ID check IS the
+	#    conversation and the Integrity decision is the player's. Choice 0 stays the honest one so the
+	#    AutoPlayer (and `play.mjs`) never bleeds Integrity by walking the top line (docs/03 build log).
+	"oneoff_minor": {
+		"start": "order",
+		"nodes": {
+			"order": {
+				"speaker": "", "expression": "neutral",
+				"lines": ["\"{want}, please.\" The note is folded twice, and the eyes stay on the counter."],
+				"choices": [
+					# No `serve: false` on purpose: the counter refuses a restricted SKU to a minor by
+					# itself, and marking this a wave-off would charge the player Kiez-Trust for
+					# keeping the law. The refusal is free, and `_end_talk` puts it in the night log.
+					{"label": "\"Ausweis, bitte.\" No ID, no sale.", "next": ""},
+					{"label": "Ring up the {want} anyway.", "sell_restricted": true, "next": ""},
 				],
 			},
 		},

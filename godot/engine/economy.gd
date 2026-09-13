@@ -88,11 +88,22 @@ const SYSTEM_LABEL := {
 	"events": "Open-mic nights",
 	"board": "Community noticeboard",
 }
-# Vignette/strand flags that visibly change the corner → a friendly label.
+# Vignette/strand/conversation flags that visibly change the corner → a friendly label. This is the
+# READ side of `story.flags`: a branch the player chose in a conversation has to leave a mark they can
+# see, or the choice was theatre. (The regulars' graphs write these — dialogues.gd.)
 const FLAG_LABEL := {
 	"flyers_up": "Gig flyers in the window",
 	"busker": "Live music out front",
 	"lena_credit": "Lena's tab",
+	"lena_tab": "Lena drinks on trust",
+	"lena_sketch": "Lena's sketch by the register",
+	"lena_fed": "Lena eats here now",
+	"juergen_crate": "You carry Jürgen's crates",
+	"juergen_warm": "Jürgen thawed out",
+	"juergen_bench": "Jürgen's bench out front",
+	"mehmet_evidence": "The rent letter is filed",
+	"mehmet_asked": "Mehmet asked the street",
+	"kiez_rally": "The Kiez turned out",
 }
 
 ## A legible roll-up of "what your corner has become" — drives the Manage-screen standing panel.
@@ -115,7 +126,8 @@ static func corner_status(s: Dictionary) -> Dictionary:
 			systems.append(SYSTEM_LABEL[system])
 	var flags: Array = []
 	for f in s["story"]["flags"]:
-		if FLAG_LABEL.has(f):
+		# Two flags may share a label (lena_credit and lena_tab are both the tab) — say it once.
+		if FLAG_LABEL.has(f) and not flags.has(FLAG_LABEL[f]):
 			flags.append(FLAG_LABEL[f])
 	return {
 		"kiez_per_night": round1(kiez_per_night),

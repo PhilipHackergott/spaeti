@@ -16,6 +16,10 @@ var pfand_bottles: int = 0
 ## deposit the reducer will not pay. It starts at 0: a component may not reach into the engine for a
 ## default, and a tray that shows 0,00 is a wiring bug you can see instead of one you cannot.
 var pfand_rate: float = 0.0
+## How many empties the guest at the counter actually brought (`view.active.bottles`). The tray may
+## never stage more than this — the reducer clamps it anyway, and a button that stages a number the
+## engine will throw away is a lie you can click.
+var pfand_available: int = 0
 
 const MAX_ROWS := 2
 
@@ -72,6 +76,10 @@ func set_pfand_rate(rate: float) -> void:
 
 func set_pfand(bottles: int) -> void:
 	pfand_bottles = maxi(0, bottles)
+	_refresh()
+
+func set_pfand_available(n: int) -> void:
+	pfand_available = maxi(0, n)
 	_refresh()
 
 func clear() -> void:
@@ -133,6 +141,10 @@ func _refresh() -> void:
 	var ring := get_node_or_null("%RingUp") as Button
 	if ring != null:
 		ring.disabled = lines.is_empty() and pfand_bottles == 0
+	var pf := get_node_or_null("%PfandButton") as Button
+	if pf != null:
+		# Nothing on the counter, nothing to take back. A staged tray stays clearable either way.
+		pf.disabled = pfand_available <= 0 and pfand_bottles <= 0
 
 ## The rate as the row prints it: "0,15" (no euro sign — the row is already a price line).
 func _rate_text() -> String:

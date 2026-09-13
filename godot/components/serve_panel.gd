@@ -15,6 +15,11 @@ const SLIDE_MS := 220
 var _shelf_items: Array = []
 var _pfand_available: int = 0
 var is_open: bool = false
+## The order the shelf was last scrolled to, "<customer id>:<sku>". The reveal fires ONCE per order:
+## the night ticks ~60x/s and every tick re-renders (Session.changed -> Screen.refresh), so revealing
+## on every render pinned the scroll to the want's page — nothing further than one window away was
+## pickable (measured: one render snapped scroll_vertical 180 -> 0).
+var _revealed_for: String = ""
 
 func _ready() -> void:
 	Palette.prepare()
@@ -40,18 +45,28 @@ func _ready() -> void:
 ## Fills the shelf from the read-model and names who is waiting.
 func render(view: Dictionary) -> void:
 	_shelf_items = view.get("shelf", [])
-	_pfand_available = int(view.get("pfand_held", 0))
+	# What the person at the counter brought in — NOT `view.pfand_held`, which is the shop's own crate.
+	# Paying out against the crate let one press double it on every serve (docs/05 §5).
+	_pfand_available = int((view.get("active", {}) as Dictionary).get("bottles", 0))
 	var shelf := get_node_or_null("%Shelf") as Shelf
 	var t := till()
 	if t != null:
 		# The view always carries the rate (docs/05 §5); 0 would be a bug worth seeing, not a silent
 		# fallback into the engine's constant from a component.
 		t.set_pfand_rate(float(view.get("pfand_rate", 0.0)))
+		t.set_pfand_available(_pfand_available)
 	if shelf != null:
 		shelf.set_items(_shelf_items, t.counts() if t != null else {})
 		# The shelf is taller than its window (17 SKUs, 23 once the modules land), so the thing they
-		# actually asked for is scrolled into view instead of being hidden three rows down.
-		_reveal(String((view.get("active", {}) as Dictionary).get("want", {}).get("sku_id", "")))
+		# actually asked for is scrolled into view instead of being hidden three rows down — ONCE per
+		# order. After that the scroll belongs to the player: upselling a beer onto a Mate order, or
+		# substituting when the want is out of stock, means reaching rows the want's page does not hold.
+		var a: Dictionary = view.get("active", {})
+		var want_sku := String((a.get("want", {}) as Dictionary).get("sku_id", ""))
+		var order := "%d:%s" % [int((a.get("customer", {}) as Dictionary).get("id", -1)), want_sku]
+		if order != _revealed_for:
+			_revealed_for = order
+			_reveal(want_sku)   # "" is a no-op, so an empty counter just re-arms the next arrival
 	var want := get_node_or_null("%Want") as Label
 	if want != null:
 		var active: Dictionary = view.get("active", {})
@@ -77,6 +92,7 @@ func _reveal(sku_id: String) -> void:
 func open(instant: bool = false) -> void:
 	is_open = true
 	visible = true
+	_revealed_for = ""   # re-opening re-centres on the want; the next render does the scrolling
 	_slide(SHOWN_X, instant)
 
 func close(instant: bool = false) -> void:
@@ -99,6 +115,8 @@ func preload_picks(sku_ids: Array, pfand_bottles: int = 0) -> void:
 				t.add_sku(entry)
 				break
 	t.set_pfand(pfand_bottles)
+	# A staged tray has to be a legal one: the guest brought at least what the capture puts in it.
+	t.set_pfand_available(maxi(pfand_bottles, _pfand_available))
 	var shelf := get_node_or_null("%Shelf") as Shelf
 	if shelf != null:
 		shelf.set_counts(t.counts())
@@ -130,8 +148,9 @@ func _on_pfand(_bottles: int) -> void:
 	var t := till()
 	if t == null:
 		return
-	# One press takes the whole crate the customer put on the counter; a second press puts it back.
-	t.set_pfand(0 if t.pfand_bottles > 0 else maxi(1, _pfand_available))
+	# One press takes every empty THIS guest put on the counter; a second press puts them back. No
+	# `maxi(1, …)`: with nothing on the counter there is nothing to take, and the button says so.
+	t.set_pfand(0 if t.pfand_bottles > 0 else _pfand_available)
 
 func _on_wave() -> void:
 	waved_off.emit()

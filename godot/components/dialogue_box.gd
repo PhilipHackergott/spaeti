@@ -225,7 +225,14 @@ func _choice_row(entry: Dictionary, index: int) -> BoxContainer:
 	btn.add_theme_stylebox_override("normal", Palette.flat_row())
 	btn.text = Strings.CHOICE_NUMBER % [index + 1, _plain_label(entry)]
 	btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	btn.clip_text = true
+	# WRAP, never clip. With a line waiting the box is 300 px (`DIALOGUE_W_QUEUE`), which leaves ~272 px
+	# of button after the panel margins and the row padding — 26 of the 139 authored choices are longer
+	# than that, and clipping ended them mid-word in the middle of a sentence the player has to read to
+	# choose it. The box is bottom-pinned and `_fit_height`/`_fit_deferred` re-measure from the combined
+	# minimum size (deferred on purpose, because an autowrapped control only reports its line count
+	# after a layout pass), so a wrapped row simply grows the panel upward.
+	btn.clip_text = false
+	btn.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	btn.action = {"choice": index}
 	# A gate is SHOWN and greyed, never hidden: the player has to be able to see the door they cannot

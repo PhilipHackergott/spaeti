@@ -33,6 +33,9 @@ static var CHARACTER_BY_ID: Dictionary = {}
 static var BEAT_STRAND: Dictionary = {}
 ## The graph every guest with no tree of their own falls back to (its lines substitute `{want}`).
 const DIALOGUE_FALLBACK := "oneoff"
+## The same parade, but a minor asking for a restricted SKU: the ID check IS the conversation, so the
+## Integrity decision is on the table instead of being swallowed by the counter's blanket refusal.
+const DIALOGUE_MINOR := "oneoff_minor"
 
 static func _static_init() -> void:
 	_index(SKUS, SKU_BY_ID)

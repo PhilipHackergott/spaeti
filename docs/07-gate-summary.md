@@ -49,4 +49,5 @@ snapping (+3…+15), prompt discipline; not palette quantisation (±0) or despec
 
 Open `godot/` in Godot 4.7.2 → Play. Title → New game → Manage → Open up → guests queue → Next guest → talk (Space/click
 advances; choices show `[Schnauze 12]`-style tags; locked gates are greyed) → dawn → Summary → Next day. `Tab` shows the
-stats strip. Headless: `node tools/godot/test.mjs`, `node tools/godot/play.mjs`.
+stats strip. Headless: `node tools/godot/test.mjs`. Windowed (Godot cannot render headless, so it needs a
+desktop session): `node tools/godot/play.mjs` → `shots/play-NN-<step>.png` + `shots/play-log.json`.

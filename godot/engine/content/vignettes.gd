@@ -171,6 +171,17 @@ const DATA: Array[Dictionary] = [
 		],
 	},
 	{
+		# The only vignette that ASKS something of the player's history: it rides `requires_flag`, the
+		# gate the content tables have always supported and nothing used. Additive on purpose — putting
+		# a flag gate on an existing row would make shipped content unreachable for most runs.
+		"id": "sketch_asked", "after_day": 5, "requires_flag": "lena_sketch", "speaker": "Someone at the wall",
+		"lines": ["She stops halfway out the door, nodding at the drawing taped over the cigarettes. \"Who did that one? It's good.\""],
+		"choices": [
+			{"label": "\"An art student. She's in here most nights.\"", "kiez": 1},
+			{"label": "\"Rent, paid in pencil.\" You shrug; she laughs.", "kiez": 0.5, "profit": 0.5},
+		],
+	},
+	{
 		"id": "wendekind", "after_day": 16, "speaker": "Two Berlins",
 		"lines": ["An older man stares a long time at the street. \"I grew up on the other side of where the Wall ran. Right there.\" He points at nothing anyone else can see. \"Sometimes I still feel it.\""],
 		"choices": [

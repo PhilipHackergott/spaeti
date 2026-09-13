@@ -6,6 +6,10 @@ extends RefCounted
 ## Port of app/src/engine/rules.ts + legal.ts, with the counter-fired story of engine-api §4.
 
 const PFAND_PER_BOTTLE := 0.15
+## The most empties one guest can carry in. `pfand_held` is the SHOP's crate awaiting wholesaler
+## credit — it is not what the person at the counter is holding, and paying out against it let one
+## guest double the crate on every serve (0 -> 1 -> 2 -> 4 -> 8 …). What they brought is their own.
+const PFAND_MAX_RETURN := 6
 ## Night length maps linearly onto a 20:00 → 06:00 night for the clock label.
 const NIGHT_START_MIN := 20 * 60
 const NIGHT_MINUTES := 10 * 60
@@ -62,17 +66,27 @@ static func apply(s: Dictionary, action: Dictionary) -> Dictionary:
 			n["reputation"]["kiez"] = Economy.clamp_meter(float(n["reputation"]["kiez"]) - 0.1)
 			_next_customer(n)
 			return n
+		# The four board intents are MANAGE-only: the wholesaler comes before opening, not at 03:00.
+		# `legal_actions` has always said so; without these guards the reducer disagreed with it.
 		"set_price":
+			if s["phase"] != "manage":
+				return s
 			var sku_id: String = action.get("sku", "")
 			if not (n["inventory"] as Dictionary).has(sku_id):
 				return s
 			n["inventory"][sku_id]["price"] = maxf(0.0, Economy.round2(float(action.get("price", 0.0))))
 			return n
 		"restock":
+			if s["phase"] != "manage":
+				return s
 			return n if _restock(n, action.get("sku", ""), int(action.get("qty", 0))) else s
 		"buy_upgrade":
+			if s["phase"] != "manage":
+				return s
 			return n if _buy_upgrade(n, action.get("id", "")) else s
 		"set_sunday_open":
+			if s["phase"] != "manage":
+				return s
 			n["open_sunday"] = bool(action.get("open", false))
 			return n
 		"talk_next":
@@ -149,6 +163,9 @@ static func _build_arrivals(s: Dictionary, rng: Rng) -> Array:
 			"character_id": "",
 			"beat_id": "",
 			"vignette_id": "",
+			# What this one is carrying back. One more draw off the same seeded rng, so a night still
+			# replays exactly from {config, seed, actions}.
+			"bottles": rng.randi_below(PFAND_MAX_RETURN + 1),
 		})
 	out.sort_custom(func(a, b): return int(a["time_ms"]) < int(b["time_ms"]))
 	return out
@@ -162,7 +179,8 @@ static func _tick(n: Dictionary, dt_ms: int) -> void:
 		var arch := Content.archetype(a["archetype_id"])
 		(n["queue"] as Array).append(SpatiState.new_customer(
 			int(n["next_customer_id"]), a["archetype_id"], a["want"], int(arch["patience_ms"]),
-			a.get("character_id", ""), a.get("beat_id", ""), a.get("vignette_id", "")))
+			a.get("character_id", ""), a.get("beat_id", ""), a.get("vignette_id", ""),
+			int(a.get("bottles", 0))))
 		n["next_customer_id"] = int(n["next_customer_id"]) + 1
 	var active: Dictionary = n["active"]
 	if not active.is_empty() and not _dialogue_pending(n):
@@ -223,6 +241,9 @@ static func _next_customer(n: Dictionary) -> void:
 
 static func _serve(n: Dictionary, give: Array, pfand_bottles: int) -> void:
 	var active: Dictionary = n["active"]
+	# You can only take back what they brought. The clamp lives HERE, not in the till: a component may
+	# not invent a quantity that moves cash, and this makes over-claiming impossible from any caller.
+	pfand_bottles = clampi(pfand_bottles, 0, int(active.get("bottles", 0)))
 	var arch := Content.archetype(active["archetype_id"])
 	var want: String = active["want"]
 	var total := 0.0
@@ -386,7 +407,7 @@ static func stat_score(s: Dictionary, stat: String) -> int:
 static func stat_mod(s: Dictionary, stat: String) -> int:
 	return modifier(stat_score(s, stat))
 
-## What a player reads for a stat id ("cha" -> "Charisma"); unknown ids print themselves.
+## What a player reads for a stat id ("cha" -> "Schnauze"); unknown ids print themselves.
 static func stat_name(stat: String) -> String:
 	return String(STAT_NAMES.get(stat, stat))
 
@@ -414,6 +435,10 @@ static func _open_talk(n: Dictionary) -> bool:
 	if active.is_empty():
 		return false
 	var graph_id := Content.dialogue_id_for(String(active.get("character_id", "")))
+	# A minor asking for a restricted SKU gets the ID check instead of the parade's "Here you go." —
+	# the counter's blanket refusal used to swallow that answer into a silent Kiez tick (docs/06 §7).
+	if graph_id == Content.DIALOGUE_FALLBACK and _is_illegal_want(active):
+		graph_id = Content.DIALOGUE_MINOR
 	var graph := Content.dialogue(graph_id)
 	if graph.is_empty():
 		return false
@@ -493,7 +518,7 @@ static func _talk_choose(n: Dictionary, index: int) -> bool:
 	var graph_id := String(talk["dialogue_id"]).trim_prefix(Talk.DIALOGUE_PREFIX)
 	var next_node := Content.dialogue_node(graph_id, next_id) if next_id != "" else {}
 	if next_node.is_empty():
-		_end_talk(n, true, bool(choice.get("serve", true)))
+		_end_talk(n, true, bool(choice.get("serve", true)), bool(choice.get("sell_restricted", false)))
 		return true
 	talk["node"] = next_id
 	talk["line"] = 0
@@ -505,8 +530,10 @@ static func _talk_choose(n: Dictionary, index: int) -> bool:
 
 ## `talk_end` (docs/06 §4, engine-internal). `dismiss` = the guest leaves; `serve_them` = their want
 ## is rung up on the way out if it is in stock, so a night of pure conversation still moves cash.
-## An underage restricted sale is the one thing the counter refuses on its own (the Integrity rule).
-static func _end_talk(n: Dictionary, dismiss: bool, serve_them: bool) -> void:
+## The counter refuses an underage restricted sale on its own UNLESS the line taken was the one that
+## knowingly sells it (`sell_restricted`) — that answer routes through the ordinary `_serve`, so it
+## costs exactly what `serve_active` costs: -8 Integrity and the `ethics` log entry.
+static func _end_talk(n: Dictionary, dismiss: bool, serve_them: bool, allow_restricted: bool = false) -> void:
 	n["talk"] = {}
 	if not dismiss:
 		return
@@ -515,13 +542,22 @@ static func _end_talk(n: Dictionary, dismiss: bool, serve_them: bool) -> void:
 		return
 	var want := String(active["want"])
 	var stock := int(((n["inventory"] as Dictionary).get(want, {}) as Dictionary).get("stock", 0))
-	var underage := bool(Content.archetype(String(active["archetype_id"])).get("underage", false))
-	var illegal := underage and bool(Content.sku(want).get("restricted", false))
-	if serve_them and stock > 0 and not illegal:
-		_serve(n, [want], 0)
+	var illegal := _is_illegal_want(active)
+	if serve_them and stock > 0 and (allow_restricted or not illegal):
+		_serve(n, [want], 0)  # the ONE Integrity path — `_serve` logs the `ethics` entry
+		return
+	if serve_them and illegal:
+		# The house rule, not a snub: it costs no Kiez-Trust, but it goes on the record so the player
+		# can see that the counter — not their answer — is what turned the kid away.
+		_log(n, "ethics", "Refused %s to a minor — no ID, no sale." % String(Content.sku(want).get("name", want)))
+		_next_customer(n)
 		return
 	n["reputation"]["kiez"] = Economy.clamp_meter(float(n["reputation"]["kiez"]) - 0.1)
 	_next_customer(n)
+
+## A minor asking for a restricted SKU. Used both to pick the conversation and to gate the auto-serve.
+static func _is_illegal_want(active: Dictionary) -> bool:
+	return bool(Content.archetype(String(active.get("archetype_id", ""))).get("underage", false)) 		and bool(Content.sku(String(active.get("want", ""))).get("restricted", false))
 
 static func _has_effect(n: Dictionary, key: String) -> bool:
 	for id in n["upgrades"]:
@@ -587,7 +623,8 @@ static func legal_actions(s: Dictionary) -> Array:
 				if kind == Talk.KIND_BEAT or kind == Talk.KIND_VIGNETTE:
 					var legacy := "resolve_vignette" if kind == Talk.KIND_VIGNETTE else "resolve_beat"
 					for i in views.size():
-						out.append({"type": legacy, "choice": i})
+						if not bool(views[i]["locked"]):  # same gate rule as talk_choose (docs/05 §8)
+							out.append({"type": legacy, "choice": i})
 			elif not (story["pending"] as Dictionary).is_empty():
 				var beat := Content.beat(story["pending"]["strand"], story["pending"]["beat"])
 				for i in (beat.get("choices", []) as Array).size():
@@ -597,7 +634,8 @@ static func legal_actions(s: Dictionary) -> Array:
 				for i in (v.get("choices", []) as Array).size():
 					out.append({"type": "resolve_vignette", "choice": i})
 			else:
-				# Take the next guest: the head of the queue, or whoever the tick already pulled up.
+				# Take the next guest: the head of the queue (the tick promotes nobody unless
+				# config.auto_take_next), or open the conversation with whoever is already at the counter.
 				if not (s["active"] as Dictionary).is_empty() or not (s["queue"] as Array).is_empty():
 					out.append({"type": "talk_next"})
 				if not (s["active"] as Dictionary).is_empty():
@@ -640,7 +678,10 @@ static func view(s: Dictionary) -> Dictionary:
 		"dialogue": _dialogue_view(s),
 		"shelf": _shelf_view(s),
 		"summary": ((s["summaries"] as Array).back() if not (s["summaries"] as Array).is_empty() else {}),
-		"manage": {"restock_options": _restock_options(s), "modules": Economy.module_options(s)},
+		# `status` is the standing roll-up: what the corner has become (modules, and the conversation
+		# branches that left a mark). Without it in the read-model the flags a graph writes are unread.
+		"manage": {"restock_options": _restock_options(s), "modules": Economy.module_options(s),
+			"status": Economy.corner_status(s)},
 		"ending": (Finale.resolve_finale(s) if s["phase"] == "end" else {}),
 	}
 
@@ -674,6 +715,7 @@ static func _active_view(s: Dictionary) -> Dictionary:
 		"patience": clampf(float(active["patience_left_ms"]) / patience_ms, 0.0, 1.0),
 		"is_story": active.get("beat_id", "") != "" or active.get("vignette_id", "") != "",
 		"underage": bool(arch.get("underage", false)),
+		"bottles": int(active.get("bottles", 0)),
 	}
 
 ## Everyone waiting, FIFO, each with the portrait the art lane drew for them: their own if they are

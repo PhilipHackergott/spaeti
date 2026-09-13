@@ -54,6 +54,17 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 1
 
+[node name="StandingHead" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"SmallLabel"
+text = "YOUR CORNER"
+
+[node name="Standing" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 0
+
 [node name="Foot" type="HBoxContainer" parent="."]
 layout_mode = 2
 alignment = 2

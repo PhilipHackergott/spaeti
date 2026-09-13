@@ -31,6 +31,7 @@ const SETTINGS_NOTE := "Audio lands with the sound pass."
 
 # ── the night ────────────────────────────────────────────────────────────────────────────────
 const SERVE := "Serve"                          # the toggle that opens the shelf
+const CLOSE := "Close"                          # ...the same plate, while the shelf is open
 const SERVE_PANEL := "SERVE"
 const NOBODY_WAITING := "no one waiting"
 const WANT_LINE := "%s: %s"                     # who is waiting: what they asked for
@@ -42,6 +43,7 @@ const RESTRICTED := "18"                        # the age gate badge on a restri
 
 # ── the register: the queue, the six stats, the checks (docs/06-dialogue-and-stats.md) ───
 const NEXT_GUEST := "Next guest"                # take the first guest in line (talk_next)
+const TALK_TO_GUEST := "Talk to them"           # the same intent with somebody already at the counter
 const QUEUE_MORE := "+%d"                       # the overflow chip when the line is longer than the strip
 const NUMBER := "%d"                            # a bare stat value
 const MODIFIER := "%+d"                         # D&D 5e: floor((stat - 10) / 2), signed even at zero
@@ -101,6 +103,7 @@ const MANAGE_TITLE := "Späti — night %d, %s"    # the weekday stays German
 const MANAGE_SECTION := "RESTOCK · PRICES"
 const MANAGE_MODULES := "MODULES"
 const MANAGE_OWNED := "owned"
+const MANAGE_STANDING := "YOUR CORNER"           # the standing panel: what the modules and the conversations made
 const OPEN_UP := "Open up"
 const CASH := "Cash %s"
 const WHOLESALE := "buy %s"                     # the wholesale price of one unit

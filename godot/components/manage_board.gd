@@ -26,6 +26,7 @@ func _ready() -> void:
 		rule.color = Palette.RULE
 	_text("%Section", Strings.MANAGE_SECTION)
 	_text("%ModuleHead", Strings.MANAGE_MODULES)
+	_text("%StandingHead", Strings.MANAGE_STANDING)
 	var open := get_node_or_null("%OpenNight") as Button
 	if open != null:
 		open.text = Strings.OPEN_UP
@@ -44,6 +45,7 @@ func render(v: Dictionary) -> void:
 	var manage: Dictionary = v.get("manage", {})
 	_build_rows(manage.get("restock_options", []))
 	_build_modules(manage.get("modules", []))
+	_build_standing(manage.get("status", {}))
 
 func _build_rows(options: Array) -> void:
 	var box := get_node_or_null("%Rows") as VBoxContainer
@@ -123,6 +125,29 @@ func _build_modules(modules: Array) -> void:
 			var buy := _button(Palette.money(float(m.get("cost", 0.0))), _on_buy.bind(String(m.get("id", ""))))
 			buy.custom_minimum_size = Vector2(58, ROW_H)
 			row.add_child(buy)
+		box.add_child(row)
+
+## What the corner has BECOME: the systems the modules switched on, and the conversation branches that
+## left a mark (`Economy.corner_status`). Engine strings, printed — a choice the player made in a talk
+## is otherwise written into `story.flags` and never read back anywhere they can see it.
+func _build_standing(status: Dictionary) -> void:
+	var box := get_node_or_null("%Standing") as VBoxContainer
+	if box == null:
+		return
+	for c in box.get_children():
+		box.remove_child(c)
+		c.queue_free()
+	var head := get_node_or_null("%StandingHead") as Label
+	var lines: Array = []
+	lines.append_array(status.get("systems", []))
+	lines.append_array(status.get("flags", []))
+	if head != null:
+		head.visible = not lines.is_empty()   # an empty header over nothing is just noise
+	box.visible = not lines.is_empty()
+	for line in lines:
+		var row := _label(String(line), 0, Palette.TEXT_DIM)
+		row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.clip_text = false
 		box.add_child(row)
 
 func _label(text: String, width: int, col: Color) -> Label:

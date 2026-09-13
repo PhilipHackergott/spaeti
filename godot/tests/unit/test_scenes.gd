@@ -98,6 +98,10 @@ func test_mock_view_matches_the_contract() -> void:
 		var v: Dictionary = MockView.view(preset)
 		for key in VIEW_KEYS:
 			assert_true(v.has(key), "%s view has %s" % [preset, key])
+		# The engine builds `queue_len` and `queue` off the same `s["queue"]` (rules.gd), so they can
+		# never disagree — and a mock that prints "2 waiting" over a frame with nobody in the line
+		# makes the capture a lie.
+		assert_eq(int(v["queue_len"]), (v["queue"] as Array).size(), "%s queue_len agrees with the line" % preset)
 		assert_true(v["shelf"] is Array, preset + " shelf is an array")
 		assert_true(v["reputation"] is Dictionary, preset + " reputation is a dictionary")
 		# JSON-safe: no nulls anywhere in the read-model.
@@ -358,11 +362,24 @@ func test_queue_strip_shows_the_line_fifo() -> void:
 	assert_eq(took.size(), 1, "and stays quiet while a conversation is open")
 	var button := strip.get_node_or_null("%NextGuest") as Button
 	assert_true(button != null and not button.visible, "the Next guest button hides while they talk")
-	# The reducer pulls the head of the queue to the counter by itself, so "take the next guest" is
-	# offered with an EMPTY line too - the strip is then the button alone.
+	# `talk_next` also opens the conversation with whoever is already at the counter, so "take the next
+	# guest" is offered with an EMPTY line too - the strip is then the button alone.
 	strip.call("set_queue", [], true)
 	assert_true(strip.visible and button.visible, "an empty line still offers the guest at the counter")
 	assert_false((strip.get_node_or_null("Plate") as Control).visible, "but there is no line to draw")
+	# ...and the button says WHICH of the two `talk_next` means, because with somebody at the counter it
+	# starts THEIR conversation and leaves the line exactly where it was.
+	strip.call("set_queue", [], true, true)
+	assert_eq(button.text, Strings.TALK_TO_GUEST, "with a guest at the counter the button says what it does")
+	strip.call("set_queue", queue, true, false)
+	assert_eq(button.text, Strings.NEXT_GUEST, "with a clear counter it takes the head of the line")
+	# And a click on the LINE never silently talks to the person at the counter instead.
+	strip.call("set_queue", queue, true, true)
+	var click := InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	strip.call("_gui_input", click)
+	assert_eq(took.size(), 1, "clicking the line does not start the counter's conversation")
 	strip.call("set_queue", [], false)
 	assert_false(strip.visible, "nobody to take and nobody waiting is no strip at all")
 	_dispose(strip)
@@ -427,6 +444,15 @@ func test_the_register_columns_do_not_overlap() -> void:
 			"the narrowed dialogue box stops short of the queue")
 	assert_eq(Palette.QUEUE_RECT.position.y + Palette.QUEUE_RECT.size.y, Palette.COUNTER_TOP,
 			"the line stands at the counter, not over it")
+	# The authored rects are not the whole story: the box keeps its bottom on DIALOGUE_RECT and GROWS
+	# UPWARD for a choice list (measured in-tree: 126 px for the three-choice `talk_choice` node, one of
+	# them a gate), and it is a later sibling, so it prints over the sheet unless the sheet gives way.
+	for h in [Palette.DIALOGUE_RECT.size.y, 96, 126, 140]:
+		var bottom: int = Palette.DIALOGUE_RECT.position.y + Palette.DIALOGUE_RECT.size.y
+		var grown := Rect2i(Palette.DIALOGUE_RECT.position.x, bottom - h, Palette.DIALOGUE_W_QUEUE, h)
+		var sheet := Rect2i(Vector2i(Palette.STATS_RECT.position.x, int(Palette.stats_top(float(bottom - h)))), Palette.STATS_RECT.size)
+		assert_false(sheet.intersects(grown), "the sheet clears a %d-px dialogue box" % h)
+		assert_false(sheet.intersects(hud), "and never climbs under the HUD to do it")
 
 ## The whole conversation, driven the way a player drives it: the box shows the line the ENGINE is on,
 ## a click asks for the next one, and a choice becomes `talk_choose` (docs/06 section 4).
@@ -470,12 +496,46 @@ func test_night_hands_the_right_column_to_the_queue() -> void:
 	assert_eq(int(box.size.x), Palette.DIALOGUE_W_QUEUE, "with a line waiting the box steps back")
 	assert_false(night.get_node_or_null("%WantBubble").visible, "the bubble stands down while they talk")
 	assert_true(night.get_node_or_null("%QueueStrip").visible, "and the line is visible")
+	# ...and the sheet steps up out of the grown box. Outside the tree the box cannot measure its own
+	# content (no theme, so no font, so no line height), so the height is staged by hand and the chrome
+	# is placed explicitly — what is under test is that the SCENE reads the box's real edge, not that a
+	# signal fires (in the running game `_ready` also wires `resized`, since the fit is a frame late).
+	var stats := night.get_node_or_null("%StatsStrip") as Control
+	night.call("_place_chrome", MockView.view("talk_choice"))
+	assert_eq(int(stats.position.y), Palette.STATS_RECT.position.y, "a one-line box leaves the sheet where it was authored")
+	box.size.y = 126.0
+	night.call("_place_chrome", MockView.view("talk_choice"))
+	assert_true(int(stats.position.y) < Palette.STATS_RECT.position.y, "a grown box pushes the sheet up")
+	assert_false(Rect2i(Vector2i(stats.position), Palette.STATS_RECT.size).intersects(Rect2i(40, 134, Palette.DIALOGUE_W_QUEUE, 126)),
+			"far enough up that the choices no longer cover Kiez Sense and Schnauze")
+	box.size.y = float(Palette.DIALOGUE_RECT.size.y)
+	night.call("_place_chrome", MockView.view("talk_choice"))
+	assert_eq(int(stats.position.y), Palette.STATS_RECT.position.y, "and it drops back when the choices are gone")
 	# The sheet is default-hidden behind Tab; `queue_waiting` is the capture that opens it for the
 	# reader, which is the preset's job, not the read-model's — so it is the PRESET that is checked.
 	night.call("apply_capture_preset", "queue_waiting")
 	assert_true(night.get_node_or_null("%StatsStrip").visible, "queue_waiting shows the sheet without Tab")
 	assert_false(night.get_node_or_null("%DialogueBox").visible, "and nobody is talking")
 	_dispose(night)
+
+## A per-render `ensure_control_visible` pinned the shelf to the want's page (measured in-tree: the
+## scroll snapped 180 -> 0 on one render), so 10 of the 17 SKUs could not be reached — no upsell, no
+## substitute for an out-of-stock want. The reveal is armed once per order, then the scroll is theirs.
+func test_shelf_reveals_once_per_order() -> void:
+	var panel := load("res://components/ServePanel.tscn").instantiate() as ServePanel
+	var v: Dictionary = MockView.view("serving")
+	panel.render(v)
+	var armed: String = panel._revealed_for
+	assert_ne(armed, "", "the first render of an order arms the reveal")
+	panel.render(v)
+	assert_eq(panel._revealed_for, armed, "re-rendering the same order does not scroll again")
+	var next_v: Dictionary = v.duplicate(true)
+	next_v["active"]["customer"]["id"] = int(next_v["active"]["customer"]["id"]) + 1
+	panel.render(next_v)
+	assert_ne(panel._revealed_for, armed, "the next customer re-arms it")
+	panel.open(true)
+	assert_eq(panel._revealed_for, "", "and re-opening the panel re-centres on the want")
+	_dispose(panel)
 
 func _dispose(n: Node) -> void:
 	if n == null:

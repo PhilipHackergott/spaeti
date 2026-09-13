@@ -9,6 +9,14 @@ extends Control
 		line = v
 		_refresh()
 
+## The guest is a minor asking for a restricted SKU. Nothing else on the frame says so — the "18"
+## badge lives on the shelf's ItemSlots, and a player who cannot see who they are selling to cannot
+## make the Integrity decision the counter puts in front of them.
+@export var age_flag: bool = false:
+	set(v):
+		age_flag = v
+		_refresh()
+
 var _want: Dictionary = {}
 
 func _ready() -> void:
@@ -42,3 +50,8 @@ func _refresh() -> void:
 	if said != null:
 		said.text = line
 		said.visible = line != ""
+	var age := get_node_or_null("%Age") as Label
+	if age != null:
+		age.text = Strings.RESTRICTED          # the same age gate the shelf stamps on the SKU
+		age.add_theme_color_override("font_color", Palette.BAD)
+		age.visible = age_flag

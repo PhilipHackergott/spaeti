@@ -2,7 +2,7 @@ class_name Fx
 extends Control
 ## The feedback layer: the Session event stream turned into one-frame-cheap, code-drawn pops.
 ## Session.event fires for every new log entry in order (docs/05 §7, kinds: open · arrive · serve ·
-## tip · balk · pfand · ethics · beat · upgrade · ordnungsamt · raid · close); a screen connects the
+## tip · balk · pfand · ethics · beat · check · upgrade · ordnungsamt · raid · close); a screen connects the
 ## signal straight to `on_event`. Everything here is a ColorRect on the pixel grid — no texture, no
 ## audio yet, so it works before the art and the sound passes land (docs/04 rule 3).
 ##

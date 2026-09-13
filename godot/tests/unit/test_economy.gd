@@ -85,3 +85,12 @@ func test_corner_status_rolls_up_what_the_place_became() -> void:
 	assert_true(status["has_security"], "the cam is up")
 	assert_true((status["systems"] as Array).has("The bench draws a crowd"), "systems are labelled")
 	assert_true((status["flags"] as Array).has("Live music out front"), "flags are labelled")
+	# A branch chosen in a conversation is on the board too, or the choice was theatre (docs/06 §3).
+	s["story"]["flags"] = ["busker", "lena_sketch", "lena_tab", "lena_credit"]
+	var talked := Economy.corner_status(s)
+	assert_true((talked["flags"] as Array).has("Lena's sketch by the register"), "a dialogue flag is labelled")
+	# lena_tab and lena_credit are the same standing; the panel says it once.
+	assert_eq((talked["flags"] as Array).count("Lena's tab"), 1, "one tab, one line")
+	# ...and the board can only print it because the read-model carries it (rules.gd view()).
+	var v: Dictionary = Rules.view(s)["manage"]["status"]
+	assert_true((v["flags"] as Array).has("Lena's sketch by the register"), "and the screen is handed it")

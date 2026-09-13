@@ -12,9 +12,11 @@ one-off** are enough to prove the concept.
 player: { stats: { str:int, dex:int, con:int, int:int, wis:int, cha:int } }      // 8..18, default 10/11/12/13/12/14
 modifier(stat) = floor((stat - 10) / 2)                                          // D&D 5e
 ```
-Names shown in the UI: **Strength, Dexterity, Constitution, Intelligence, Wisdom, Charisma** (Strings). Some matter in
-conversation (CHA persuade, WIS notice, INT reason), some in physical tasks (STR lift the crate, DEX catch the
-falling bottle, CON the 3-am shift). `SpatiState.new_game(config)` seeds the defaults; a later character-creation
+Names shown in the UI (the Späti-flavoured set, §7): **Muscle** (str) · **Hands** (dex) · **Stamina** (con) ·
+**Brains** (int) · **Kiez Sense** (wis) · **Schnauze** (cha) — `Strings.STAT_NAMES` and `Rules.STAT_NAMES`, kept
+identical by `test_scenes.gd::test_the_two_stat_tables_agree`. The ids stay D&D so the mechanics read as 5e. Some
+matter in conversation (Schnauze persuade, Kiez Sense notice, Brains reason), some in physical tasks (Muscle lifts
+the crate, Hands catch the falling bottle, Stamina is the 3-am shift). `SpatiState.new_game(config)` seeds the defaults; a later character-creation
 screen may replace them — not in this slice.
 
 ## 2. Checks (pure, seeded)
@@ -30,20 +32,24 @@ requirement) when the stat is below `min`; no roll.
 ## 3. Dialogue graphs (`engine/content/dialogues.gd`, data only)
 
 ```
-DIALOGUES = {
+const DATA: Dictionary = {                       # re-exported as Content.DIALOGUES
   "lena": { start:"hello", nodes:{
      "hello": { speaker:"lena", expression:"neutral", lines:["Mate, bitte. …I'm fifty cents short again."],
                 choices:[
                   { label:"On the house.", effects:{ kiez:+1, cash:-1.8 }, next:"thanks" },
-                  { label:"[Charisma 12] Pay me in a sketch.", check:{stat:"cha", dc:12}, next:"sketch_ok", next_fail:"sketch_no" },
+                  { label:"[Schnauze 12] Pay me in a sketch.", check:{stat:"cha", dc:12}, next:"sketch_ok", next_fail:"sketch_no" },
                   { label:"Cash only, Lena.", effects:{ kiez:-1 }, next:"" } ] },
      ... } },
   "juergen": …   (a STR 12 gate to lift his crate; a WIS check to notice he is cold),
   "mehmet":  …   (an INT check on the rent letter; a CHA check),
-  "oneoff":  { start:"order", nodes:{ "order": { lines:["{want}, please."], choices:[{label:"Here you go.", next:""},{label:"We're out.", effects:{kiez:-0.5}, next:""}] } } }
+  "oneoff":  { start:"order", nodes:{ "order": { lines:["{want}, please."], choices:[{label:"Here you go.", next:""},{label:"We're out.", effects:{kiez:-0.5}, next:"", serve:false}] } } },
+  "oneoff_minor": … (the same parade, under age, asking for something restricted: "Ausweis, bitte." or sell it anyway)
 }
 ```
-`next:""` ends the conversation. `expression` per node drives the Portrait. `{want}` is substituted with the guest's
+`next:""` ends the conversation. A choice may also carry `serve:false` — the guest then leaves **without** the
+auto-serve (you turned them away) — or `sell_restricted:true`, which is the one line that knowingly sells a
+restricted SKU to a minor (it routes through the ordinary serve: −8 Integrity and an `ethics` log entry, exactly
+like `serve_active`). `expression` per node drives the Portrait. `{want}` is substituted with the guest's
 wanted SKU name. Effects use the existing reducer paths (`kiez`, `profit`, `integrity`, `cash`, `flags`).
 Each regular's tree is **5–8 nodes with 2 checks/gates**; that is the whole story budget for the slice.
 
@@ -67,7 +73,7 @@ While `state.talk` is open, `legal_actions` offers only `talk_advance` / `talk_c
 - **The queue is visible:** small busts (or heads) of the waiting guests lined up at the right edge of the counter,
   FIFO left→right, with the one being served at the centre. A "Next guest" button (or clicking the first in line) →
   `talk_next`.
-- **Conversation:** the DialogueBox shows lines; choices show their stat tag in the label (`[Charisma 12]`), locked
+- **Conversation:** the DialogueBox shows lines; choices show their stat tag in the label (`[Schnauze 12]`), locked
   gates greyed with the reason, and after a roll a small **d20 pop** with `roll + mod vs DC → success/fail`.
 - **Stats panel:** a compact six-stat strip (name, value, modifier) — visible in the HUD or on a toggle (`Tab`).
 - The serve panel may stay reachable but is not part of the demo path.

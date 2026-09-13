@@ -125,7 +125,7 @@ const PORTRAIT_OVERLAP := 30
 const LEAN_ONTO := 6
 const PORTRAIT_TOP_MIN := 14   # 2026-09-13: with the 144x174 busts the clamp, not the overlap, decided the seat; 14 lets the forearms clear the counter edge
 ## The bust is anchored by its BOTTOM-CENTRE, never by a spec rectangle: shipped art is narrower than
-## the 190-px placeholder box (you_neutral is 155), so a left-anchored bust would slide off centre.
+## the 144-px spec box (you_neutral is 118), so a left-anchored bust would slide off centre.
 ## docs/02 "Night framing" puts the customer at x 250; with the serve panel open it steps left so the
 ## panel cannot cover it (verify round 3: Jürgen was ~55 % hidden in `pfand`).
 const PORTRAIT_CENTRE_X := 250
@@ -138,7 +138,8 @@ const GAP := 4
 ## trade places: the queue owns the right edge, the six stats the left edge, and the bust + the
 ## dialogue box keep the middle. Every rectangle below was measured against the two things already
 ## nailed down — the SPÄTI neon (x 124-224, y 20-62, SceneLayers.NeonGlow) and the active bust
-## (bottom-centred on PORTRAIT_CENTRE_X 250, up to 190 px wide, so x 155-345) — because the brief is
+## (bottom-centred on PORTRAIT_CENTRE_X 250; busts are 144x174 since 2026-09-13, but the columns keep
+## the historical 190-px CLEARANCE envelope, so x 155-345 — test_scenes.gd checks that wider rect) — because the brief is
 ## explicit that the queue may cover neither.
 ## The right column, top to bottom: the d20 result, then the line (name over busts) with the
 ## "Next guest" button under it. The button sits at the BOTTOM of the strip on purpose - the want
