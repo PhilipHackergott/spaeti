@@ -16,9 +16,9 @@ const SIZES := {
 	"scene/counter": Vector2i(480, 130),
 	"scene/title": Vector2i(480, 270),
 	"char/you_neutral": Vector2i(144, 174),
-	"char/lena_neutral": Vector2i(144, 174),
-	"char/lena_warm": Vector2i(144, 174),
-	"char/lena_upset": Vector2i(144, 174),
+	"char/lena_neutral": Vector2i(160, 193),   # leaning busts are drawn a step larger (v10: "enlarge Lena, more intimate presence")
+	"char/lena_warm": Vector2i(160, 193),   # leaning busts are drawn a step larger (v10: "enlarge Lena, more intimate presence")
+	"char/lena_upset": Vector2i(160, 193),   # leaning busts are drawn a step larger (v10: "enlarge Lena, more intimate presence")
 	"char/juergen_neutral": Vector2i(144, 174),
 	"char/juergen_warm": Vector2i(144, 174),
 	"char/mehmet_neutral": Vector2i(144, 174),

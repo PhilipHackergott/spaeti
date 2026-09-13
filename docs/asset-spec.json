@@ -120,8 +120,8 @@
     {
       "id": "char/lena_neutral",
       "kind": "portrait",
-      "w": 144,
-      "h": 174,
+      "w": 160,
+      "h": 193,
       "transparent": true,
       "gen": "1024x1536",
       "aspect": "portrait",
@@ -138,8 +138,8 @@
     {
       "id": "char/lena_warm",
       "kind": "portrait",
-      "w": 144,
-      "h": 174,
+      "w": 160,
+      "h": 193,
       "transparent": true,
       "gen": "1024x1536",
       "aspect": "portrait",
@@ -155,8 +155,8 @@
     {
       "id": "char/lena_upset",
       "kind": "portrait",
-      "w": 144,
-      "h": 174,
+      "w": 160,
+      "h": 193,
       "transparent": true,
       "gen": "1024x1536",
       "aspect": "portrait",

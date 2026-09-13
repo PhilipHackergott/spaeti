@@ -118,12 +118,12 @@ const SERVE_RECT := Rect2i(228, 8, 248, 256)
 ## How far the counter layer is raised above the bottom of the frame (2026-09-13, both judges: "a narrow
 ## grey strip above the dialogue panel", "Lena looks submerged behind the counter"). The r6 strip's own top
 ## 37 rows are the wall behind the counter, so flush-with-the-bottom hid the countertop under the panel.
-const COUNTER_LIFT := 0   # r7 carries its laminate edge in its top 10 rows; the 20-px lift was for r6 (37 rows of wall above the edge)
+const COUNTER_LIFT := -8   # v10: the judge wants the rear counter edge lower and the leaner larger; the strip already carries its edge in its top rows
 const PORTRAIT_OVERLAP := 30
 ## A LEANING bust (Assets.staging) sits in front of the counter with its bottom edge — the forearms'
 ## underside — this many px below the counter's back edge, i.e. resting on the laminate surface.
 const LEAN_ONTO := 6
-const PORTRAIT_TOP_MIN := 14   # 2026-09-13: with the 144x174 busts the clamp, not the overlap, decided the seat; 14 lets the forearms clear the counter edge
+const PORTRAIT_TOP_MIN := 12   # a 193-px leaner needs the room; the HUD sits at the sides, the SPÄTI board right of the bust
 ## The bust is anchored by its BOTTOM-CENTRE, never by a spec rectangle: shipped art is narrower than
 ## the 144-px spec box (you_neutral is 118), so a left-anchored bust would slide off centre.
 ## docs/02 "Night framing" puts the customer at x 250; with the serve panel open it steps left so the

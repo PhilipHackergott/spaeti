@@ -32,7 +32,7 @@ Godot 4.7.2; every screen is a real `.tscn` you can open in the editor.
 | Lena / Mehmet neutral | 79 / 79 | Lena since regenerated ×3 in the leaning format (composed only) |
 | One-offs (clubber, tourist) | 78 / 78 | |
 | You / Brandt / Tobias / Schulz / Nadia | 73 / 76 / 75 / 74 / 68 | outside the demo path |
-| **Hero screen (`dialogue_choice`, composed)** | **74** (v10) | trajectory 71 → 74 → 70/74 → 73 → 72 → 73 → 70 → 74 over ten rounds; v11 (larger leaner, lower counter edge) judging |
+| **Hero screen (`dialogue_choice`, composed)** | **75** (v11) | trajectory 71 → 74 → 70/74 → 73 → 72 → 73 → 70 → 74 → 75 over eleven rounds; v11 = Lena drawn at 160 px leaning, counter edge 8 px lower (composition 77, character 75, Berlin 89, palette 63, ui 71) |
 
 What moved the composed score: the choices inside the panel (+3), the three HUD plates → minimal HUD in conversation,
 the leaning staging (character fidelity 63 → 74). What did not: the light-pool overlay (read as "washed-out grey"),
