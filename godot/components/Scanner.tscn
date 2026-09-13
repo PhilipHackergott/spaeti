@@ -1,0 +1,38 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://components/scanner.gd" id="1_script"]
+[ext_resource type="Theme" path="res://components/Theme.tres" id="2_theme"]
+
+[node name="Scanner" type="Control"]
+custom_minimum_size = Vector2(52, 48)
+offset_left = 284.0
+offset_top = 174.0
+offset_right = 336.0
+offset_bottom = 222.0
+theme = ExtResource("2_theme")
+script = ExtResource("1_script")
+
+[node name="Plate" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Art" type="TextureRect" parent="."]
+unique_name_in_owner = true
+offset_left = 4.0
+offset_top = 4.0
+offset_right = 48.0
+offset_bottom = 44.0
+mouse_filter = 2
+stretch_mode = 2
+
+[node name="Glass" type="ColorRect" parent="."]
+unique_name_in_owner = true
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 44.0
+offset_bottom = 16.0
+mouse_filter = 2

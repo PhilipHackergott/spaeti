@@ -1,0 +1,207 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://components/register_panel.gd" id="1_script"]
+[ext_resource type="Theme" path="res://components/Theme.tres" id="2_theme"]
+[ext_resource type="PackedScene" path="res://components/PixelButton.tscn" id="3_button"]
+[ext_resource type="PackedScene" path="res://components/StepChip.tscn" id="4_chip"]
+
+[node name="RegisterPanel" type="Control"]
+custom_minimum_size = Vector2(138, 232)
+offset_left = 340.0
+offset_top = 30.0
+offset_right = 478.0
+offset_bottom = 262.0
+theme = ExtResource("2_theme")
+script = ExtResource("1_script")
+
+[node name="Plate" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+offset_right = 138.0
+offset_bottom = 232.0
+mouse_filter = 2
+
+[node name="Head" type="Label" parent="."]
+unique_name_in_owner = true
+offset_left = 4.0
+offset_top = 2.0
+offset_right = 66.0
+offset_bottom = 20.0
+mouse_filter = 2
+theme_type_variation = &"SpeakerLabel"
+text = "Register"
+
+[node name="CheckId" parent="." instance=ExtResource("3_button")]
+unique_name_in_owner = true
+offset_left = 68.0
+offset_top = 2.0
+offset_right = 134.0
+offset_bottom = 20.0
+theme_type_variation = &"StepButton"
+text = "Check ID"
+
+[node name="Banner" type="Label" parent="."]
+unique_name_in_owner = true
+offset_left = 4.0
+offset_top = 20.0
+offset_right = 134.0
+offset_bottom = 38.0
+mouse_filter = 2
+theme_type_variation = &"SmallLabel"
+clip_text = true
+text = "Check that again."
+
+[node name="Lines" type="Control" parent="."]
+unique_name_in_owner = true
+offset_left = 4.0
+offset_top = 40.0
+offset_right = 134.0
+offset_bottom = 112.0
+mouse_filter = 2
+
+[node name="Empty" type="Label" parent="."]
+unique_name_in_owner = true
+offset_left = 4.0
+offset_top = 40.0
+offset_right = 134.0
+offset_bottom = 56.0
+mouse_filter = 2
+theme_type_variation = &"SmallLabel"
+clip_text = true
+text = "nothing scanned yet"
+
+[node name="SubtotalRow" type="Control" parent="."]
+unique_name_in_owner = true
+offset_left = 4.0
+offset_top = 114.0
+offset_right = 134.0
+offset_bottom = 130.0
+mouse_filter = 2
+
+[node name="SubtotalLabel" type="Label" parent="SubtotalRow"]
+unique_name_in_owner = true
+offset_right = 80.0
+offset_bottom = 16.0
+mouse_filter = 2
+theme_type_variation = &"SmallLabel"
+vertical_alignment = 1
+text = "Subtotal"
+
+[node name="Subtotal" type="Label" parent="SubtotalRow"]
+unique_name_in_owner = true
+offset_left = 80.0
+offset_right = 130.0
+offset_bottom = 16.0
+mouse_filter = 2
+theme_type_variation = &"SmallLabel"
+horizontal_alignment = 2
+vertical_alignment = 1
+clip_text = true
+text = "0,00 €"
+
+[node name="PfandRow" type="Control" parent="."]
+unique_name_in_owner = true
+offset_left = 4.0
+offset_top = 132.0
+offset_right = 134.0
+offset_bottom = 148.0
+
+[node name="PfandLabel" type="Label" parent="PfandRow"]
+unique_name_in_owner = true
+offset_right = 42.0
+offset_bottom = 16.0
+mouse_filter = 2
+theme_type_variation = &"SmallLabel"
+vertical_alignment = 1
+text = "Pfand"
+
+[node name="PfandDown" parent="PfandRow" instance=ExtResource("4_chip")]
+unique_name_in_owner = true
+offset_left = 44.0
+offset_top = 0.0
+offset_right = 56.0
+offset_bottom = 16.0
+
+[node name="PfandValue" type="Label" parent="PfandRow"]
+unique_name_in_owner = true
+offset_left = 57.0
+offset_right = 71.0
+offset_bottom = 16.0
+mouse_filter = 2
+theme_type_variation = &"SmallLabel"
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "0x"
+
+[node name="PfandUp" parent="PfandRow" instance=ExtResource("4_chip")]
+unique_name_in_owner = true
+offset_left = 72.0
+offset_top = 0.0
+offset_right = 84.0
+offset_bottom = 16.0
+
+[node name="PfandAmount" type="Label" parent="PfandRow"]
+unique_name_in_owner = true
+offset_left = 86.0
+offset_right = 130.0
+offset_bottom = 16.0
+mouse_filter = 2
+theme_type_variation = &"SmallLabel"
+horizontal_alignment = 2
+vertical_alignment = 1
+clip_text = true
+text = "0,00 €"
+
+[node name="TotalRow" type="Control" parent="."]
+unique_name_in_owner = true
+offset_left = 4.0
+offset_top = 150.0
+offset_right = 134.0
+offset_bottom = 170.0
+mouse_filter = 2
+
+[node name="TotalLabel" type="Label" parent="TotalRow"]
+unique_name_in_owner = true
+offset_right = 54.0
+offset_bottom = 20.0
+mouse_filter = 2
+vertical_alignment = 1
+text = "Total"
+
+[node name="Total" type="Label" parent="TotalRow"]
+unique_name_in_owner = true
+offset_left = 54.0
+offset_right = 130.0
+offset_bottom = 20.0
+mouse_filter = 2
+theme_type_variation = &"LeadLabel"
+horizontal_alignment = 2
+vertical_alignment = 1
+clip_text = true
+text = "0,00 €"
+
+[node name="TurnAround" parent="." instance=ExtResource("3_button")]
+unique_name_in_owner = true
+offset_left = 4.0
+offset_top = 172.0
+offset_right = 134.0
+offset_bottom = 190.0
+theme_type_variation = &"StepButton"
+text = "Turn around"
+
+[node name="RingUp" parent="." instance=ExtResource("3_button")]
+unique_name_in_owner = true
+offset_left = 4.0
+offset_top = 192.0
+offset_right = 134.0
+offset_bottom = 210.0
+theme_type_variation = &"StepButton"
+text = "Ring up"
+
+[node name="WaveOff" parent="." instance=ExtResource("3_button")]
+unique_name_in_owner = true
+offset_left = 4.0
+offset_top = 212.0
+offset_right = 134.0
+offset_bottom = 230.0
+theme_type_variation = &"StepButton"
+text = "Wave off"

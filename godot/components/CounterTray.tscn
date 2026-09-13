@@ -1,0 +1,31 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://components/counter_tray.gd" id="1_script"]
+[ext_resource type="Theme" path="res://components/Theme.tres" id="2_theme"]
+
+[node name="CounterTray" type="Control"]
+custom_minimum_size = Vector2(272, 42)
+offset_left = 6.0
+offset_top = 172.0
+offset_right = 278.0
+offset_bottom = 214.0
+mouse_filter = 2
+theme = ExtResource("2_theme")
+script = ExtResource("1_script")
+
+[node name="Slots" type="Control" parent="."]
+unique_name_in_owner = true
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Empty" type="Label" parent="."]
+unique_name_in_owner = true
+offset_top = 24.0
+offset_right = 272.0
+offset_bottom = 40.0
+mouse_filter = 2
+theme_type_variation = &"SmallLabel"
+text = "counter's clear"

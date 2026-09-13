@@ -74,6 +74,57 @@ func test_season_is_reproducible_end_to_end() -> void:
 	assert_ne(SpatiState.to_json(AutoPlayer.play_nights(_fresh(2), SEASON_NIGHTS)), SpatiState.to_json(a),
 		"another seed tells another story")
 
+## A night driven through the REGISTER — wall trips, a rejected ring-up and a Pfand row — replays
+## exactly and survives the save seam (docs/08 §6). The uid counter, `view_mode` and `last_verdict`
+## are top-level state now, so a run that handled objects has to come back as the same bytes.
+func test_a_register_night_replays_and_round_trips() -> void:
+	var a := _play_register_night(4)
+	var b := _play_register_night(4)
+	assert_eq(SpatiState.to_json(a), SpatiState.to_json(b), "the same register night, twice, identical")
+	assert_true(int(a["next_item_uid"]) > 1, "…and it really did handle objects (%d uids)" % int(a["next_item_uid"]))
+	assert_false((a["last_verdict"] as Dictionary).is_empty(), "with a verdict on the last ring-up")
+	var text := SpatiState.to_json(a)
+	assert_eq(SpatiState.to_json(SpatiState.from_json(text)), text, "and it survives JSON byte for byte")
+	assert_ne(SpatiState.to_json(_play_register_night(5)), text, "another seed is another night")
+
+## Scan everything on the counter, fetch whatever the basket wants off the wall, take the deposit,
+## ring up (twice when the first one is refused) — the register's real actions, no shortcuts.
+func _play_register_night(seed_value: int) -> Dictionary:
+	var s := AutoPlayer.manage(SpatiState.new_game({"seed": seed_value, "auto_take_next": true}))
+	s = Rules.apply(s, {"type": "open_night"})
+	var served := 0
+	var guard := 0
+	while served < 6 and guard < 3000:
+		guard += 1
+		s = Rules.tick(s, 500)
+		if Talk.is_open(s):
+			s = AutoPlayer.play_talk(s)
+			continue
+		if (s["active"] as Dictionary).is_empty() or not (s["story"]["pending"] as Dictionary).is_empty() \
+			or String(s["story"]["pending_vignette"]) != "":
+			continue
+		for entry in (s["active"]["basket"] as Array).duplicate(true):
+			var row: Dictionary = entry
+			if bool(row["placed"]) or Content.brands_for(String(row["sku"])).is_empty():
+				continue
+			s = Rules.apply(s, {"type": "turn_around", "on": true})
+			for i in int(row["qty"]):
+				s = Rules.apply(s, {"type": "take_from_wall", "sku": String(row["sku"]),
+					"brand": String((Content.brands_for(String(row["sku"]))[0] as Dictionary)["id"])})
+			s = Rules.apply(s, {"type": "turn_around", "on": false})
+		for entry in (s["active"]["counter"] as Array).duplicate(true):
+			s = Rules.apply(s, {"type": "scan", "uid": int((entry as Dictionary)["uid"])})
+		s = Rules.apply(s, {"type": "set_pfand", "bottles": int(s["active"]["bottles"])})
+		var before := s
+		s = Rules.apply(s, {"type": "ring_up"})
+		if not (s["active"] as Dictionary).is_empty():
+			s = Rules.apply(s, {"type": "ring_up"})
+		if is_same(s, before):
+			s = Rules.apply(s, {"type": "skip_active"})
+			continue
+		served += 1
+	return s
+
 func test_apply_never_mutates_the_state_it_was_given() -> void:
 	var s := Rules.apply(_fresh(3), {"type": "open_night"})
 	var before := SpatiState.to_json(s)

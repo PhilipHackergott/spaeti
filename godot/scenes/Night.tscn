@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=19 format=3]
 
 [ext_resource type="Script" path="res://scenes/night.gd" id="1_script"]
 [ext_resource type="Theme" path="res://components/Theme.tres" id="2_theme"]
@@ -12,6 +12,12 @@
 [ext_resource type="PackedScene" path="res://components/StatsStrip.tscn" id="10_stats"]
 [ext_resource type="PackedScene" path="res://components/DiceResult.tscn" id="11_dice"]
 [ext_resource type="PackedScene" path="res://components/QueueStrip.tscn" id="12_queue"]
+[ext_resource type="PackedScene" path="res://components/CounterTray.tscn" id="13_tray"]
+[ext_resource type="PackedScene" path="res://components/Scanner.tscn" id="14_scanner"]
+[ext_resource type="PackedScene" path="res://components/RegisterPanel.tscn" id="15_register"]
+[ext_resource type="PackedScene" path="res://components/TobaccoWall.tscn" id="16_wall"]
+[ext_resource type="PackedScene" path="res://components/OrderCard.tscn" id="17_order"]
+[ext_resource type="PackedScene" path="res://components/DragLayer.tscn" id="18_drag"]
 
 [node name="Night" type="Control"]
 anchor_right = 1.0
@@ -68,4 +74,27 @@ theme_type_variation = &"StepButton"
 text = "Serve"
 
 [node name="ServePanel" parent="." instance=ExtResource("8_serve")]
+unique_name_in_owner = true
+
+[node name="CounterTray" parent="." instance=ExtResource("13_tray")]
+unique_name_in_owner = true
+visible = false
+
+[node name="Scanner" parent="." instance=ExtResource("14_scanner")]
+unique_name_in_owner = true
+visible = false
+
+[node name="RegisterPanel" parent="." instance=ExtResource("15_register")]
+unique_name_in_owner = true
+visible = false
+
+[node name="TobaccoWall" parent="." instance=ExtResource("16_wall")]
+unique_name_in_owner = true
+visible = false
+
+[node name="OrderCard" parent="." instance=ExtResource("17_order")]
+unique_name_in_owner = true
+visible = false
+
+[node name="DragLayer" parent="." instance=ExtResource("18_drag")]
 unique_name_in_owner = true

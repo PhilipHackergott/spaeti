@@ -212,3 +212,199 @@ func _plain(label: String) -> String:
 		if close > 0:
 			return label.substr(close + 1).strip_edges()
 	return label
+
+# ───────────────────────── docs/09 §6 — the cast, as data ─────────────────────────
+## Eleven persona cards, one frozen expression vocabulary, and DCs that make a check feel like a coin.
+## Everything below is content integrity: nothing here can crash a night, and every one of them would
+## ship silently — a card with no `stake`, a face the art lane was never asked to draw, a DC 18 check
+## that reads as a tax. The cast is the slice's product; these are its acceptance criteria.
+
+## The eleven guests: everyone with a persona card. `you`, `brandt` and the one-off silhouettes are in
+## the registry for their portraits and are deliberately NOT guests (docs/09 §2.11).
+const GUESTS := ["lena", "juergen", "mehmet", "schulz", "achim", "karim", "nadia", "tobias",
+	"robin", "aylin", "bley"]
+const SEASONS := ["summer", "autumn", "winter", "spring"]
+## docs/09 §0: checks sit at DC 11-13 and the lowest LOCKING gate per stat is 11-15. Nothing below 11
+## (a free choice dressed as a roll) and nothing above 15 (aspiration the player cannot read).
+const DC_MIN := 11
+const DC_MAX := 15
+
+func test_all_eleven_guests_carry_a_complete_persona_card() -> void:
+	for id in GUESTS:
+		var ch := Content.character(id)
+		assert_false(ch.is_empty(), "%s is in the cast registry" % id)
+		if ch.is_empty():
+			continue
+		for key in ["age", "job", "strand_id", "story", "stake", "arc_link", "voice", "quirk",
+				"signature_prop", "schedule", "basket", "order_line", "pays", "pfand", "arc"]:
+			assert_true(ch.has(key), "%s's card declares %s" % [id, key])
+		assert_true(int(ch.get("age", 0)) >= 18, "%s has an age (%d)" % [id, int(ch.get("age", 0))])
+		assert_true(String(ch.get("job", "")).length() > 2, "%s has a job" % id)
+		assert_true(String(ch.get("story", "")).length() > 80, "%s's story is a paragraph, not a label" % id)
+		assert_true(String(ch.get("order_line", "")).length() > 8, "%s says a sentence when they order" % id)
+		# The two MANDATORY clauses (docs/09 §2): a guest with no relationship to the Späti and no
+		# relationship to the developer pressure is decoration. Neither may be written as a shrug.
+		assert_true(String(ch.get("stake", "")).length() > 30, "%s has a stake in the Späti" % id)
+		assert_true(String(ch.get("arc_link", "")).length() > 30, "%s is tied to the main arc" % id)
+		assert_false(Content.strand(String(ch.get("strand_id", ""))).is_empty(),
+			"%s's strand_id names a real strand (%s)" % [id, ch.get("strand_id", "")])
+		assert_true((ch.get("basket", []) as Array).size() >= 3, "%s orders enough to ring up" % id)
+
+func test_every_card_lays_out_trubys_seven_steps_across_the_year() -> void:
+	# Summer 1-2 · Autumn 3-4 · Winter 5-6 · Spring 7 (docs/09 §2). The step titles are BEAT IDS a
+	# later season ships — "The Night He Doesn't Come" is shippable, "Battle" is not — so a card with
+	# four seasons is a season's worth of work already specified, not a promise to design one later.
+	for id in GUESTS:
+		var arc: Dictionary = Content.character(id).get("arc", {})
+		var steps := 0
+		for season in SEASONS:
+			assert_true(arc.has(season), "%s's arc covers %s" % [id, season])
+			for step in (arc.get(season, []) as Array):
+				steps += 1
+				assert_true(String(step).length() > 3, "%s/%s: step titles are beat ids" % [id, season])
+		assert_eq(steps, 7, "%s lays out all seven steps (got %d)" % [id, steps])
+		assert_eq((arc.get("spring", []) as Array).size(), 1, "%s: spring is step 7 alone" % id)
+
+func test_every_cast_colour_is_its_own() -> void:
+	# The QueueStrip's chips are code-drawn silhouettes in the speaker's `colour`, never shrunken
+	# portraits — which is the whole reason two guests may not share a hue. Eleven distinct chips is
+	# how a queue of named regulars reads as a queue of people.
+	var seen: Dictionary = {}
+	var re := RegEx.create_from_string("^#[0-9a-f]{6}$")
+	for ch in Content.CHARACTERS:
+		var colour := String(ch["colour"])
+		assert_true(re.search(colour) != null, "%s's colour is a #rrggbb string (%s)" % [ch["id"], colour])
+		assert_false(seen.has(colour), "%s's colour is its own (%s clashes with %s)"
+			% [ch["id"], colour, seen.get(colour, "")])
+		seen[colour] = String(ch["id"])
+
+func test_the_expression_vocabulary_is_frozen_and_honest() -> void:
+	# TWO failure modes, and the second is the quiet one. A tree naming a face outside the six is a
+	# typo that falls back to neutral and looks like the character never reacted. A character LISTING
+	# a face the art lane has not drawn is worse: a stamped placeholder standing next to a finished
+	# bust reads as a broken character rather than as an unfinished expression (docs/09 §3).
+	assert_eq(Content.EXPRESSIONS.size(), 6, "six ids, identical across the whole cast")
+	for wanted in ["neutral", "warm", "wary", "upset", "surprised", "tired"]:
+		assert_true(Content.EXPRESSIONS.has(wanted), "the vocabulary carries %s" % wanted)
+	for ch in Content.CHARACTERS:
+		for expression in (ch["expressions"] as Array):
+			assert_true(Content.EXPRESSIONS.has(String(expression)),
+				"%s lists %s, which is in the frozen six" % [ch["id"], expression])
+			var asset := String(ch["portrait"]) + "_" + String(expression)
+			assert_true(Assets.is_real(asset),
+				"%s lists %s because %s is on disk" % [ch["id"], expression, asset])
+	for id in Content.DIALOGUES:
+		for node_id in (Content.DIALOGUES[id]["nodes"] as Dictionary):
+			var expression := String((Content.DIALOGUES[id]["nodes"][node_id] as Dictionary).get("expression", "neutral"))
+			assert_true(Content.EXPRESSIONS.has(expression),
+				"%s/%s names a face from the frozen six (%s)" % [id, node_id, expression])
+
+func test_every_new_tree_changes_the_face_it_is_speaking_with() -> void:
+	# A tree whose every node is `neutral` is a tree with no performance in it: the bust is the only
+	# thing on screen that can react, and `Portrait` follows the NODE, never the customer.
+	for id in ["schulz", "achim", "karim", "nadia", "tobias", "robin", "aylin", "bley"]:
+		var faces: Dictionary = {}
+		for node_id in (Content.DIALOGUES[id]["nodes"] as Dictionary):
+			faces[String((Content.DIALOGUES[id]["nodes"][node_id] as Dictionary)["expression"])] = true
+		assert_true(faces.size() >= 3, "%s's tree wears at least three faces (got %s)" % [id, str(faces.keys())])
+
+func test_every_roll_is_a_real_coin_and_every_gate_is_actually_locked() -> void:
+	# docs/09 §0: a check below DC 11 is a free choice dressed as a roll, above 13 it is a tax; and a
+	# gate whose `min` is already met on night one reads as a choice, not as aspiration. The defaults
+	# are 10/11/12/13/12/14, so the lowest LOCKING min per stat is exactly one above its default.
+	var defaults: Dictionary = SpatiState.new_game({"seed": 1})["player"]["stats"]
+	var gates := 0
+	for id in Content.DIALOGUES:
+		for node_id in (Content.DIALOGUES[id]["nodes"] as Dictionary):
+			for choice in (Content.DIALOGUES[id]["nodes"][node_id]["choices"] as Array):
+				var where := "%s/%s" % [id, node_id]
+				var check: Dictionary = (choice as Dictionary).get("check", {})
+				if not check.is_empty():
+					var stat := String(check["stat"])
+					assert_true(Rules.STAT_IDS.has(stat), "%s rolls one of the six stats (%s)" % [where, stat])
+					var dc := int(check["dc"])
+					assert_true(dc >= DC_MIN and dc <= DC_MAX, "%s: DC %d is in %d..%d" % [where, dc, DC_MIN, DC_MAX])
+					var chance := Talk.success_chance(dc, Rules.modifier(int(defaults[stat])))
+					assert_true(chance >= 0.4 and chance <= 0.7,
+						"%s: %d%% is a coin, not a tax" % [where, int(round(chance * 100.0))])
+				var requires: Dictionary = (choice as Dictionary).get("requires", {})
+				if not requires.is_empty():
+					gates += 1
+					var gate_stat := String(requires["stat"])
+					assert_true(Rules.STAT_IDS.has(gate_stat), "%s gates on one of the six (%s)" % [where, gate_stat])
+					var minimum := int(requires["min"])
+					assert_true(minimum >= DC_MIN and minimum <= DC_MAX,
+						"%s: a min of %d is in %d..%d" % [where, minimum, DC_MIN, DC_MAX])
+					assert_true(minimum > int(defaults[gate_stat]),
+						"%s: %s %d is LOCKED on night one (default %d)"
+						% [where, Rules.stat_name(gate_stat), minimum, int(defaults[gate_stat])])
+	assert_true(gates >= 11, "the cast really does gate things behind the stats (%d gates)" % gates)
+
+func test_every_new_tree_locks_at_least_one_door() -> void:
+	# docs/09 §4: 5-8 nodes · >= 1 d20 check · >= 1 gate that is locked at default stats. The gate is
+	# what makes an upgrade mean something; a tree of pure rolls has nothing to aspire to.
+	for id in ["schulz", "achim", "karim", "nadia", "tobias", "robin", "aylin", "bley"]:
+		var checks := 0
+		var gates := 0
+		for node_id in (Content.DIALOGUES[id]["nodes"] as Dictionary):
+			for choice in (Content.DIALOGUES[id]["nodes"][node_id]["choices"] as Array):
+				if not (choice as Dictionary).get("check", {}).is_empty():
+					checks += 1
+				if not (choice as Dictionary).get("requires", {}).is_empty():
+					gates += 1
+		assert_true(checks >= 1, "%s rolls at least one d20 (got %d)" % [id, checks])
+		assert_true(gates >= 1, "%s locks at least one door (got %d)" % [id, gates])
+
+func test_the_order_is_woven_into_the_first_node() -> void:
+	# docs/09 §4: the order is spoken in the FIRST node, so the basket landing on the counter is the
+	# answer to something the guest actually said. The register reads `basket`; the player reads this.
+	for id in GUESTS:
+		var graph: Dictionary = Content.DIALOGUES.get(id, {})
+		assert_false(graph.is_empty(), "%s has a tree" % id)
+		if graph.is_empty():
+			continue
+		var start: Dictionary = graph["nodes"][String(graph["start"])]
+		var opening := ""
+		for line in (start["lines"] as Array):
+			opening += String(line) + " "
+		var names_something := false
+		for entry in Content.basket_for(id):
+			var sku_id := String((entry as Dictionary)["sku"])
+			var sku_name := String(Content.sku(sku_id).get("name", ""))
+			if opening.contains("{qty." + sku_id + "}") or opening.contains("{brand." + sku_id + "}") \
+					or opening.contains("{logo." + sku_id + "}") or opening.to_lower().contains(sku_name.to_lower()):
+				names_something = true
+		assert_true(names_something, "%s's opening node says what they came in for" % id)
+
+func test_every_guest_can_be_walked_out_of_the_shop() -> void:
+	# The soft-lock rule, run rather than read: take each guest, walk the TOP LINE the way the headless
+	# AutoPlayer does, and assert the reducer always has something legal to offer until the talk ends.
+	# `test_every_graph_is_playable` proves the graph is well-formed; this proves it is escapable, which
+	# is a different property and the one that shipped broken last time.
+	for id in GUESTS:
+		var s := SpatiState.new_game({"seed": 7})
+		s["phase"] = "night"
+		s["active"] = SpatiState.new_customer(1, String(Content.character(id)["archetype_id"]), "mate", 10000, id)
+		s = Rules.apply(s, {"type": "talk_next"})
+		assert_eq(String(s["talk"]["dialogue_id"]), Talk.DIALOGUE_PREFIX + id, "%s opens their own tree" % id)
+		var steps := 0
+		while Talk.is_open(s) and steps < 40:
+			steps += 1
+			var actions := Rules.legal_actions(s)
+			assert_true(actions.size() > 0, "%s: the counter is never soft-locked (step %d)" % [id, steps])
+			if actions.is_empty():
+				break
+			var before := SpatiState.to_json(s)
+			var advanced := false
+			for a in actions:
+				if String(a["type"]) == "talk_advance":
+					s = Rules.apply(s, a)
+					advanced = true
+					break
+			if advanced:
+				assert_ne(SpatiState.to_json(s), before, "%s: talk_advance moved the state" % id)
+				continue
+			s = Rules.apply(s, {"type": "talk_choose", "choice": 0})
+			assert_ne(SpatiState.to_json(s), before, "%s: choice 0 moved the state" % id)
+		assert_false(Talk.is_open(s), "%s's top line reaches the door in %d steps" % [id, steps])
+		assert_true((s["active"] as Dictionary).is_empty(), "%s leaves the counter" % id)

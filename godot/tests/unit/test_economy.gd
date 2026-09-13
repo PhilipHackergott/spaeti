@@ -23,6 +23,36 @@ func test_satisfaction_rewards_the_right_item_fast_and_fair() -> void:
 	assert_true(slow < good, "dawdling disappoints")
 	assert_true(Economy.satisfaction(false, "gouge", 0.0) >= 0.0, "never negative")
 
+## `satisfaction` widened from a bool to an accuracy for the register (docs/08 §3.4). The mapping
+## `0.25 + 0.45 × accuracy` has to reproduce the old endpoints EXACTLY, or every number in the game
+## moves under a change that was supposed to be a refactor.
+func test_the_accuracy_mapping_keeps_the_old_endpoints() -> void:
+	assert_almost(Economy.satisfaction(1.0, "fair", 1.0), Economy.satisfaction(true, "fair", 1.0), 0.000001,
+		"accuracy 1.0 is the old `got_wanted` true")
+	assert_almost(Economy.satisfaction(0.0, "fair", 1.0), Economy.satisfaction(false, "fair", 1.0), 0.000001,
+		"accuracy 0.0 is the old false")
+	assert_almost(Economy.satisfaction(1.0, "fair", 0.0) - Economy.satisfaction(0.0, "fair", 0.0), 0.45, 0.000001,
+		"and the whole range between them is 0.45 wide")
+	var half := Economy.satisfaction(0.5, "fair", 0.5)
+	assert_true(half > Economy.satisfaction(0.0, "fair", 0.5) and half < Economy.satisfaction(1.0, "fair", 0.5),
+		"half an order lands between the two — the register grades, it does not judge")
+
+## The five buckets and the one score (docs/08 §3.4), on the function itself rather than through a
+## night: `extra` and `missing` weigh a whole unit, the wrong mark weighs half.
+func test_order_accuracy_weighs_the_wrong_mark_at_half() -> void:
+	var order := [{"sku": "cigarettes", "brand": "adler", "qty": 2}]
+	var exact := Economy.order_accuracy(order, [{"sku": "cigarettes", "brand": "adler", "qty": 2}], {})
+	assert_true(bool(exact["ok"]), "the right two packs is no errors at all")
+	var navy := Economy.order_accuracy(order, [{"sku": "cigarettes", "brand": "nordstern", "qty": 2}], {})
+	assert_almost(float(navy["errors"]), 1.0, 0.001, "two wrong marks weigh 2 × 0.5")
+	var invented := Economy.order_accuracy(order, [{"sku": "cigarettes", "brand": "adler", "qty": 2},
+		{"sku": "chips", "brand": "", "qty": 2}], {})
+	assert_almost(float(invented["errors"]), 2.0, 0.001, "…and two invented units weigh 2 × 1")
+	assert_true(float(navy["accuracy"]) > float(invented["accuracy"]),
+		"reaching for the navy pack is a different sin from inventing a sale")
+	var nothing := Economy.order_accuracy(order, [], {})
+	assert_almost(float(nothing["accuracy"]), 0.0, 0.001, "and ringing nothing is nothing right")
+
 func test_tips_need_a_happy_customer() -> void:
 	var tourist := Content.archetype("tourist")
 	assert_almost(Economy.tip_for(tourist, 10.0, 0.4), 0.0, 0.001, "unhappy customers do not tip")

@@ -1,0 +1,22 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://components/step_chip.gd" id="1_script"]
+[ext_resource type="Theme" path="res://components/Theme.tres" id="2_theme"]
+
+[node name="StepChip" type="Panel"]
+custom_minimum_size = Vector2(12, 18)
+offset_right = 12.0
+offset_bottom = 18.0
+clip_contents = true
+theme = ExtResource("2_theme")
+script = ExtResource("1_script")
+
+[node name="Glyph" type="Label" parent="."]
+unique_name_in_owner = true
+offset_top = -4.0
+offset_right = 12.0
+offset_bottom = 22.0
+mouse_filter = 2
+theme_type_variation = &"SmallLabel"
+horizontal_alignment = 1
+text = "+"

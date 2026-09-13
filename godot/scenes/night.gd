@@ -17,6 +17,21 @@ extends Screen
 
 const BUBBLE_RIGHT := Vector2(340, 74)
 
+## Every action this screen hands the reducer, in order. The pointer-driven register test asserts the
+## DICTIONARY a synthetic click produced (docs/08 section 6) — today's soft-lock shipped because a
+## driver pressed buttons by name, so the driver may never name one again.
+signal acted(action: Dictionary)
+
+## Which of the three chrome modes `_place_chrome` settled on last. Read by `_seat_portrait`, which
+## runs from four places and must not re-derive the mode in any of them.
+var _ringing: bool = false
+var _on_wall: bool = false
+## The correction this player has already read. Her line covers the counter band while it is on
+## screen (mode exclusivity: dialogue OR tray, docs/08 4.3), so it has to be dismissible by the same
+## click that advances any other line — otherwise the tray she is telling you to fix is unreachable
+## for the rest of the customer, which is the soft-lock this screen already shipped once.
+var _correction_seen: String = ""
+
 ## The night ends itself. Session ticks every frame, so `render` is the place both transitions are
 ## noticed — these two latches keep each one firing exactly once per night.
 var _closing: bool = false
@@ -33,6 +48,8 @@ func _ready() -> void:
 	if layers != null and portrait != null:
 		layers.mount(portrait)   # position is re-derived from the counter edge, so it need not survive
 	_seat_portrait()
+	_seat_counter()
+	_wire_register()
 	var box := _dialogue()
 	if box != null:
 		if not box.choice.is_connected(_on_choice):
@@ -99,6 +116,7 @@ func render(v: Dictionary) -> void:
 		hud.render(v)
 	var active: Dictionary = v.get("active", {})
 	var talk: Dictionary = v.get("talk", {})
+	_note_mode(v)
 	_notice_customer(active)
 	var portrait := _portrait()
 	if portrait != null:
@@ -115,13 +133,21 @@ func render(v: Dictionary) -> void:
 			box.show_dialogue(_talk_dialogue(talk), _capture_mode)
 		elif not dialogue.is_empty():
 			box.show_dialogue(dialogue, _capture_mode)
-		elif not active.is_empty():
+		elif _ringing and _correction_of(v) != "" and _correction_of(v) != _correction_seen:
+			# The one free correction, spoken in character over the counter (docs/08 section 1). The
+			# register's banner is only the TELL beside the flagged line; her words belong here, where
+			# there are 264 px to say them in.
+			box.show_dialogue(_correction_line(active, _correction_of(v)), true)
+		elif not active.is_empty() and not _ringing:
+			# During a ring-up her order is the OrderCard and the tray, not a speech balloon: the box
+			# is hidden until somebody actually speaks (docs/08 section 1's frame table).
 			box.show_dialogue(_order_line(active), true)
 		else:
 			box.clear()
 	var panel := _serve()
 	if panel != null:
 		panel.render(v)
+	_render_register(v, active, talk)
 	var dice := _dice()
 	if dice != null:
 		dice.show_check(talk.get("last_check", {}) as Dictionary if not talk.is_empty() else {})
@@ -138,7 +164,9 @@ func render(v: Dictionary) -> void:
 	if toggle != null:
 		# `legal_actions` offers no serve at all while the story (or a conversation) holds the counter,
 		# docs/05 §4 + docs/06 §4 — the button says so instead of dispatching something illegal.
-		var can_serve := not active.is_empty() and dialogue.is_empty() and talk.is_empty()
+		# ...and it stands down entirely during a ring-up: the register IS the serve path now, and two
+		# ways to sell the same basket is how a till and a counter disagree (docs/08 section 3.6).
+		var can_serve := not active.is_empty() and dialogue.is_empty() and talk.is_empty() and not _ringing
 		var panel_open := panel != null and panel.is_open
 		# It doubles as the panel's close (docs/06 §5), so an open panel always keeps it live: greyed
 		# only when it is neither a serve nor a close — which is also when it is hidden. (It used to
@@ -186,6 +214,7 @@ func _notice_customer(active: Dictionary) -> void:
 	if id == _active_id:
 		return
 	_active_id = id
+	_correction_seen = ""   # a new person at the counter has not said anything yet
 	var panel := _serve()
 	if panel == null:
 		return
@@ -203,7 +232,13 @@ func _seat_portrait() -> void:
 		return
 	var panel := _serve()
 	var serving := panel != null and panel.is_open
-	var centre_x := Palette.PORTRAIT_CENTRE_X_SERVING if serving else Palette.PORTRAIT_CENTRE_X
+	# Three columns, three seats: the serve panel pushes hardest, the register a little less (it owns
+	# only the right column), and an ordinary night leaves the bust where docs/02 put it.
+	var centre_x := Palette.PORTRAIT_CENTRE_X
+	if serving:
+		centre_x = Palette.PORTRAIT_CENTRE_X_SERVING
+	elif _ringing:
+		centre_x = Palette.PORTRAIT_CENTRE_X_RING
 	# A LEANING bust (Assets.staging) goes in front of the counter with its forearms on the laminate; every
 	# other bust keeps the Coffee Talk seat behind it. Re-mounting is idempotent, so this is safe per render.
 	if portrait.staging() == "leaning":
@@ -286,6 +321,12 @@ func _anchor_choice_now() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if is_paused():
 		return
+	# The register's own verbs come first, and only while it is open: Q turns around (and back), Enter
+	# rings up, Delete and -/+ work the line the focus ring is standing on. Digits are deliberately
+	# left alone — they still pick dialogue choices, which is the one binding this screen prints.
+	if _ringing and _register_keys(event):
+		get_viewport().set_input_as_handled()
+		return
 	if event.is_action_pressed("ui_accept"):
 		# The BOX is not the state: a guest at the counter always has their order line on screen
 		# (`render`'s `active` fallback), so `box.visible` was true in exactly the moment Space should
@@ -295,7 +336,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		var box := _dialogue()
 		if speaking and box != null and box.visible:
 			box.advance()
-		else:
+		elif not _ringing:
+			# The serve panel is a debug affordance during a ring-up (docs/08 section 3.6): Space may
+			# not open a second way to sell the basket that is already on the counter.
 			toggle_serve()
 		get_viewport().set_input_as_handled()
 		return
@@ -342,7 +385,8 @@ func _place_chrome(v: Dictionary) -> void:
 	var active: Dictionary = v.get("active", {})
 	var talk: Dictionary = v.get("talk", {})
 	var queue: Array = v.get("queue", [])
-	var queue_shown := not serve_open and not queue.is_empty()
+	_note_mode(v)
+	var queue_shown := not serve_open and not _ringing and not queue.is_empty()
 	var strip := _queue()
 	if strip != null:
 		# Mirrors `legal_actions` (docs/06 section 4): `talk_next` is on offer whenever no conversation
@@ -355,7 +399,12 @@ func _place_chrome(v: Dictionary) -> void:
 		# full-width, so a live button under them would sit inside the choice stack.
 		var beat: Dictionary = v.get("dialogue", {})
 		var can_start: bool = talk.is_empty() and beat.is_empty() and (not active.is_empty() or not queue.is_empty())
-		strip.set_queue(([] if serve_open else queue), can_start and not serve_open, not active.is_empty())
+		# The register takes the right column, so the strip re-docks to a button under the HUD and drops
+		# the line — but it keeps the BUTTON, because `talk_next` is still legal with a guest at the
+		# counter (docs/06 4) and an action with no control is the soft-lock that already shipped once.
+		strip.set_dock(Palette.QUEUE_RECT_RING if _ringing else Palette.QUEUE_RECT, _ringing)
+		strip.set_queue(([] if serve_open or _ringing else queue),
+			can_start and not serve_open and not _on_wall, not active.is_empty())
 	var bubble := get_node_or_null("%WantBubble") as WantBubble
 	if bubble != null:
 		bubble.set_want(active.get("want", {}) if not active.is_empty() else {})
@@ -365,13 +414,17 @@ func _place_chrome(v: Dictionary) -> void:
 		bubble.position = BUBBLE_RIGHT
 		# Hidden during ANY conversation — a talk or a pending story beat — not only a talk: the judges read the
 		# card over the doorway as competing with the character (v8/v9). The order line at the counter still shows it.
-		bubble.visible = not active.is_empty() and not serve_open and talk.is_empty() and not queue_shown and (v.get("dialogue", {}) as Dictionary).is_empty()
+		bubble.visible = not active.is_empty() and not serve_open and not _ringing and talk.is_empty() and not queue_shown and (v.get("dialogue", {}) as Dictionary).is_empty()
 	var box := _dialogue()
 	if box != null:
 		var r := Palette.DIALOGUE_RECT
 		var w := r.size.x
 		if serve_open:
 			w = Palette.DIALOGUE_W_SERVING
+		elif _ringing:
+			# The register owns the right column; the box keeps the gutter left of it, where the one
+			# free correction floats over the counter and nothing else ever does.
+			w = Palette.DIALOGUE_W_RING
 		elif queue_shown:
 			w = Palette.DIALOGUE_W_QUEUE
 		box.set_width(float(w))   # the box owns its height (it grows upward for a choice list)
@@ -381,6 +434,10 @@ func _place_chrome(v: Dictionary) -> void:
 		hud.set_compact(serve_open)
 		# A conversation — a talk OR a pending story beat/vignette with its lines — gets Coffee Talk's minimal HUD.
 		hud.set_focus(not talk.is_empty() or not (v.get("dialogue", {}) as Dictionary).is_empty())
+		# The wall has no HUD: the OrderCard takes the top-left corner and the running total the
+		# top-right, which is docs/08 section 1's promise that the mark and the money never leave.
+		hud.visible = not _on_wall
+	_place_ring_chrome()
 	_seat_portrait()
 
 ## The sheet and the dialogue box share the left column, and the box is drawn over it (Night.tscn
@@ -408,6 +465,30 @@ func _order_line(active: Dictionary) -> Dictionary:
 		"lines": [Strings.ORDER_LINE % String(want.get("name", ""))],
 		"choices": [],
 		"kind": "order",
+	}
+
+## What the reducer said when it refused the ring-up, or "" (docs/08 section 3.4). The engine writes
+## the sentence; this screen only decides where it is printed.
+## What she says about a refused ring-up. The REDUCER decides WHICH complaint (`correction_kind`, the
+## bucket it flagged); the WORDS come from `Strings`, which is where every other player-visible
+## sentence in this project lives — `Rules.CORRECTION_LINES` stays the reducer's own fallback, so a
+## bucket the table has not learned yet still speaks instead of going silent (docs/08 §3.4).
+func _correction_of(v: Dictionary) -> String:
+	var register: Dictionary = v.get("register", {})
+	var kind := String(register.get("correction_kind", ""))
+	if kind != "" and Strings.CORRECTION_BY_KIND.has(kind):
+		return String(Strings.CORRECTION_BY_KIND[kind])
+	return String(register.get("correction", ""))
+
+## Her correction as the DialogueBox wants it: one line, her face, no choices. Presentation only.
+func _correction_line(active: Dictionary, said: String) -> Dictionary:
+	return {
+		"speaker": _speaker_name(active),
+		"portrait": String(active.get("portrait", "")),
+		"expression": String(active.get("expression", "wary")),
+		"lines": [said],
+		"choices": [],
+		"kind": "correction",
 	}
 
 ## The name the cast registry gives them ("'Bottle' Jürgen"), else the archetype's ("Kiez regular").
@@ -439,7 +520,15 @@ func _on_talk_next() -> void:
 func _on_dialogue_finished() -> void:
 	if _capture_mode:
 		return
-	if view().get("talk", {}).is_empty():
+	var v := view()
+	var said := _correction_of(v)
+	if _ringing and said != "" and said != _correction_seen:
+		# Her correction is read and put away by the same click that advances any other line. Nothing
+		# is dispatched: the reducer already said its piece, and the flagged line stays flagged.
+		_correction_seen = said
+		refresh()
+		return
+	if v.get("talk", {}).is_empty():
 		return
 	dispatch({"type": "talk_advance"})
 
@@ -506,3 +595,318 @@ func _stats() -> StatsStrip:
 
 func _dice() -> DiceResult:
 	return get_node_or_null("%DiceResult") as DiceResult
+
+
+# -- the ring-up (docs/08-register-and-tobacco.md) ------------------------------------------------
+
+## The tray and the scanner are props ON the laminate, so they are mounted into `SceneLayers`' new
+## `OnCounter` slot — after the counter art, before the tint. Idempotent, and called from `render` as
+## well as `_ready` because the capture and the tests drive a Night that never entered a tree.
+func _seat_counter() -> void:
+	var layers := _layers()
+	if layers == null:
+		return
+	var tray := _tray()
+	if tray != null:
+		layers.mount_on_counter(tray)
+	var scanner := _scanner()
+	if scanner != null:
+		layers.mount_on_counter(scanner)
+
+## Every intent the ring-up components emit becomes an action dictionary HERE and nowhere else.
+func _wire_register() -> void:
+	var tray := _tray()
+	if tray != null:
+		if not tray.scan_requested.is_connected(_on_scan):
+			tray.scan_requested.connect(_on_scan)
+		if not tray.drag_started.is_connected(_on_drag_started):
+			tray.drag_started.connect(_on_drag_started)
+	var scanner := _scanner()
+	if scanner != null:
+		if not scanner.scanned.is_connected(_on_scan):
+			scanner.scanned.connect(_on_scan)
+		if not scanner.activated.is_connected(_on_scanner_activated):
+			scanner.activated.connect(_on_scanner_activated)
+	var reg := _register_panel()
+	if reg != null and not reg.action.is_connected(_on_register_action):
+		reg.action.connect(_on_register_action)
+	var wall := _wall_view()
+	if wall != null:
+		if not wall.taken.is_connected(_on_wall_take):
+			wall.taken.connect(_on_wall_take)
+		if not wall.put_back.is_connected(_on_put_back):
+			wall.put_back.connect(_on_put_back)
+		if not wall.turn_back.is_connected(_on_turn_back):
+			wall.turn_back.connect(_on_turn_back)
+	var drag := _drag()
+	if drag != null:
+		if not drag.dropped.is_connected(_on_dropped):
+			drag.dropped.connect(_on_dropped)
+		if not drag.hovering.is_connected(_on_drag_hover):
+			drag.hovering.connect(_on_drag_hover)
+
+## Everything the register draws, from the read-model and nothing else.
+func _render_register(v: Dictionary, active: Dictionary, talk: Dictionary) -> void:
+	_seat_counter()
+	_wire_register()
+	var register: Dictionary = v.get("register", {})
+	var tray := _tray()
+	if tray != null:
+		tray.render(v.get("counter", []))
+	var reg := _register_panel()
+	if reg != null:
+		reg.set_pfand_available(int(active.get("bottles", 0)))
+		reg.set_can_serve(not active.is_empty())
+		# `turn_around` is illegal mid-talk and mid-drag (docs/08 section 3.2), so the button says so
+		# instead of dispatching something the reducer will refuse.
+		reg.set_can_turn(not active.is_empty() and talk.is_empty() and not _is_dragging())
+		reg.render(register)
+	var scanner := _scanner()
+	if scanner != null and not _is_dragging():
+		scanner.set_armed(false)
+	var card := _order_card()
+	if card != null:
+		card.set_docked(String(v.get("view_mode", "counter")) == "wall")
+		card.render(v.get("order", []), _speaker_name(active))
+	var wall := _wall_view()
+	if wall != null:
+		wall.render(v.get("wall", {}))
+		wall.set_total(float(register.get("total", 0.0)))
+		var want_open := not register.is_empty() and String(v.get("view_mode", "counter")) == "wall"
+		if want_open and not wall.is_open():
+			wall.open(_capture_mode)
+		elif not want_open and wall.is_open():
+			wall.close(_capture_mode)
+
+## Who is on screen in each of the three modes. Mode exclusivity is the whole rule: dialogue OR tray,
+## queue OR register, counter OR wall — never both, or the counter band stops being readable.
+## The REGISTER mode (docs/08 section 4.3): once a basket is on the counter the right column stops
+## being the queue and becomes the till, the left gutter becomes the OrderCard, and the line collapses
+## into the HUD's "N waiting" tail. `view_mode` then says which way your body is facing. Decided in ONE
+## place because `render` needs the answer before `_place_chrome` runs.
+func _note_mode(v: Dictionary) -> void:
+	_ringing = not (v.get("register", {}) as Dictionary).is_empty()
+	_on_wall = _ringing and String(v.get("view_mode", "counter")) == "wall"
+
+func _place_ring_chrome() -> void:
+	var tray := _tray()
+	if tray != null:
+		tray.visible = _ringing and not _on_wall
+	var scanner := _scanner()
+	if scanner != null:
+		scanner.visible = _ringing and not _on_wall
+	var reg := _register_panel()
+	if reg != null:
+		reg.visible = _ringing and not _on_wall
+	var stats := _stats()
+	var sheet_open := stats != null and stats.visible
+	var card := _order_card()
+	if card != null:
+		# The card and the stats sheet share the left gutter and Tab swaps them (docs/08 4.3).
+		card.visible = _ringing and not (sheet_open and not _on_wall)
+	var portrait := _portrait()
+	if portrait != null:
+		portrait.visible = not _on_wall
+	var dice := _dice()
+	if dice != null and _ringing:
+		dice.visible = false   # the d20 plate and the register want the same 138 px of column
+
+## Q both ways, Enter to ring up, Delete / - / + on the focused line. Esc is deliberately NOT bound:
+## `Main` owns it for the pause frame, and a wall you cannot pause from is worse than a wall you
+## leave with Q or with Back (docs/08 section 4.2 asks for Esc; this is the one place it is refused).
+func _register_keys(event: InputEvent) -> bool:
+	var key := event as InputEventKey
+	if key == null or not key.pressed or key.echo:
+		return false
+	match key.keycode:
+		KEY_Q:
+			return _act({"type": "turn_around", "on": not _on_wall})
+		KEY_ENTER, KEY_KP_ENTER:
+			return _act({"type": "ring_up"})
+		KEY_DELETE, KEY_BACKSPACE:
+			var line := _focused_line()
+			return line >= 0 and _act({"type": "register_remove", "line": line})
+		KEY_MINUS, KEY_KP_SUBTRACT:
+			return _step_focused_line(-1)
+		KEY_EQUAL, KEY_PLUS, KEY_KP_ADD:
+			return _step_focused_line(1)
+	return false
+
+func _step_focused_line(delta: int) -> bool:
+	var line := _focused_line()
+	var reg := _register_panel()
+	if line < 0 or reg == null:
+		return false
+	var lines: Array = reg.register.get("lines", [])
+	if line >= lines.size():
+		return false
+	var qty := int((lines[line] as Dictionary).get("qty", 1)) + delta
+	return _act({"type": "register_set_qty", "line": line, "qty": qty})
+
+func _focused_line() -> int:
+	var reg := _register_panel()
+	return reg.focused_line() if reg != null else -1
+
+func _is_dragging() -> bool:
+	var drag := _drag()
+	return drag != null and drag.is_dragging()
+
+# -- intents become actions ----------------------------------------------------------------------
+
+func _on_scan(uid: int) -> void:
+	_act({"type": "scan", "uid": uid})
+
+func _on_drag_started(payload: Dictionary, art: Dictionary, from: Vector2) -> void:
+	var drag := _drag()
+	if drag != null:
+		drag.begin(payload, art, from)
+
+## The DragLayer picked the target; the TARGET decides what its own drop means and then emits the
+## intent it always emits. A drop is never a second code path into the reducer.
+func _on_dropped(payload: Dictionary, target: Control) -> void:
+	if target != null and target.has_method("take"):
+		target.call("take", payload)
+
+func _on_scanner_activated() -> void:
+	var drag := _drag()
+	var scanner := _scanner()
+	if drag == null or scanner == null or not drag.is_dragging():
+		return
+	drag.release_at(scanner.get_global_rect().get_center())
+
+## The glass follows the drag, not the mouse button: it is armed only while something that CAN be
+## scanned is over it, which is the one visual promise the drop makes before you let go.
+func _on_drag_hover(target: Control) -> void:
+	var scanner := _scanner()
+	if scanner != null:
+		scanner.set_armed(target == scanner)
+
+func _on_register_action(a: Dictionary) -> void:
+	_act(a)
+
+func _on_wall_take(sku_id: String, brand_id: String) -> void:
+	_act({"type": "take_from_wall", "sku": sku_id, "brand": brand_id})
+
+func _on_put_back(uid: int) -> void:
+	_act({"type": "put_back", "uid": uid})
+
+func _on_turn_back() -> void:
+	_act({"type": "turn_around", "on": false})
+
+## The ONE way this screen talks to the reducer during a ring-up. It announces the dictionary first,
+## so a driver can assert what a synthetic click actually produced instead of trusting a node name.
+func _act(action: Dictionary) -> bool:
+	acted.emit(action)
+	return dispatch(action)
+
+# -- what offers what (the anti-soft-lock lens, docs/08 section 6) --------------------------------
+
+## Every on-screen control that OFFERS this action. `legal_actions` hands the test a list; this turns
+## each entry into the node a finger could actually land on, and an empty answer is a soft-lock.
+func controls_for(action: Dictionary) -> Array[Control]:
+	var out: Array[Control] = []
+	match String(action.get("type", "")):
+		"scan":
+			var tray := _tray()
+			var slot: Control = tray.slot_for(int(action.get("uid", -1))) if tray != null else null
+			if slot != null:
+				out.append(slot)
+				# The drag path ends on the glass; the click path is the slot itself. Both are real.
+				var scanner := _scanner()
+				if scanner != null:
+					out.append(scanner)
+		"take_from_wall":
+			var wall := _wall_view()
+			var cell: Control = wall.cell_for(String(action.get("sku", "")), String(action.get("brand", ""))) if wall != null else null
+			if cell != null:
+				out.append(cell)
+		"put_back":
+			var wall_b := _wall_view()
+			var hand: Control = wall_b.hand_for(int(action.get("uid", -1))) if wall_b != null else null
+			if hand != null:
+				out.append(hand)
+		"turn_around":
+			if bool(action.get("on", true)):
+				var reg := _register_panel()
+				var turn: Control = reg.control_for(action) if reg != null else null
+				if turn != null:
+					out.append(turn)
+			else:
+				var wall_c := _wall_view()
+				var back: Control = wall_c.get_node_or_null("%Back") as Control if wall_c != null else null
+				if back != null:
+					out.append(back)
+		"talk_next":
+			var strip := _queue()
+			var next_button: Control = strip.get_node_or_null("%NextGuest") as Control if strip != null else null
+			if next_button != null:
+				out.append(next_button)
+		_:
+			var reg_any := _register_panel()
+			var any: Control = reg_any.control_for(action) if reg_any != null else null
+			if any != null:
+				out.append(any)
+	var live: Array[Control] = []
+	for c in out:
+		if _is_live(c):
+			live.append(c)
+	return live
+
+## Visible all the way up, and not greyed out. A control the ring cannot focus and a finger cannot
+## press is not an answer to "where is this action".
+func _is_live(c: Control) -> bool:
+	if c == null:
+		return false
+	var n: Node = c
+	while n != null and n != self:
+		var as_control := n as Control
+		if as_control != null and not as_control.visible:
+			return false
+		n = n.get_parent()
+	var chip := c as StepChip
+	if chip != null:
+		return chip.is_enabled()
+	var b := c as Button
+	return b == null or not b.disabled
+
+## The topmost control a click at `p` would actually reach, hit-tested on the REAL rects at 480x270.
+## Written by hand rather than asked of the viewport because the tests drive a Night that never
+## entered a tree — and because "is it covered" is exactly the question a soft-lock answers wrong.
+func control_at(p: Vector2) -> Control:
+	return _hit(self, p)
+
+func _hit(node: Node, p: Vector2) -> Control:
+	var found: Control = null
+	var as_control := node as Control
+	if as_control != null:
+		if not as_control.visible:
+			return null
+		var hits: bool = as_control.mouse_filter != Control.MOUSE_FILTER_IGNORE and as_control.get_global_rect().has_point(p)
+		if as_control != self and hits:
+			found = as_control
+	for child in node.get_children():
+		# Later children draw later, so the last match down the tree is the one on top.
+		var deeper := _hit(child, p)
+		if deeper != null:
+			found = deeper
+	return found
+
+# -- nodes ---------------------------------------------------------------------------------------
+
+func _tray() -> CounterTray:
+	return get_node_or_null("%CounterTray") as CounterTray
+
+func _scanner() -> Scanner:
+	return get_node_or_null("%Scanner") as Scanner
+
+func _register_panel() -> RegisterPanel:
+	return get_node_or_null("%RegisterPanel") as RegisterPanel
+
+func _order_card() -> OrderCard:
+	return get_node_or_null("%OrderCard") as OrderCard
+
+func _wall_view() -> TobaccoWall:
+	return get_node_or_null("%TobaccoWall") as TobaccoWall
+
+func _drag() -> DragLayer:
+	return get_node_or_null("%DragLayer") as DragLayer

@@ -60,13 +60,47 @@ state.talk = {} | { customer_id:int, dialogue_id:String, node:String, line:int, 
 actions:  talk_next              // start with the first guest in the queue (FIFO) — the customer becomes active and talk opens
           talk_advance           // next line of the current node (or opens the choices when lines are exhausted)
           talk_choose{choice:int} // resolve: gate/roll → effects → next node (or end)
-          talk_end               // (engine-internal when next=="") the guest leaves; their want is auto-served if in stock
+          talk_end               // (engine-internal when next=="") ends the conversation. The guest leaves and their
+                                 //   want is auto-served ONLY IF THEY HAVE NO BASKET — the nameless parade, the
+                                 //   serve-loop sims, `config.auto_take_next`. A guest whose basket is on the counter
+                                 //   STAYS STANDING: the talk ending is the sale starting, and the register is the
+                                 //   serve (docs/08 §1, docs/05 §10.4). Leaving the old behaviour in place meant every
+                                 //   authored tree rang itself up and the register was unreachable for the whole cast.
 view.queue = Array[{ customer_id, character_id, name, portrait, expression, is_story:bool }]   // everyone waiting, FIFO
 view.talk  = {} | { speaker, portrait, expression, lines:Array[String], line:int, choices:Array[{ label, check:{stat,dc,mod,chance}|{}, locked:bool, reason:String }], last_check:{}|{ stat, roll, mod, dc, success } }
 view.player = { stats:{...}, mods:{...} }
 ```
 While `state.talk` is open, `legal_actions` offers only `talk_advance` / `talk_choose`. The old `resolve_beat` /
 `resolve_vignette` paths route through the same graph (a beat = a one-node dialogue) so the DialogueBox has ONE source.
+
+### Tokens in an authored line (docs/09 §0)
+
+`Talk.node_of` substitutes into BOTH the node's `lines` and each choice's `label`, from one map built once per node by
+`Talk.subs_for(s)`. Substitution is **per BASKET LINE**, not per character — Achim orders three different tobacco
+products in one breath and a single `habits.brand` field cannot serve that sentence:
+
+| token | resolves to | via |
+|---|---|---|
+| `{want}` | the SKU the guest came in for — the original, still what a plain order says | `Talk.want_name_of` |
+| `{qty.<sku>}` | how many of that line she asked for | the basket row |
+| `{brand.<sku>}` | the noun phrase she SAYS — "Drei Ringe tobacco", "long Feder papers" | `Content.brand_spoken` |
+| `{logo.<sku>}` | the facing's **ASSET ID** — an inline mark GLYPH, never spoken text | `Content.brand_logo` |
+
+Three rules the authored lines obey, each of which has already been broken once:
+
+1. **`spoken` is a whole noun phrase, not a bare name.** `long {brand.papers}` renders "long long Feder papers". Write
+   `{brand.papers}` and let the catalogue carry the length.
+2. **`{logo.*}` is a picture.** It resolves to `tob/pack_fuchs`, so the **DialogueBox draws it** as a 16×16 `BrandMark`
+   in the middle of the sentence (docs/04). A box that printed it instead put an asset id into four of the cast's
+   order lines.
+3. **A token whose basket line does not exist is left ALONE, not blanked** — so a tree is never *broken* by a basket
+   that lacks the SKU, it just prints `{brand.filters}` onto the counter at 03:00. `test_tokens.gd` is what fails the
+   build for that, and `::test_no_token_survives_to_the_screen` is the one that checks the REAL `Rules.view` rather
+   than the authored table: the reducer's 4-line basket cap can truncate away the very row a line speaks about.
+
+`Content.brand_phrase(id)` is the fourth accessor, added with the `mark` speech tier: the article-free logo phrase
+("eagle", "fox", "cream booklet") that fills `Strings.ASK_MARK_PHRASE`. It has no token of its own — it is what the
+ENGINE composes `order[i].said` from, not something an author writes into a line.
 
 ## 5. The register screen (Night scene) for the slice
 
@@ -76,7 +110,8 @@ While `state.talk` is open, `legal_actions` offers only `talk_advance` / `talk_c
 - **Conversation:** the DialogueBox shows lines; choices show their stat tag in the label (`[Schnauze 12]`), locked
   gates greyed with the reason, and after a roll a small **d20 pop** with `roll + mod vs DC → success/fail`.
 - **Stats panel:** a compact six-stat strip (name, value, modifier) — visible in the HUD or on a toggle (`Tab`).
-- The serve panel may stay reachable but is not part of the demo path.
+- The serve panel is **off the shipped screen** since docs/08 §3.6: the demo path is the REGISTER (scan → wall →
+  ring up), and `ServePanel` / `Shelf` / `Till` are a `play.mjs --serve` debug affordance so they never rot untested.
 
 ## 6. Tests the engine lane ships
 

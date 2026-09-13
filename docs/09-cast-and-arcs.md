@@ -88,27 +88,60 @@ unmatched token alone, so a tree is never *broken* by a basket that lacks the SK
 
 ## 1. The brand slots
 
-A customer orders tobacco by **pointing at the wall**: a logo, a colour, a spoken word. The register
-topic is the **authority on the final table**; the cast lane only ever writes the *token*, so a rename
-is one edit in one table and zero edits in any line of dialogue.
+A customer orders tobacco by **pointing at the wall**: a logo, a colour, a spoken word. **`docs/08` §2
+is the canonical catalogue**, and it now ships as `godot/engine/content/brands.gd` (22 rows: 8
+cigarettes, 4 rolling tobaccos, 6 paper variants, 4 filter variants). The cast lane only ever writes
+the *token*, so a rename is one edit in one table and zero edits in any line of dialogue.
 
-| slot id | logo | pack colour | spoken as (`brand_spoken`) | logo phrase (`brand_logo`) | tier / form |
+The eleven guests draw on these rows; the rest of the catalogue is wall filler and wrong-pack fodder,
+which is exactly what a matching game needs.
+
+| brand id | mark (the shape) | colour | spoken as (`Content.brand_spoken`) | logo phrase | tier / form |
 |---|---|---|---|---|---|
-| `kranich` | a crane in flight | sea-green | "Kranich" | "the crane" | mainstream full-flavour cigarettes |
-| `sperling` | a sparrow | ochre-brown | "Sperling" | "the brown bird" | cheapest cigarettes on the wall |
-| `roter_stern` | a red star on cream | cream + red | "Roter Stern" | "the red star" | **filterless**, one row, being delisted |
-| `nachtfalter` | a moth | night-blue + silver | "Nachtfalter" | "the moth" | premium cigarettes |
-| `polarfuchs` | an arctic fox | white + ice-blue | "Polarfuchs" | "the fox" | capsule / menthol cigarettes |
-| `zunder` | a flint spark | black, 30 g / 50 g | "Zunder" | "the black pouch" | rolling tobacco, strong |
-| `halm` | a stalk of grass | pale green, 30 g | "Halm" | "the green pouch" | rolling tobacco, organic |
-| `linde` | a lime leaf | pale green, long + short | "Linde" | "the leaf" | rolling papers |
-| `wolke` | a cloud | white, slim + extra-slim | "Wolke" | "the cloud" | filter tips |
+| `kranich` | S-hook crane neck, 2 blocks | `#2f7a5f` jade | "Kranich cigarettes" | "the crane" | mainstream full-flavour cigarettes |
+| `fuchs` | two ear triangles over a muzzle block | `#d2691e` orange | "Fuchs cigarettes" | "the fox" | cheapest cigarettes on the wall |
+| `luxor` | stepped pyramid, 3 rows | `#c9a227` gold | "Luxor cigarettes" | "the pyramid" | **filterless**, one row, being delisted |
+| `nordstern` | 8-point star, one core block and 4 arms | `#1e3a63` navy | "Nordstern cigarettes" | "the star" | premium cigarettes |
+| `perle` | filled circle with one highlight block | `#c8c3bb` pearl | "Perle cigarettes" | "the pearl" | capsule / menthol cigarettes |
+| `zunder` | 4-block flint spark | `#2a2a30` charcoal | "Zunder tobacco" | "the black pouch" | rolling tobacco, strong |
+| `dreiringe` | three rings in a row | `#6b7a3a` olive | "Drei Ringe tobacco" | "the green pouch" | rolling tobacco, organic |
+| `pap_feder_lang` · `pap_feder_kurz` | tall · short booklet, single thin foot band | `#e6dcc2` cream | "long Feder papers" · "short Feder papers" | "the cream booklet" | rolling papers, by length |
+| `fil_slim` · `fil_reg` | narrow · wide box, three plain round tips | `#cfc7b4` putty · `#b9a982` sand | "slim filters" · "regular filters" | "the slim ones" · "the fat ones" | filter tips, by gauge |
 
-The SKU table already carries `cigarettes`, `tobacco`, `papers` and `vape`. **`filters` is a new SKU
-the register topic must add** — three trees below order it by gauge. Variant (`long`/`short`,
-`slim`/`xslim`, `30g`/`50g`) lives on the basket line, not in the brand row.
+**The remap, for anyone reading an older draft.** This section used to carry its own placeholder ids;
+they are gone, and every basket below was rewritten onto the canonical ones.
 
----
+| was | is | what travelled |
+|---|---|---|
+| `kranich` | `kranich` | the crane; the colour became jade |
+| `sperling` | `fuchs` | cheapest on the wall, a warm animal mark — "the brown bird" becomes "the fox" |
+| `roter_stern` | `luxor` | the filterless relic being delisted; a gold pyramid instead of a red star |
+| `nachtfalter` | `nordstern` | premium, night-blue; the moth becomes the star |
+| `polarfuchs` | `perle` | the pale cool pack; capsule / menthol |
+| `zunder` | `zunder` | unchanged |
+| `halm` | `dreiringe` | the organic green pouch |
+| `linde` | `pap_feder_lang` / `pap_feder_kurz` | a paper *brand* is a paper *variant*: the length is the id |
+| `wolke` | `fil_slim` / `fil_reg` | a filter *brand* is a filter *variant*: the gauge is the id |
+
+**Three rules that fall out of the canonical table, and every line below obeys them.**
+
+1. **The variant IS the id.** `long`/`short` and `slim`/`regular` live in `pap_*` / `fil_*`, not in a
+   parallel `variant` field, so one lookup answers "what is this facing". (`30 g`/`50 g` on a pouch has
+   no id in docs/08 §2 and is flavour text only; "extra-slim" collapses onto `fil_slim`, the only slim
+   gauge that exists.)
+2. **`spoken` is a whole noun phrase, not a bare name** — "long Feder papers", not "Linde". So a line
+   never writes the modifier twice: `long {brand.papers}` would read *"long long Feder papers"*. Write
+   `{brand.papers}` and let the table carry the length.
+3. **`{logo.<sku>}` is a picture, not a word.** `Content.brand_logo(id)` returns the facing's **asset
+   id** (`tob/pack_fuchs`), which is what `BrandMark` crops its 16×16 window out of — so the token is an
+   inline mark glyph in a line, never spoken text. The "logo phrase" column above is still
+   authoring-only: it has **no accessor yet**, and the day a line needs to *say* "the fox" the table
+   gains a `phrase` field and `Content.brand_phrase(id)` beside the other two.
+
+**`filters` is a real SKU and it now exists** — `{"id": "filters", "cost": 0.35, "base_price": 1.0,
+"fair_lo": 0.8, "fair_hi": 1.6, "category": "tobacco", "icon": "sku/filters"}`, shipped in `skus.gd`
+alongside the brand catalogue, so it reaches the ManageBoard with stock and a price band like
+everything else. Three trees below order it by gauge.
 
 ## 2. The cast
 
@@ -140,7 +173,8 @@ she made.
 - **Arc link:** her half of the flat is in the building Lindner is buying. A "professionalised"
   Spätkauf has no line item for a tab on a fridge door — she is the first person the corner loses.
 - **Habits:** Mate (stood on the laminate label-out, like she works here), Schrippe, and on a good week
-  `1× {brand.tobacco}` green pouch + long `{brand.papers}` + `{brand.filters}`. Never takes the Pfand
+  `1× {brand.tobacco}` (`dreiringe`, the green pouch) + `{brand.papers}` (`pap_feder_lang`) +
+  `{brand.filters}` (`fil_reg`). Never takes the Pfand
   back; leaves it as a tip she can pretend isn't one. **Arrives** ~23:30, most nights.
 - **Voice:** quick, deflecting, jokes ahead of the sentence that would hurt. Short clauses. Says "ähm"
   when she means *I am about to ask you for something*.
@@ -170,7 +204,7 @@ transactions and weather reports.
   the human cost of the main arc's squeeze, standing in front of you, in a jacket that is not a winter
   jacket.
 - **Habits:** whatever the Pfand covers, in this order: a Schrippe, a Sterni, and
-  `1× {brand.cigarettes}` (`sperling`) if the count runs past six euro. Pays entirely by offsetting the
+  `1× {brand.cigarettes}` (`fuchs`) if the count runs past six euro. Pays entirely by offsetting the
   deposit against the bill — his line at the register *is* the Pfand-offset case. **Arrives** ~22:00
   and again ~01:30.
 - **Voice:** short, formal, exact numbers. Deflects care with logistics.
@@ -200,8 +234,8 @@ cannot read.
   people instead of serving them.
 - **Arc link:** same envelope, same lawyer's name, six weeks from Friday. He is your co-defendant, and
   Brandt has already been in his shop buying two lemons and staying twenty minutes.
-- **Habits:** `1× {brand.cigarettes}` (`kranich`) — the same pack for thirty-one years, "the red one,
-  don't ask which red" — a Mate, a large water. The "**the usual**" order: the register must let you
+- **Habits:** `1× {brand.cigarettes}` (`kranich`) — the same pack for thirty-one years, "the green one,
+  don't ask which green" — a Mate, a large water. The "**the usual**" order: the register must let you
   ring his basket from memory. **Arrives** ~20:30, after he shuts.
 - **Voice:** warm, blunt, arrives at the point sideways. Says "Quatsch." Uses your uncle as a yardstick
   and knows exactly what he is doing when he does it.
@@ -231,7 +265,7 @@ first, and can tell you what stood on any corner within four streets, and in whi
 - **Arc link:** Brandt's people have already been to her door with a *Modernisierungsangebot* and a
   slow, kind voice "for the old lady". They expect her to be the easiest tenant in the Haus. She is not.
 - **Habits:** two Schrippen, milk, a block of chocolate on Fridays, and `1× {brand.cigarettes}`
-  (`roter_stern`) **filterless** — the last row of it on your wall, which the wholesaler has stopped
+  (`luxor`) **filterless** — the last row of it on your wall, which the wholesaler has stopped
   listing. When that row runs out it is a story beat, not a stock-out. **Arrives** ~18:40, daily.
 - **Voice:** dry, declarative, small cruelties followed by an unexpected tenderness. Calls you *Junge*.
   Never explains a reference.
@@ -260,8 +294,8 @@ all of them.
 - **Stake:** your window is his noticeboard and your counter is his stage.
 - **Arc link:** when the fight comes, Achim already knows how to run one. He has the folding table, the
   laminator, a PA in a cupboard and no shame whatsoever. He is your campaign, badly dressed.
-- **Habits:** the deepest register order in the game — `50 g {brand.tobacco}` (`zunder`) + long
-  `{brand.papers}` + **slim** `{brand.filters}` ("not the fat ones") + one Sterni + the cheap lighter,
+- **Habits:** the deepest register order in the game — `{brand.tobacco}` (`zunder`, the 50 g) +
+  `{brand.papers}` (`pap_feder_lang`) + `{brand.filters}` (`fil_slim`, "not the fat ones") + one Sterni + the cheap lighter,
   never the branded one. Three separate reaches at the wall, and he *will* correct you on the filter
   gauge. **Arrives** after a load-in, ~01:00, and he is loud about it.
 - **Voice:** loud, funny, five clauses where one would do, lands on a hard consonant. Softens exactly
@@ -293,7 +327,7 @@ problem, and a way in. Keeps every letter in a plastic sleeve.
 - **Arc link:** he is what the corner is *for*. A Kiez that can absorb a stranger is worth defending; a
   lobby with a keypad is not. Brandt's plan has no floor for the person who needs somewhere to be bad
   at German in public.
-- **Habits:** `2× {brand.cigarettes}` (`sperling`) ordered as *"the bird, the brown bird"*, a large
+- **Habits:** `2× {brand.cigarettes}` (`fuchs`) ordered as *"the fox, the one with the ears"*, a large
   water, a Mate, a chocolate for the girl in the flat below on Fridays. Orders by logo and colour, never
   by brand name, until the night he doesn't. **Arrives** ~00:20, after his shift.
 - **Voice:** careful, formal, short. Rehearses before he speaks. Apologises for language that is fine.
@@ -326,7 +360,7 @@ including conversations.
   she would appear.
 - **Habits:** two coffees (one for whoever is on the door downstairs), two Schrippen, painkillers about
   once a fortnight — *the children's one*. **No tobacco**, and the register must register that absence:
-  the night she looks at the `nachtfalter` row is a beat, not a sale. **Arrives 03:40**, between a
+  the night she looks at the `nordstern` row is a beat, not a sale. **Arrives 03:40**, between a
   double.
 - **Voice:** quiet, economical, medical precision, gallows humour delivered without a smile. Never asks
   for anything. Says "it's fine" in four different meanings.
@@ -355,7 +389,7 @@ the rent letters he hears about at your counter. Warm, lonely, generous and stru
 - **Arc link:** the **fake-ally opponent**. His company's Series B was led by a fund with Lindner three
   layers down, and its office lease carries a break clause tied to the block's residential conversion
   completing by March. When he offers to help save the Späti he will mean it, and it will cost you.
-- **Habits:** four Sternis on a Thursday, chips, `1× {brand.cigarettes}` (`nachtfalter`) — "only when I
+- **Habits:** four Sternis on a Thursday, chips, `1× {brand.cigarettes}` (`nordstern`) — "only when I
   drink, so, twice a week" — and a vape the week you stock them. Card out before you have scanned the
   first bottle, every time, and he apologises for it. Tips the change and then some. **Arrives** ~21:00
   Thursdays, and whenever he has nowhere to be.
@@ -386,8 +420,8 @@ are coming home in the summer.
   you are nineteen.
 - **Arc link:** the corner is the reason they stayed in Berlin instead of going back. A lobby with a
   keypad is not a place you can stand outside of at 1am without a reason. If the corner goes, they go.
-- **Habits:** an energy drink, gummi bears, `1× {brand.tobacco}` (`halm`) green pouch, **short**
-  `{brand.papers}`, extra-slim `{brand.filters}` — and they will specify the gauge. **Arrives** ~01:10,
+- **Habits:** an energy drink, gummi bears, `1× {brand.tobacco}` (`dreiringe`, the green pouch),
+  `{brand.papers}` (`pap_feder_kurz`), `{brand.filters}` (`fil_slim`) — and they will specify the gauge. **Arrives** ~01:10,
   four nights a week, and stays outside longer than the transaction.
 - **Voice:** flat, deadpan, very fast once the guard drops. The grin arrives a second late, which is
   how you know it is real.
@@ -422,7 +456,7 @@ years of Sundays. Lately, sometimes, he doesn't.
 - **Arc link:** the bench is public, free and unbuyable, which is precisely what the development plan
   has no line item for. The first thing a "professionalised" corner removes is somewhere to sit for
   nothing — and she is the one who notices the fence notice on the door.
-- **Habits:** two Mate, a water, `1× {brand.cigarettes}` (`polarfuchs`) — and **a lighter**, every
+- **Habits:** two Mate, a water, `1× {brand.cigarettes}` (`perle`) — and **a lighter**, every
   single time, without exception. **Arrives Sunday 07:40**, and only then.
 - **Voice:** fast, warm, radiant, plans stated as facts. Goes very even when something costs her.
 
@@ -452,7 +486,7 @@ Tuesday and went to lunch.
   date* — arrives through a customer relationship, months before Brandt hands you hers, and pairs with
   Tobias's break clause rather than duplicating it. Sets `main_lever_hint`.
 - **Habits:** still water, never sparkling. One bar of chocolate he leaves on the counter most nights.
-  `1× {brand.cigarettes}` (`nachtfalter`), a pack a night, most of it thrown away. Pays cash, exact,
+  `1× {brand.cigarettes}` (`nordstern`), a pack a night, most of it thrown away. Pays cash, exact,
   and does not want a bag. **Arrives 03:10**, nightly, never at any other hour.
 - **Voice:** clipped, formal, sentences with the subject fully specified. One unguarded clause per
   night, immediately covered by an ordinary one.
@@ -531,6 +565,18 @@ silhouettes before the next capture pass** — `oneoff_clubber`, `oneoff_tourist
 `regular` → lateworker · `tourist` → tourist · `raver` → clubber · `nurse` → lateworker ·
 `student` → clubber · `insomniac` → dogwalker · `party` → clubber · `kid` → kassenkind
 
+**Not done yet, and here is the exact blocker.** The remap is one `portrait` field per archetype in
+`customers.gd`, but `char/oneoff_lateworker_neutral`, `char/oneoff_dogwalker_neutral` and
+`char/oneoff_kassenkind_neutral` are in **neither `docs/asset-spec.json` nor `Assets.SIZES`**, and
+`test_dialogue.gd::test_the_queue_view_is_fifo_and_carries_portraits` asserts that every portrait in
+the queue is an id the art pipeline knows. Pointing an archetype at an unspecced id fails that test on
+the next build. Placeholder rows in `characters.gd` are deliberately absent for the same reason a
+half-drawn expression is: a row listing a `neutral` that is not on disk is exactly the broken
+character `test_content.gd::test_the_expression_vocabulary_is_frozen_and_honest` exists to catch.
+**Order of operations:** three spec entries + three SIZES rows (orchestrator) → three `neutral` busts
+at 144×174 (art lane) → three `characters.gd` rows and eight `customers.gd` `portrait` fields (cast
+lane, ten minutes).
+
 (The QueueStrip itself is safe either way: its chips are code-drawn silhouettes in the speaker's
 `colour`, not shrunken portraits — which is exactly why all eleven colours above are distinct hues.)
 
@@ -546,6 +592,19 @@ Every new tree: **5–8 nodes · ≥ 1 d20 check · ≥ 1 gate that is locked at
 change per node · ≥ 1 flag a later season reads · the order woven into the first node · choice 0 never
 gated · every `next`/`next_fail` resolving to a written node or `""`.**
 
+**SHIPPED.** All eight are in `godot/engine/content/dialogues.gd`, and the blocks below are kept
+identical to it — `dialogues.gd` is the source of truth and this section is its mirror. Two edits
+happened between the draft and the build, both of them content bugs the tests would not have caught:
+
+1. **Labels were trimmed to fit the counter.** `test_content.gd::test_no_authored_choice_outgrows_the_counter`
+   measures every authored label against the real Jersey 10 face in the real box width
+   (`DIALOGUE_W_QUEUE 300`, minus panel margins and row padding, minus a rolled choice's tag) and
+   allows two lines. About a dozen labels lost a clause; none lost a meaning.
+2. **Robin's order stuttered.** The draft read `short {brand.papers}` and `the extra-slim
+   {brand.filters}`, which render *"short short Feder papers"* and *"the extra-slim slim filters"* —
+   §1 rule 2 again, one draft later. The shipped line is `{brand.papers}, and {brand.filters}. The
+   slim, not the fat ones.`, which keeps the gauge-specifying characterisation and says it once.
+
 ### 4.1 Frau Schulz — the price strip, and what stood on this corner before
 
 ```gdscript
@@ -558,7 +617,7 @@ gated · every `next`/`next_fail` resolving to a written node or `""`.**
 				"choices": [
 					{"label": "\"Two left on the wall. I'll put one aside for Friday.\"", "effects": {"kiez": 1.0, "flags": ["schulz_reserved"]}, "next": "strip"},
 					{"label": "[Kiez Sense 12] She is not asking about cigarettes.", "check": {"stat": "wis", "dc": 12}, "next": "konsum", "next_fail": "strip"},
-					{"label": "\"Wholesaler's dropped them, Frau Schulz. That's the last row.\"", "effects": {"kiez": -0.5}, "next": "strip"},
+					{"label": "\"Wholesaler's dropped them. That's the last row.\"", "effects": {"kiez": -0.5}, "next": "strip"},
 				],
 			},
 			"konsum": {
@@ -574,7 +633,7 @@ gated · every `next`/`next_fail` resolving to a written node or `""`.**
 				"lines": ["\"Your uncle wrote the prices by hand. On card. You could read them from the street.\"", "She counts the coins out of a purse with a clasp older than you are, one at a time, which takes a while and is meant to."],
 				"choices": [
 					{"label": "\"I'll write the next lot by hand.\"", "effects": {"kiez": 0.5}, "next": "bag"},
-					{"label": "[Hands 12] Take the card and let her dictate the dispatcher's hand.", "requires": {"stat": "dex", "min": 12}, "effects": {"kiez": 2.0, "flags": ["schulz_hand"]}, "next": "bag"},
+					{"label": "[Hands 12] Let her dictate the dispatcher's hand.", "requires": {"stat": "dex", "min": 12}, "effects": {"kiez": 2.0, "flags": ["schulz_hand"]}, "next": "bag"},
 					{"label": "\"The strips came with the shelf.\"", "next": "bag"},
 				],
 			},
@@ -584,7 +643,7 @@ gated · every `next`/`next_fail` resolving to a written node or `""`.**
 				"choices": [
 					{"label": "\"Bis morgen, Frau Schulz.\"", "next": "door"},
 					{"label": "[Muscle 11] Carry it up the four floors.", "requires": {"stat": "str", "min": 11}, "effects": {"kiez": 2.0, "flags": ["schulz_bag"]}, "next": "landing"},
-					{"label": "[Schnauze 13] Get her to say who knocked on her door last week.", "check": {"stat": "cha", "dc": 13}, "next": "brandt", "next_fail": "door"},
+					{"label": "[Schnauze 13] Who knocked on her door last week?", "check": {"stat": "cha", "dc": 13}, "next": "brandt", "next_fail": "door"},
 				],
 			},
 			"landing": {
@@ -599,7 +658,7 @@ gated · every `next`/`next_fail` resolving to a written node or `""`.**
 				"lines": ["\"A young woman. Good coat. She said Modernisierung, and she said it slowly. For the old lady.\"", "\"I have been offered a better flat by better-dressed people before, Junge. In '92 as well.\""],
 				"choices": [
 					{"label": "\"Don't sign anything. Bring it to me first.\"", "effects": {"kiez": 2.0, "flags": ["schulz_brandt_visit"]}, "next": "door"},
-					{"label": "\"What did you tell her?\" (\"Nothing. I gave her the time.\")", "effects": {"kiez": 1.0, "flags": ["schulz_brandt_visit"]}, "next": "door"},
+					{"label": "\"What did you tell her?\" (\"Nothing.\")", "effects": {"kiez": 1.0, "flags": ["schulz_brandt_visit"]}, "next": "door"},
 				],
 			},
 			"door": {
@@ -619,11 +678,11 @@ gated · every `next`/`next_fail` resolving to a written node or `""`.**
 		"nodes": {
 			"order": {
 				"speaker": "achim", "expression": "neutral",
-				"lines": ["\"Fifty of {brand.tobacco}, long {brand.papers}, and the SLIM {brand.filters} — slim, not the fat ones, I'm not a plumber.\"", "\"And a Sterni and the cheap lighter. Not the branded one. I'm not paying two euro for fire.\" Three separate reaches at the wall. He watches all three like a man marking a load-in."],
+				"lines": ["\"Fifty of {brand.tobacco}, {brand.papers}, and {brand.filters} — slim, not the fat ones, I'm not a plumber.\"", "\"And a Sterni and the cheap lighter. Not the branded one. I'm not paying two euro for fire.\" Three separate reaches at the wall. He watches all three like a man marking a load-in."],
 				"choices": [
 					{"label": "Ring all five through, slims included.", "effects": {"kiez": 0.5}, "next": "chain"},
-					{"label": "[Brains 11] The fifty is cheaper than the two thirties he always buys.", "check": {"stat": "int", "dc": 11}, "next": "maths", "next_fail": "chain"},
-					{"label": "[Muscle 11] Get the top-row box down without the step stool.", "requires": {"stat": "str", "min": 11}, "next": "reach"},
+					{"label": "[Brains 11] The fifty is cheaper than two thirties.", "check": {"stat": "int", "dc": 11}, "next": "maths", "next_fail": "chain"},
+					{"label": "[Muscle 11] Reach the top-row box without the stool.", "requires": {"stat": "str", "min": 11}, "next": "reach"},
 				],
 			},
 			"maths": {
@@ -637,7 +696,7 @@ gated · every `next`/`next_fail` resolving to a written node or `""`.**
 				"speaker": "achim", "expression": "surprised",
 				"lines": ["You go up on the counter edge and have it down in one. No stool, no wobble.", "\"…Alright. Alright. Your uncle used the stool like a pensioner.\""],
 				"choices": [
-					{"label": "\"My uncle also never dropped a box on a customer.\"", "effects": {"kiez": 1.0}, "next": "chain"},
+					{"label": "\"My uncle never dropped a box on a customer.\"", "effects": {"kiez": 1.0}, "next": "chain"},
 				],
 			},
 			"chain": {
@@ -645,7 +704,7 @@ gated · every `next`/`next_fail` resolving to a written node or `""`.**
 				"lines": ["\"You seen it? Down the block. Neon sign, app, a QR code where the till should be. They've got a CONCEPT.\"", "\"And they've done the Vorderhaus. The one we held for eleven years. Lofts. There's a plaque, mate. A PLAQUE. About us. Next to a keypad we couldn't get through.\""],
 				"choices": [
 					{"label": "Let him run. Don't fill the gap.", "effects": {"kiez": 0.5}, "next": "poster"},
-					{"label": "[Schnauze 13] \"So do it again. Here. This corner, this winter.\"", "check": {"stat": "cha", "dc": 13}, "next": "scene", "next_fail": "poster"},
+					{"label": "[Schnauze 13] \"So do it again. Here. This winter.\"", "check": {"stat": "cha", "dc": 13}, "next": "scene", "next_fail": "poster"},
 					{"label": "\"It's a shop, Achim. Not the Stasi.\"", "effects": {"kiez": -0.5}, "next": "poster"},
 				],
 			},
@@ -662,7 +721,7 @@ gated · every `next`/`next_fail` resolving to a written node or `""`.**
 				"choices": [
 					{"label": "Tape it up, centre of the window.", "effects": {"kiez": 1.5, "flags": ["achim_poster"]}, "next": "off"},
 					{"label": "\"Inside the door. The window is my livelihood.\"", "effects": {"kiez": 0.5, "flags": ["achim_poster_inside"]}, "next": "off"},
-					{"label": "[Stamina 13] Shut the shop and do the sixty-poster route with him.", "requires": {"stat": "con", "min": 13}, "effects": {"kiez": 2.5, "cash": -18.0, "flags": ["achim_route", "achim_ally"]}, "next": "four_am"},
+					{"label": "[Stamina 13] Shut the shop, do the poster route with him.", "requires": {"stat": "con", "min": 13}, "effects": {"kiez": 2.5, "cash": -18.0, "flags": ["achim_route", "achim_ally"]}, "next": "four_am"},
 				],
 			},
 			"four_am": {
@@ -690,16 +749,16 @@ gated · every `next`/`next_fail` resolving to a written node or `""`.**
 		"nodes": {
 			"point": {
 				"speaker": "karim", "expression": "neutral",
-				"lines": ["\"Good evening. One water — still — one Mate, and… {qty.cigarettes}. The bird. {logo.cigarettes}.\"", "His finger goes over your shoulder, precise, to exactly the right row. He builds the sentence like a shelf, checking the level, and lands it."],
+				"lines": ["\"Good evening. One water — still — one Mate, and… {qty.cigarettes}. The fox. {logo.cigarettes}.\"", "His finger goes over your shoulder, precise, to exactly the right row. He builds the sentence like a shelf, checking the level, and lands it."],
 				"choices": [
-					{"label": "\"{qty.cigarettes}× {brand.cigarettes}. Coming up.\" Ring it, no fuss.", "next": "lesson"},
+					{"label": "\"{qty.cigarettes}× {brand.cigarettes}.\" Ring it, no fuss.", "next": "lesson"},
 					{"label": "[Kiez Sense 11] He mouthed the word before he pointed.", "check": {"stat": "wis", "dc": 11}, "next": "practice", "next_fail": "lesson"},
 					{"label": "[Schnauze 12] Say the brand once, slowly, like it's nothing.", "check": {"stat": "cha", "dc": 12}, "next": "word", "next_fail": "stiff"},
 				],
 			},
 			"word": {
 				"speaker": "karim", "expression": "warm",
-				"lines": ["\"{brand.cigarettes}.\" He says it back, then again to himself while you bag it. \"{brand.cigarettes}. The bird is a {brand.cigarettes}.\"", "\"Tomorrow I will not point.\""],
+				"lines": ["\"{brand.cigarettes}.\" He says it back, then again to himself while you bag it. \"{brand.cigarettes}. The fox is a {brand.cigarettes}.\"", "\"Tomorrow I will not point.\""],
 				"choices": [
 					{"label": "\"Point anyway. I like the pointing.\"", "effects": {"kiez": 1.0, "flags": ["karim_word"]}, "next": "lesson"},
 					{"label": "\"Say it the Kiez way: einmal die {brand.cigarettes}, und zwar zackig.\"", "effects": {"kiez": 1.5, "flags": ["karim_word", "karim_zackig"]}, "next": "lesson"},
@@ -732,8 +791,8 @@ gated · every `next`/`next_fail` resolving to a written node or `""`.**
 				"speaker": "karim", "expression": "wary",
 				"lines": ["A plastic sleeve comes out of the jacket, flattened at the corners from being carried a long time. The top envelope is the window kind, and it is still sealed.", "\"Four days. I read the sender, and then I put it in my jacket, and I have been very busy for four days.\""],
 				"choices": [
-					{"label": "\"Bring it tomorrow, early. We'll go through it slowly.\"", "effects": {"kiez": 1.0, "flags": ["karim_form"]}, "next": "goodnight"},
-					{"label": "[Brains 14] Open it here and read the paragraph under the date.", "requires": {"stat": "int", "min": 14}, "next": "read"},
+					{"label": "\"Bring it tomorrow, early. We'll go through it.\"", "effects": {"kiez": 1.0, "flags": ["karim_form"]}, "next": "goodnight"},
+					{"label": "[Brains 14] Read the paragraph under the date.", "requires": {"stat": "int", "min": 14}, "next": "read"},
 					{"label": "\"That's Behörde business, Karim. I sell Mate.\"", "effects": {"kiez": -1.0}, "next": "goodnight"},
 				],
 			},
@@ -741,7 +800,7 @@ gated · every `next`/`next_fail` resolving to a written node or `""`.**
 				"speaker": "karim", "expression": "surprised",
 				"lines": ["It is not a refusal. It is a request for one document he already has, in the sleeve, second from the back.", "He looks at the counter for a while. \"Six weeks I did not sleep for this paper.\""],
 				"choices": [
-					{"label": "Photocopy it on the back-room machine. On the house.", "effects": {"kiez": 2.0, "flags": ["karim_form", "karim_helped"]}, "next": "goodnight"},
+					{"label": "Photocopy it out back. On the house.", "effects": {"kiez": 2.0, "flags": ["karim_form", "karim_helped"]}, "next": "goodnight"},
 				],
 			},
 			"goodnight": {
@@ -773,7 +832,7 @@ gated · every `next`/`next_fail` resolving to a written node or `""`.**
 				"lines": ["The children's dose. At twenty to four, on her way *in* to a shift, not out of one.", "\"He's six. Thirty-eight nine at ten o'clock. My mother's with him and she'll call if it climbs.\" Her jaw is doing a lot of work."],
 				"choices": [
 					{"label": "\"Then you should be at home, and you know it.\"", "effects": {"kiez": 0.5}, "next": "wall"},
-					{"label": "Turn the box round and read the weight column out loud.", "effects": {"kiez": 1.0}, "next": "dose"},
+					{"label": "Turn the box round. Read the weight column out loud.", "effects": {"kiez": 1.0}, "next": "dose"},
 					{"label": "\"Take it. Pay me whenever.\"", "effects": {"cash": -3.0, "kiez": 2.0, "flags": ["nadia_tab"]}, "next": "wall"},
 				],
 			},
@@ -787,7 +846,7 @@ gated · every `next`/`next_fail` resolving to a written node or `""`.**
 			},
 			"wall": {
 				"speaker": "nadia", "expression": "wary",
-				"lines": ["The moth row, second from the top. She has been looking at it for the length of a coffee.", "\"Eleven years. I stopped the day of the scan. And that wall still talks to me every single night.\""],
+				"lines": ["The star row, second from the top. She has been looking at it for the length of a coffee.", "\"Eleven years. I stopped the day of the scan. And that wall still talks to me every single night.\""],
 				"choices": [
 					{"label": "\"Nothing off that wall tonight. Coffee's poured.\"", "effects": {"kiez": 1.0, "flags": ["nadia_held"]}, "next": "childcare"},
 					{"label": "\"Your call, Nadia. I'll ring it if you say so.\"", "effects": {"flags": ["nadia_offered"]}, "next": "childcare"},
@@ -799,7 +858,7 @@ gated · every `next`/`next_fail` resolving to a written node or `""`.**
 				"lines": ["Her phone goes on the counter face-up, which it never does. Her mother has the flu. Leo is asleep four streets away and will not be, at seven.", "\"It's fine. I'll sort it. It's fine.\""],
 				"choices": [
 					{"label": "\"What would actually help? Say the thing.\"", "effects": {"kiez": 1.0}, "next": "bye"},
-					{"label": "[Stamina 13] \"I'll open at six. Bring him here till your shift ends.\"", "requires": {"stat": "con", "min": 13}, "effects": {"kiez": 2.5, "flags": ["nadia_kid"]}, "next": "bye"},
+					{"label": "[Stamina 13] \"I'll open at six. Bring him here.\"", "requires": {"stat": "con", "min": 13}, "effects": {"kiez": 2.5, "flags": ["nadia_kid"]}, "next": "bye"},
 					{"label": "\"You always say it's fine.\"", "effects": {"kiez": 0.5, "flags": ["nadia_seen"]}, "next": "bye"},
 				],
 			},
@@ -826,8 +885,8 @@ gated · every `next`/`next_fail` resolving to a written node or `""`.**
 				"lines": ["\"Four Sternis, the chips, and one {brand.cigarettes} — love the pack, honestly, it's such a clean design. I only smoke when I drink, so, you know. Twice a week.\"", "Card out before you've scanned the first bottle. \"Keep the change. No — keep it, I mean it. This place is the reason I moved to this Kiez.\""],
 				"choices": [
 					{"label": "\"Thanks, Tobias.\" Take the tip, ring it straight.", "effects": {"cash": 5.0, "kiez": 0.5}, "next": "fund"},
-					{"label": "[Kiez Sense 12] Read the lanyard he forgot to take off.", "check": {"stat": "wis", "dc": 12}, "next": "lanyard", "next_fail": "fund"},
-					{"label": "[Schnauze 13] Ring the pack at tourist price and see if he blinks.", "check": {"stat": "cha", "dc": 13}, "effects_success": {"cash": 3.0, "integrity": -2.0, "flags": ["tobias_gouged"]}, "effects_fail": {"kiez": -1.0}, "next": "fund", "next_fail": "fund"},
+					{"label": "[Kiez Sense 12] Read the lanyard he forgot to remove.", "check": {"stat": "wis", "dc": 12}, "next": "lanyard", "next_fail": "fund"},
+					{"label": "[Schnauze 13] Ring the pack at tourist price.", "check": {"stat": "cha", "dc": 13}, "effects_success": {"cash": 3.0, "integrity": -2.0, "flags": ["tobias_gouged"]}, "effects_fail": {"kiez": -1.0}, "next": "fund", "next_fail": "fund"},
 				],
 			},
 			"lanyard": {
@@ -852,7 +911,7 @@ gated · every `next`/`next_fail` resolving to a written node or `""`.**
 				"choices": [
 					{"label": "\"That's kind. I'll think about it.\"", "effects": {"flags": ["tobias_fund_offered"]}, "next": "night"},
 					{"label": "[Brains 13] A fund needs a funder.", "check": {"stat": "int", "dc": 13}, "next": "lindner", "next_fail": "night"},
-					{"label": "[Schnauze 15] Make him say the investor's name out loud.", "requires": {"stat": "cha", "min": 15}, "effects": {"flags": ["tobias_fund_offered"]}, "next": "lindner"},
+					{"label": "[Schnauze 15] Make him say the investor's name.", "requires": {"stat": "cha", "min": 15}, "effects": {"flags": ["tobias_fund_offered"]}, "next": "lindner"},
 				],
 			},
 			"lindner": {
@@ -860,7 +919,7 @@ gated · every `next`/`next_fail` resolving to a written node or `""`.**
 				"lines": ["Three questions in he says it himself and doesn't hear it: the fund sits under the community budget, the Series B was led by a property group's venture arm, and the office lease has a break clause tied to the block's residential conversion completing by March.", "\"…Lindner. Yeah. But that's just capital, they don't *do* anything, they're an LP.\" A pause. \"That's bad, isn't it. That's why you went quiet.\""],
 				"choices": [
 					{"label": "\"March. Say that date again, slowly.\"", "effects": {"kiez": 1.0, "flags": ["tobias_digging", "main_lever_hint"]}, "next": "ask"},
-					{"label": "\"Then I'll take the money and the corner keeps its prices.\"", "effects": {"cash": 60.0, "integrity": -3.0, "flags": ["tobias_lindner", "took_fund"]}, "next": "night"},
+					{"label": "\"Then I'll take the money and keep our prices.\"", "effects": {"cash": 60.0, "integrity": -3.0, "flags": ["tobias_lindner", "took_fund"]}, "next": "night"},
 					{"label": "\"No fund. Just come in and buy beer like a person.\"", "effects": {"kiez": 1.0, "flags": ["tobias_lindner"]}, "next": "ask"},
 				],
 			},
@@ -889,7 +948,7 @@ gated · every `next`/`next_fail` resolving to a written node or `""`.**
 		"nodes": {
 			"counter": {
 				"speaker": "robin", "expression": "wary",
-				"lines": ["\"Energy, gummi bears, {brand.tobacco} — {logo.tobacco} — short {brand.papers}, and the extra-slim {brand.filters}. The extra-slim, not the normal ones.\"", "\"This place is kind of depressing, by the way.\" Delivered completely flat, eyes on you, waiting."],
+				"lines": ["\"{brand.tobacco} — {logo.tobacco} — {brand.papers}, and {brand.filters}. The slim ones, not the fat ones. And an energy and the gummi bears.\"", "\"This place is kind of depressing, by the way.\" Delivered completely flat, eyes on you, waiting."],
 				"choices": [
 					{"label": "\"It's a Späti at one in the morning. That's the genre.\"", "effects": {"kiez": 0.5}, "next": "roll"},
 					{"label": "[Kiez Sense 12] That was a test, not an insult.", "check": {"stat": "wis", "dc": 12}, "next": "test", "next_fail": "roll"},
@@ -900,7 +959,7 @@ gated · every `next`/`next_fail` resolving to a written node or `""`.**
 				"speaker": "robin", "expression": "surprised",
 				"lines": ["They say something rude to everyone on the first go. Eleven months of it. It is cheaper to be thrown out on your own terms than on somebody else's.", "You put the tin down without a word and don't rise to it. Their whole face resets a millimetre."],
 				"choices": [
-					{"label": "\"Sit on the crate if you want. It's warmer inside the door.\"", "effects": {"kiez": 1.5, "flags": ["robin_crate"]}, "next": "roll"},
+					{"label": "\"Sit on the crate. It's warmer inside the door.\"", "effects": {"kiez": 1.5, "flags": ["robin_crate"]}, "next": "roll"},
 					{"label": "\"Depressing is free. The energy drink is two twenty.\"", "effects": {"kiez": 1.0}, "next": "roll"},
 				],
 			},
@@ -909,7 +968,7 @@ gated · every `next`/`next_fail` resolving to a written node or `""`.**
 				"lines": ["They roll one on the counter, badly — too much in one end, the paper going soft at the seam. Third attempt.", "\"Don't. I know. I'm learning.\""],
 				"choices": [
 					{"label": "\"You're learning fine.\"", "next": "name"},
-					{"label": "[Hands 12] Roll one and slide it over without comment.", "requires": {"stat": "dex", "min": 12}, "effects": {"kiez": 1.5, "flags": ["robin_rolled"]}, "next": "name"},
+					{"label": "[Hands 12] Roll one and slide it over, no comment.", "requires": {"stat": "dex", "min": 12}, "effects": {"kiez": 1.5, "flags": ["robin_rolled"]}, "next": "name"},
 					{"label": "\"Buy the ready-mades. Cheaper by the hour.\"", "next": "name"},
 				],
 			},
@@ -918,7 +977,7 @@ gated · every `next`/`next_fail` resolving to a written node or `""`.**
 				"lines": ["\"Put it on the tab thing. If you do tabs.\" A pause. \"Robin. With an i-n. Not what my bank card says — the card's my mum's old account, it's a whole thing.\"", "Said fast and flat, and their hand is very still on the counter."],
 				"choices": [
 					{"label": "Write ROBIN on the fridge list. \"Done.\"", "effects": {"kiez": 2.0, "flags": ["robin_name"]}, "next": "home"},
-					{"label": "\"Robin. Got it.\" Say it once more, naturally, later.", "effects": {"kiez": 2.0, "flags": ["robin_name"]}, "next": "home"},
+					{"label": "\"Robin. Got it.\" Use it again later, naturally.", "effects": {"kiez": 2.0, "flags": ["robin_name"]}, "next": "home"},
 					{"label": "\"The card has to match the name, sorry.\"", "effects": {"kiez": -2.5, "integrity": -1.0}, "next": "home"},
 				],
 			},
@@ -1019,7 +1078,7 @@ gated · every `next`/`next_fail` resolving to a written node or `""`.**
 				"lines": ["He does not leave. He turns the water bottle a quarter turn on the laminate. Twice.", "\"You are open at three. Remarkable. In Grunewald there is nothing open at three. Not even the people.\""],
 				"choices": [
 					{"label": "\"Somebody's always awake. I just sell to them.\"", "next": "tuesday"},
-					{"label": "\"You drive here from Grunewald?\" (He does. Nightly.)", "effects": {"kiez": 0.5}, "next": "tuesday"},
+					{"label": "\"You drive here from Grunewald?\" (He does.)", "effects": {"kiez": 0.5}, "next": "tuesday"},
 				],
 			},
 			"armour": {
@@ -1036,7 +1095,7 @@ gated · every `next`/`next_fail` resolving to a written node or `""`.**
 				"choices": [
 					{"label": "\"It's this street. You're standing in page eleven.\"", "effects": {"flags": ["bley_lindner"]}, "next": "close"},
 					{"label": "\"Tidy for who?\"", "effects": {"kiez": 0.5, "flags": ["bley_lindner"]}, "next": "close"},
-					{"label": "[Brains 14] Work out what page eleven actually gives them.", "requires": {"stat": "int", "min": 14}, "effects": {"kiez": 1.0, "flags": ["bley_lindner"]}, "next": "clause"},
+					{"label": "[Brains 14] What does page eleven actually give them?", "requires": {"stat": "int", "min": 14}, "effects": {"kiez": 1.0, "flags": ["bley_lindner"]}, "next": "clause"},
 				],
 			},
 			"clause": {
@@ -1044,7 +1103,7 @@ gated · every `next`/`next_fail` resolving to a written node or `""`.**
 				"lines": ["The facility is conditional. Vacant possession on a fixed date, or the tranche is repriced — which means every week a tenant stays is a number on somebody's spreadsheet going the wrong way.", "\"…You understood that faster than my analyst.\" He looks at the shelf, the fridge, the hand-written prices. \"I would not repeat where you heard it.\""],
 				"choices": [
 					{"label": "\"I won't. What's the date?\"", "effects": {"kiez": 1.5, "flags": ["bley_tip", "main_lever_hint"]}, "next": "close"},
-					{"label": "\"Write it down for me. Nothing with your name on it.\"", "effects": {"kiez": 2.0, "flags": ["bley_tip", "main_lever_hint"]}, "next": "close"},
+					{"label": "\"Write it down. Nothing with your name on it.\"", "effects": {"kiez": 2.0, "flags": ["bley_tip", "main_lever_hint"]}, "next": "close"},
 					{"label": "\"You financed it. You can unfinance it.\"", "effects": {"kiez": 0.5, "integrity": 1.0, "flags": ["bley_tip"]}, "next": "close"},
 				],
 			},
@@ -1066,7 +1125,7 @@ lands, each opening line becomes a **list order** so the till has something to s
 
 | tree | node | new first line |
 |---|---|---|
-| `lena` | `hello` | `"Mate, ein Schrippe, und {brand.tobacco} mit langen {brand.papers}. …And I'm fifty cents short. Again."` |
+| `lena` | `hello` | `"Mate, ein Schrippe, und {brand.tobacco} mit {brand.papers}. …And I'm fifty cents short. Again."` |
 | `juergen` | `crate` | append: `"Und einmal die {brand.cigarettes}. Die kleinen. If it reaches."` |
 | `mehmet` | `letter` | prepend: `"Die {brand.cigarettes}, ein Mate, ein Wasser — und pack die Kippen unten hin, my wife has eyes like a Zollbeamter."` |
 
@@ -1077,6 +1136,16 @@ lands, each opening line becomes a **list order** so the till has something to s
 - **Budget:** 2–5 flags per guest per season. The trees above spend 2–5 each.
 - **Every flag must have a declared reader** — a beat's `requires_flag`, an `epilogue` branch key, or a
   later-season tree's gate. A flag nobody reads is a lie in the save file.
+- **And the declaration is now data, not prose.** The list below shipped as
+  `StoryData.FLAG_READERS` (re-exported as `Content.FLAG_READERS`, one accessor
+  `Content.flag_reader(flag)`), because a reader named only in a design document cannot fail a build.
+  `test_flags.gd::test_every_flag_set_has_a_reader` accepts **three** reader kinds and requires
+  exactly one of them per flag: **(1)** a real `requires_flag` gate, **(2)** an `Economy.FLAG_LABEL`
+  entry (the Manage screen's corner-status panel prints it), **(3)** a `FLAG_READERS` row naming the
+  beat that *will* consume it. Kind 3 is a promise with a deadline:
+  `test_flags.gd::test_no_declared_reader_is_dead` fails the build the day a real gate or a
+  `FLAG_LABEL` takes over and the row is not deleted, so the table cannot drift into fiction of its
+  own. `bley_tip` is the first flag to graduate — `bley/b_patron.requires_flag` reads it for real.
 - **Declared readers:** `lena_*` → S1 autumn beat + the `found_voice` outcome · `juergen_*` → *The Night
   He Doesn't Come* · `mehmet_*`, `kiez_rally` → main step 13 + S3 winter · `schulz_reserved |
   schulz_hand | schulz_listen | schulz_bag | schulz_brandt_visit` → *They Take The Signal Box Down* and
@@ -1118,13 +1187,13 @@ display and authoring data.
 
 		# ── what the register serves ────────────────────────────────────────────────
 		"basket": [
-			{"sku": "tobacco", "qty": 1, "brand": "zunder", "variant": "50g"},
-			{"sku": "papers",  "qty": 1, "brand": "linde",  "variant": "long"},
-			{"sku": "filters", "qty": 1, "brand": "wolke",  "variant": "slim"},
+			{"sku": "tobacco", "qty": 1, "brand": "zunder"},
+			{"sku": "papers",  "qty": 1, "brand": "pap_feder_lang"},
+			{"sku": "filters", "qty": 1, "brand": "fil_slim"},
 			{"sku": "beer",    "qty": 1},
 			{"sku": "lighter", "qty": 1},
 		],
-		"order_line": "Fifty of {brand.tobacco}, long {brand.papers}, and the SLIM {brand.filters}.",
+		"order_line": "Fifty of {brand.tobacco}, {brand.papers}, and {brand.filters}.",
 		"pays": "exact coins", "pfand": "never returns", "tip": 0.0,
 
 		# ── the seven steps, keyed by season, labelled with shippable beat ids ───────
@@ -1137,12 +1206,32 @@ display and authoring data.
 	},
 ```
 
+**SHIPPED, with three registry hooks.** All eleven rows are in `characters.gd`, persona keys and
+all. Alongside them: `const EXPRESSIONS` (the frozen six of §3, re-exported as `Content.EXPRESSIONS`),
+`Content.basket_for(character_id)` — the one call the register and `Talk.subs_for` both make, so the
+want-list and the spoken line read the same rows — and `Content.FLAG_READERS` / `flag_reader()` from
+§4.10. `expressions` lists **only what is on disk today**, which currently means `["neutral"]` for
+eight of the eleven: `schulz`, `nadia`, `tobias` and `brandt` were *trimmed* from arrays that claimed
+faces the art lane never drew. Promotion stays one array edit per delivered portrait.
+
 **Three coordination rules.**
 
 1. **`basket` is the single source of the order.** The register topic seeds `state.active.basket` from
    it rather than inventing a parallel table, and `Talk.subs_for` builds `{brand.*}` / `{qty.*}` /
    `{logo.*}` out of the same rows. `wants` stays for the weighted-spawn path; where both exist,
-   `basket` wins — one line in StoryFlow, no engine surgery.
+   `basket` wins — one line in StoryFlow, no engine surgery. **Both halves shipped:**
+   `Rules._place_basket` reads the card's rows (`rules.gd:469`) and `Talk.subs_for` substitutes from
+   what it placed (`talk.gd:87`).
+   **And therefore ROW ORDER IS LOAD-BEARING.** `_place_basket` truncates to the reducer's caps —
+   `BASKET_MAX_LINES 4`, `BASKET_MAX_UNITS 6`, `BASKET_MAX_PLACED 3` (`rules.gd:30`) — and also skips
+   any SKU the shop has not unlocked yet. A dropped row takes its `{brand.*}` token with it, `_apply`
+   leaves what it cannot match alone, and the box then PRINTS `{brand.filters}` into a sentence. Three
+   cards carry five rows (Lena, Achim, Robin) and one is capped by placed units (Aylin), so every
+   token-bearing line is written FIRST and the prose-only line is the one that gives. Robin's draft
+   ordering shipped the bug and `test_tokens.gd::test_no_token_survives_to_the_screen` caught it by
+   walking his whole tree through `Rules.view` — the authored table said the basket was fine; only the
+   read-model knew it was not. Four rows per card is the safe number; five is a deliberate bet on
+   ordering, and the register lane raising `BASKET_MAX_LINES` to 5 would retire it.
 2. **`order_line` is the authored spoken order**, and it must use the same tokens as the tree's first
    node. It exists so the register's want-list and the dialogue's first line can never drift apart, and
    so a plain (no-tree) arrival still says a sentence a person would say.
@@ -1177,6 +1266,16 @@ Nothing new enters `view`. A persona card is **static content**, so the reader c
 ---
 
 ## 6. Groundwork: now vs later
+
+**Status, cast lane, this pass.** Shipped: items **1, 2 (minus the three one-off silhouettes), 4, 5,
+6 and 7** — eleven persona rows, the eight trees plus the three one-line edits, the `bley` strand
+(seven beats, three outcomes, twelve epilogue lines) and the `aylinjonas` two-field edit, `const
+EXPRESSIONS`, `test_tokens.gd` / `test_flags.gd` / the cast half of `test_content.gd`, and `REGULARS`
+in `test_dialogue.gd` widened from three ids to eleven. Still owed by other lanes: **item 3**
+(`Talk.subs_for` and the two `_apply` call sites — `Content.brand_spoken` / `brand_logo` exist, but
+nothing substitutes `{brand.*}` / `{qty.*}` / `{logo.*}` yet, so those tokens currently print raw),
+the three one-off silhouettes and the archetype remap they gate (§3), and **item 8/9** (art wave 1 and
+the QueueStrip job subtitle).
 
 ### Now — the things that are expensive to retrofit
 
@@ -1232,7 +1331,7 @@ Nothing new enters `view`. A persona card is **static content**, so the reader c
 - **`schedule`.** One unread key on every card until StoryFlow reads it. At a 24-hour counter, arrival
   time *is* characterisation — Nadia at 03:40, Bley at 03:10, Aylin only Sunday at 07:40 — and it costs
   nothing to record today and is expensive to retrofit into eleven hand-written cards later.
-- **The `roter_stern` stock-out as a real inventory event** rather than a line of dialogue. It wants the
+- **The `luxor` filterless stock-out as a real inventory event** rather than a line of dialogue. It wants the
   register's stock model first.
 - **The rest of the bench:** `yusuf` first (the underage ID beat is the tobacco wall's moral hinge and
   the only owner of `sell_restricted`), then `schmidt`, then the two-person strands S12 and S14 once

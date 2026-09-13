@@ -68,6 +68,26 @@ func set_queue(queue: Array, can_start: bool, at_counter: bool = false) -> void:
 func is_empty() -> bool:
 	return _queue.is_empty()
 
+## The strip authors its button at this inset inside `Palette.QUEUE_RECT` — under the line, because
+## the want bubble stands beside the bust at y 74..120 and a button at the top of the column covered it.
+const BUTTON_INSET := Rect2i(8, 64, 116, 18)
+
+## Where the strip stands. The register mode (docs/08 4.3) has no room for the LINE — the register
+## owns the right column and the HUD's "N waiting" tail carries the count — but `talk_next` is still
+## legal with a guest at the counter, so the strip re-docks to a button-sized plate instead of
+## disappearing. Collapsing a list is fine; hiding a legal action is not.
+func set_dock(r: Rect2i, button_only: bool = false) -> void:
+	position = Vector2(r.position)
+	custom_minimum_size = Vector2(r.size)
+	size = Vector2(r.size)
+	var btn := _next_button()
+	if btn == null:
+		return
+	var inset := Rect2i(Vector2i.ZERO, r.size) if button_only else BUTTON_INSET
+	btn.position = Vector2(inset.position)
+	btn.custom_minimum_size = Vector2(inset.size)
+	btn.size = Vector2(inset.size)
+
 # ── the line ──────────────────────────────────────────────────────────────────────────────────
 
 func _rebuild() -> void:
@@ -81,7 +101,7 @@ func _rebuild() -> void:
 	if name_label != null:
 		name_label.visible = not _queue.is_empty()
 		if not _queue.is_empty():
-			name_label.text = String((_queue[0] as Dictionary).get("name", Strings.SOMEONE))
+			name_label.text = _who(_queue[0], name_label)
 			name_label.add_theme_color_override("font_color", _colour_of(_queue[0]))
 	# Three guests, then a "+N" chip: past that the line is a number, not something you read.
 	var shown := mini(_queue.size(), Palette.QUEUE_SLOTS if _queue.size() <= Palette.QUEUE_SLOTS else Palette.QUEUE_SLOTS - 1)
@@ -89,6 +109,24 @@ func _rebuild() -> void:
 		chips.add_child(_chip(_queue[i], i == 0))
 	if _queue.size() > shown:
 		chips.add_child(_overflow(_queue.size() - shown))
+
+## Who is at the head of the line — their name, and their JOB when the plate is wide enough to hold
+## both (docs/09 §5 step 1: the cheapest proof that the cast reads as eleven distinct people and not
+## as eleven coloured silhouettes). The job comes from the persona card, so it is content, never a
+## word this component invents. MEASURED, not guessed: the label is 132 px and `clip_text` would
+## otherwise end "painting student" mid-word, which reads worse than the name on its own.
+func _who(guest: Dictionary, label: Label) -> String:
+	var who := String(guest.get("name", Strings.SOMEONE))
+	var job := String(Content.character(String(guest.get("character_id", ""))).get("job", ""))
+	if job == "":
+		return who
+	var both := Strings.queue_who(who, job)
+	var font := label.get_theme_font("font")
+	if font == null:
+		return who
+	var width := font.get_string_size(both, HORIZONTAL_ALIGNMENT_LEFT, -1,
+		label.get_theme_font_size("font_size")).x
+	return both if width <= label.size.x else who
 
 ## One waiting guest: a dark plate with a bust silhouette in their speaker colour. The first in line
 ## keeps full opacity, an amber edge and an amber floor line; the rest step back.

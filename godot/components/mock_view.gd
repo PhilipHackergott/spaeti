@@ -14,6 +14,9 @@ const PRESETS := [
 	"queue_waiting", "talk_lines", "talk_choice", "talk_result",
 	# The season's end — the finale card (Finale.resolve_finale).
 	"ending",
+	# The ring-up (docs/08-register-and-tobacco.md section 3.3): the basket on the counter, the wall
+	# behind you, and the wrong pack already flagged before you press Ring up.
+	"register_counter", "register_wall", "register_error",
 ]
 
 static func presets() -> Array:
@@ -123,6 +126,31 @@ static func view(preset: String) -> Dictionary:
 					{"character": "juergen", "line": "Jürgen keeps the crate by the door, and nobody moves it."},
 				],
 			}
+		"register_counter":
+			# 22:41. Nadia's basket has landed on the laminate: the crate in slot 0, the Mate already
+			# scanned, two Adler and a booklet fetched off the wall and still waiting for the glass.
+			_set_clock(v, "22:41", 0.34)
+			v["active"] = _nadia("neutral", 0.68)
+			v["counter"] = _counter(false)
+			v["register"] = _register(false)
+			v["order"] = _order(false)
+		"register_wall":
+			# Turned around. The night keeps ticking, the card rides along and so does the money.
+			_set_clock(v, "22:42", 0.35)
+			v["active"] = _nadia("neutral", 0.61)
+			v["counter"] = _counter(false)
+			v["register"] = _register(false)
+			v["order"] = _order(false)
+			v["view_mode"] = "wall"
+			v["wall"] = _wall()
+		"register_error":
+			# The navy pack against her red chip: the line is flagged, the first ring-up was refused,
+			# and she is wary. The register is still open — that is the one free correction.
+			_set_clock(v, "22:43", 0.36)
+			v["active"] = _nadia("wary", 0.47)
+			v["counter"] = _counter(true)
+			v["register"] = _register(true)
+			v["order"] = _order(true)
 		_:
 			pass
 	# ONE source, exactly as the engine builds it (rules.gd: both fields come off `s["queue"]`), so a
@@ -160,6 +188,15 @@ static func _base() -> Dictionary:
 		"dialogue": {},
 		"shelf": _shelf(),
 		"summary": {},
+		# The ring-up (docs/08 section 3.3). Empty on every pre-register preset on purpose: those are
+		# the serve screen's reference shots, and a tray drawn into them would change nine captures.
+		# `view_mode` is TOP LEVEL because which way your body is facing must survive a customer
+		# leaving while you are at the wall.
+		"counter": [],
+		"register": {},
+		"order": [],
+		"view_mode": "counter",
+		"wall": {},
 		# `status` is the standing roll-up (Economy.corner_status). Empty on purpose: the manage capture
 		# is a fresh corner, so the "your corner" panel stands down and the shot is unchanged.
 		"manage": {"restock_options": _restock(), "modules": _modules(),
@@ -298,3 +335,178 @@ static func _modules() -> Array:
 		# The wording mirrors `Economy.unlock_reason`: the mock may only say what the engine could.
 		{"def": {"id": "mate_tap", "name": "Mate on tap", "cost": 280.0, "note": "Pulls the late crowd"}, "owned": false, "available": false, "affordable": false, "reason": "unlocks on day 10"},
 	]
+
+
+# --- the ring-up (docs/08-register-and-tobacco.md section 3.3) -------------------------------
+
+## Nadia Ferreira, the night-shift nurse of docs/08 section 1 and docs/09 section 2.7: three empties,
+## a Mate, and the one tobacco line she does NOT take.
+static func _nadia(expression: String, patience: float) -> Dictionary:
+	return {
+		"customer": {"id": 31, "archetype_id": "nurse", "want": "mate", "character_id": "nadia"},
+		"archetype": {"id": "nurse", "name": "Nachtschwester"},
+		"want": {"sku_id": "mate", "name": "Mate", "price": 1.8, "stock": 18, "icon": "sku/mate"},
+		"portrait": "char/nadia",
+		"expression": expression,
+		"patience": patience,
+		"is_story": false,
+		"bottles": 3,
+	}
+
+## One `view.counter` row. The brand's identity is READ OUT OF THE CATALOGUE, never re-typed here: a
+## mock that invents a mark or a colour teaches a lie in every capture and in every test.
+static func _item(uid: int, sku_id: String, brand_id: String, slot: int, scanned: bool,
+		origin: String = "customer") -> Dictionary:
+	var b := Content.brand(brand_id)
+	var s := Content.sku(sku_id)
+	return {
+		"uid": uid,
+		"sku_id": sku_id,
+		"name": String(b.get("name", s.get("name", sku_id))),
+		"brand": brand_id,
+		"mark": String(b.get("mark", "")),
+		"colour": String(b.get("colour", "")),
+		"icon": String(b.get("icon", s.get("icon", ""))),
+		"kind": "item",
+		"count": 1,
+		"scanned": scanned,
+		# Where it came from: she put it down, or you walked to the wall for it (docs/08 §3.3).
+		"origin": origin,
+		"slot": slot,
+	}
+
+## The crate: ONE sprite with a count badge in slot 0, not three loose bottles, which would eat the
+## tray (docs/08 section 3.5). It is a deposit, so it carries no sku and never reaches the scanner.
+static func _crate(uid: int, bottles: int) -> Dictionary:
+	return {
+		# `name` is "" exactly as the reducer emits it for the crate — the deposit is one of the few
+		# things on screen the STRING TABLE names, not the catalogue (rules.gd's counter view).
+		"uid": uid, "sku_id": "pfand", "name": "", "brand": "", "mark": "", "colour": "",
+		"icon": "prop/pfand_crate", "kind": "crate", "count": bottles, "scanned": false,
+		"origin": "customer", "slot": 0,
+	}
+
+## What is standing on the laminate. `wrong` is the Nordstern case: you reached for the navy pack.
+static func _counter(wrong: bool) -> Array:
+	return [
+		_crate(1, 3),
+		_item(2, "mate", "", 1, true),
+		_item(3, "cigarettes", "nordstern" if wrong else "adler", 2, wrong, "wall"),
+		_item(4, "cigarettes", "adler", 3, false, "wall"),
+		_item(5, "papers", "pap_feder_lang", 4, false, "wall"),
+	]
+
+## `view.register`. `matches` is the REDUCER's verdict — the mock states it, it never derives it.
+static func _register(wrong: bool) -> Dictionary:
+	var lines: Array = [
+		{"sku_id": "mate", "name": "Mate", "brand": "", "mark": "", "colour": "",
+			"qty": 1, "unit_price": 1.8, "line_total": 1.8, "restricted": false, "matches": true},
+	]
+	if wrong:
+		var n := Content.brand("nordstern")
+		lines.append({"sku_id": "cigarettes", "name": String(n.get("name", "")), "brand": "nordstern",
+			"mark": String(n.get("mark", "")), "colour": String(n.get("colour", "")),
+			"qty": 1, "unit_price": 8.5, "line_total": 8.5, "restricted": true, "matches": false})
+	var subtotal := 0.0
+	for line in lines:
+		subtotal += float((line as Dictionary)["line_total"])
+	var pfand_line := 3.0 * Rules.PFAND_PER_BOTTLE
+	return {
+		"lines": lines,
+		"pfand_bottles": 3,
+		"pfand_line": pfand_line,
+		"subtotal": subtotal,
+		"total": subtotal - pfand_line,
+		"can_ring": true,
+		"id_checked": false,
+		# One free correction per customer, spoken in character (docs/08 section 3.4). The reducer
+		# writes the sentence; the panel only frames it.
+		"correction": String(Rules.CORRECTION_LINES["wrong_brand"]) if wrong else "",
+		"corrections": 1 if wrong else 0,
+		# The bucket behind the sentence; the box takes its words from `Strings.CORRECTION_BY_KIND`.
+		"correction_kind": "wrong_brand" if wrong else "",
+		"flagged": [1] if wrong else [],
+	}
+
+## `view.order` — her words, one chip per basket line. In `mark` mode the chip prints the swatch and
+## the CATEGORY and never the brand name; the Mate and the Pfand are named because they are not a
+## puzzle. `satisfied` is the reducer's, like `matches`.
+## `view.order` — EXACTLY the row `Rules._order_view` emits (docs/08 §3.3), key for key, including the
+## ones a component would otherwise have to re-derive. `name` is the SKU's name and `brand_name` is
+## the BRAND's, withheld as "" unless the engine says she used it: the chip may not decide how much a
+## customer gave away. `said` is composed the way the reducer composes it (`Rules._said_for`), so a
+## capture reads the sentence the game would actually print. Nadia is a nurse — the `mark` tier.
+static func _order(wrong: bool) -> Array:
+	var adler := Content.brand("adler")
+	var feder := Content.brand("pap_feder_lang")
+	return [
+		{"sku_id": "mate", "said": "1x Mate.", "qty": 1, "name": "Mate", "category": "drinks",
+			"brand": "", "brand_name": "", "mark": "", "colour": "", "icon": "sku/mate",
+			"name_shown": false, "satisfied": true},
+		{"sku_id": "cigarettes", "said": "2x the ones with the eagle — cigarettes.", "qty": 2,
+			"name": String(Content.sku("cigarettes").get("name", "")), "category": "tobacco",
+			"brand": "adler", "brand_name": "", "mark": String(adler.get("mark", "")),
+			"colour": String(adler.get("colour", "")), "icon": String(adler.get("icon", "")),
+			"name_shown": false, "satisfied": false},
+		{"sku_id": "papers", "said": "1x the cream booklet.", "qty": 1,
+			"name": String(Content.sku("papers").get("name", "")), "category": "tobacco",
+			"brand": "pap_feder_lang", "brand_name": "", "mark": String(feder.get("mark", "")),
+			"colour": String(feder.get("colour", "")), "icon": String(feder.get("icon", "")),
+			"name_shown": false, "satisfied": false},
+		{"sku_id": "pfand", "said": "3x Pfand.", "qty": 3, "name": "", "category": "pfand",
+			"brand": "", "brand_name": "", "mark": "", "colour": "", "icon": "prop/pfand_crate",
+			"name_shown": false, "satisfied": not wrong},
+	]
+
+## `view.wall`: three shelves, a price rail each, and what you are already carrying. The facings come
+## straight out of `Content.BRANDS`, in registry order, so the wall never reshuffles between captures
+## and a brand added to the catalogue is on the wall the same day.
+static func _wall() -> Dictionary:
+	return {
+		"shelves": [_wall_shelf("cigarettes", 0), _wall_shelf("tobacco", 1), _wall_shelf_bottom()],
+		"hand": [{"uid": 8, "sku_id": "cigarettes", "brand": "adler"}],
+	}
+
+static func _wall_shelf(sku_id: String, row: int) -> Dictionary:
+	var s := Content.sku(sku_id)
+	var cells: Array = []
+	for b in Content.brands_for(sku_id):
+		cells.append(_wall_cell(b, row, cells.size(), _mock_stock(String((b as Dictionary).get("id", "")))))
+	return {"label": String(s.get("name", sku_id)), "price": float(s.get("base_price", 0.0)), "cells": cells}
+
+## The bottom shelf carries papers AND filters on one rail — ten facings, one price. The rail quotes
+## the papers, which is the deviation docs/08 section 4.3's "one price per rail" costs when two SKUs
+## share a shelf; a second rail is the fix if the judge reads it as wrong.
+static func _wall_shelf_bottom() -> Dictionary:
+	var s := Content.sku("papers")
+	var cells: Array = []
+	for sku_id in ["papers", "filters"]:
+		for b in Content.brands_for(String(sku_id)):
+			cells.append(_wall_cell(b, 2, cells.size(), _mock_stock(String((b as Dictionary).get("id", "")))))
+	return {"label": String(s.get("name", "papers")), "price": float(s.get("base_price", 0.0)), "cells": cells}
+
+## One facing, in exactly the keys docs/08 section 3.3 documents — `BrandMark.merge` is what fills in
+## the facing's icon, band and footprint, which is the path the real read-model will take too.
+static func _wall_cell(brand_row: Dictionary, row: int, col: int, stock: int) -> Dictionary:
+	return {
+		"sku_id": String(brand_row.get("sku", "")),
+		"brand": String(brand_row.get("id", "")),
+		"name": String(brand_row.get("name", "")),
+		"mark": String(brand_row.get("mark", "")),
+		"colour": String(brand_row.get("colour", "")),
+		# The facing's own asset id, so `BrandMark` never has to go back to the catalogue for it.
+		"icon": String(brand_row.get("icon", "")),
+		"stock": stock,
+		"row": row,
+		"col": col,
+	}
+
+## Deterministic stock for the capture: Bergmann is out and Luxor is down to its last row (which is a
+## Schulz story beat waiting to happen, docs/09 section 2.4), so both greyed states are on screen.
+static func _mock_stock(brand_id: String) -> int:
+	match brand_id:
+		"bergmann":
+			return 0
+		"luxor":
+			return 1
+	return 6

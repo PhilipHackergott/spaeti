@@ -91,7 +91,69 @@ const TILL_PFAND_ROW := "Pfand %d × %s"         # bottles × the rate the reduc
 const TOTAL := "Total"
 const RING_UP := "Ring up"
 const PFAND := "Pfand"
+## The head of the line, when their job fits beside their name ("Lena · painting student").
+const QUEUE_WHO := "%s · %s"
+
+static func queue_who(who: String, job: String) -> String:
+	return QUEUE_WHO % [who, job]
 const WAVE_OFF := "Wave off"
+
+# ── the ring-up: the counter tray, the register, the tobacco wall (docs/08 §4) ───────────────
+## The register is the till grown up: the same three verbs (Ring up · Pfand · Wave off, above) plus
+## the two the counter adds — turning around to the wall, and asking for an ID before you sell.
+const REGISTER := "Register"
+const REGISTER_EMPTY := "nothing scanned yet"
+const SUBTOTAL := "Subtotal"
+const TURN_AROUND := "Turn around"
+const WALL_BACK := "Back"
+const CHECK_ID := "Check ID"
+const ID_CHECKED := "ID checked"
+const TRAY_EMPTY := "counter's clear"
+const ORDER_EMPTY := "they haven't asked yet"
+const IN_HAND := "In hand"
+## A quantity, the way the whole pool already writes one (`STOCK_COUNT`): a lowercase x, because
+## Jersey 10 has no × glyph and a missing glyph prints as a hole, not as a multiplication sign.
+const QTY := "%dx"
+## The row controls: a stepper pair and a delete. Symbols, not words — a 130-px register line has
+## room for a name or for the word "Remove", never both.
+const STEP_UP := "+"
+const STEP_DOWN := "-"
+const REMOVE := "x"
+## The one free correction, when the reducer rejects a bad ring-up and does not say why itself.
+const CORRECTION := "Check that again."
+## …and what she actually says, by the bucket the reducer flagged (`view.register.correction_kind`,
+## docs/08 §3.4). The REDUCER decides which bucket; the words are the table's, which is the rule for
+## every other player-visible sentence in the game. One line each — the box is 264 px on the register
+## screen and a second line covers the tray until it is dismissed.
+const CORRECTION_BY_KIND := {
+	"wrong_brand": "That's not the one, love. Look at the mark.",
+	"extra": "I didn't take that one.",
+	"missing": "There's something missing there.",
+	"wrong_count": "Not that many — count them again.",
+}
+
+## How a customer asks for what she came in for (docs/08 §2, "How a customer phrases it"). The ENGINE
+## composes these into `order[i].said` so the OrderCard, the talk graph and any test read one string
+## and can never disagree; `Rules.ASK_*` mirrors the table because a pure reducer may not import a
+## component, exactly as `Rules.STAT_NAMES` mirrors `STAT_NAMES`. `test_scenes.gd` pins the two.
+## NOTE THE LOWERCASE x, the same one `QTY` uses: Jersey 10 has no × glyph and a missing glyph
+## prints as a HOLE, not as a multiplication sign. `said` is a player-visible sentence, so it obeys
+## the same rule the rest of the pool does.
+const ASK_CIGS := "%dx %s — cigarettes."
+const ASK_POUCH := "%dx %s — rolling tobacco."
+## Everything that is not a pack or a pouch — papers, filters, and every non-tobacco line. The noun
+## is the brand's own `spoken` phrase, which already carries the length and the gauge ("long Feder
+## papers", "slim filters"). A template that re-split that into (length, kind) would have to re-derive
+## words the catalogue already says, and would print "long long Feder papers" — docs/09 §1 rule 2.
+const ASK_ITEM := "%dx %s."
+const ASK_PFAND := "%dx Pfand."
+## The `mark` speech tier: she points instead of naming. `%s` is `Content.brand_phrase` — the
+## article-free logo phrase ("eagle", "fox"), because this template already carries the article.
+const ASK_MARK_PHRASE := "the ones with the %s"
+## …and how she points at a booklet or a box of filters, which carry no emblem to point at: the
+## object itself is the answer ("the cream booklet", "the slim ones"), docs/09 §1 rule 1.
+const ASK_POINT := "the %s"
+const ASK_TAIL := "That's it."
 
 # ── the HUD (one compact line per corner) ────────────────────────────────────────────────────
 const HUD_NIGHT := "Night %d"

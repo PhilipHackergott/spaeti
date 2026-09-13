@@ -1,0 +1,12 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://components/brand_mark.gd" id="1_script"]
+[ext_resource type="Theme" path="res://components/Theme.tres" id="2_theme"]
+
+[node name="BrandMark" type="Control"]
+custom_minimum_size = Vector2(16, 16)
+offset_right = 16.0
+offset_bottom = 16.0
+mouse_filter = 2
+theme = ExtResource("2_theme")
+script = ExtResource("1_script")

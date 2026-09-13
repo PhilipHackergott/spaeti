@@ -78,6 +78,12 @@ static func new_game(config: Dictionary = {}) -> Dictionary:
 		"story": new_story(),
 		"player": new_player(),
 		"talk": {},
+		# The register (docs/08 §3.1). Everything that dies with the customer lives under `active`;
+		# these three stay TOP LEVEL on purpose — which way your body is facing, the uid counter and the
+		# record of the last ring-up all have to survive a customer leaving while you are at the wall.
+		"view_mode": "counter",
+		"next_item_uid": 1,
+		"last_verdict": {},
 		"rng_state": int(cfg["seed"]) & 0xFFFFFFFF,
 		"log": [],
 	}
@@ -119,6 +125,28 @@ static func new_customer(id: int, archetype_id: String, want: String, patience_m
 		# Empties THEY carried in — the Pfand you can pay out for them. Not `pfand_held`, which is the
 		# shop's own crate waiting on wholesaler credit.
 		"bottles": bottles,
+		# The register, nested under the person it belongs to (docs/08 §3.1): `_next_customer` clears
+		# `active` wholesale, so counter/register desync is structurally impossible rather than a thing
+		# somebody has to remember to clear. Empty until `place_basket` fires at the counter.
+		"basket": [],
+		"counter": [],
+		"register": new_register(),
+		"hand": [],
+	}
+
+## The claim, as opposed to the counter's physical truth (docs/08 §3.1). `flagged` holds the line
+## indices the rejected ring-up marked; `correction` is what she said about it.
+static func new_register() -> Dictionary:
+	return {
+		"lines": [],
+		"pfand_bottles": 0,
+		"id_checked": false,
+		"corrections": 0,
+		"flagged": [],
+		"correction": "",
+		## The bucket behind that sentence, so the box can pick the words out of `Strings` instead of
+		## printing the reducer's own English (docs/08 §3.4).
+		"correction_kind": "",
 	}
 
 static func clone(s: Dictionary) -> Dictionary:
@@ -203,6 +231,11 @@ static func _normalise(s: Dictionary) -> Dictionary:
 		talk["line"] = int(talk["line"])
 		_normalise_data(talk["last_check"])
 	s["talk"] = talk
+	# The register keys post-date the autosave, so they are read with defaults: a save written before
+	# docs/08 landed loads into a shop facing the counter with an empty till (docs/08 §3.1).
+	s["view_mode"] = String(s.get("view_mode", "counter"))
+	s["next_item_uid"] = int(s.get("next_item_uid", 1))
+	s["last_verdict"] = _normalise_verdict(s.get("last_verdict", {}))
 	for entry in s["log"]:
 		entry["ts"] = int(entry["ts"])
 		_normalise_data(entry["data"])
@@ -222,6 +255,58 @@ static func _normalise_customer(c: Dictionary) -> void:
 	c["id"] = int(c["id"])
 	c["patience_left_ms"] = int(c["patience_left_ms"])
 	c["bottles"] = int(c.get("bottles", 0))
+	# The register, re-integered (docs/08 §3.1). Every count here is a whole number of things, so a
+	# save that came back as 2.0 packs would stringify differently and break the replay guarantee.
+	var basket: Array = c.get("basket", [])
+	for row in basket:
+		(row as Dictionary)["qty"] = int((row as Dictionary).get("qty", 1))
+	c["basket"] = basket
+	var counter: Array = c.get("counter", [])
+	for item in counter:
+		(item as Dictionary)["uid"] = int((item as Dictionary).get("uid", 0))
+		(item as Dictionary)["count"] = int((item as Dictionary).get("count", 1))
+	c["counter"] = counter
+	var register: Dictionary = c.get("register", new_register())
+	for line in (register.get("lines", []) as Array):
+		(line as Dictionary)["qty"] = int((line as Dictionary).get("qty", 1))
+		var uids: Array = (line as Dictionary).get("uids", [])
+		for i in uids.size():
+			uids[i] = int(uids[i])
+	register["pfand_bottles"] = int(register.get("pfand_bottles", 0))
+	register["corrections"] = int(register.get("corrections", 0))
+	# Both halves of the correction get a default, so a register saved before the bucket id existed
+	# still round-trips to a byte-identical `to_json` (test_determinism.gd).
+	register["correction"] = String(register.get("correction", ""))
+	register["correction_kind"] = String(register.get("correction_kind", ""))
+	var flagged: Array = register.get("flagged", [])
+	for i in flagged.size():
+		flagged[i] = int(flagged[i])
+	register["flagged"] = flagged
+	c["register"] = register
+	var hand: Array = c.get("hand", [])
+	for held in hand:
+		(held as Dictionary)["uid"] = int((held as Dictionary).get("uid", 0))
+	c["hand"] = hand
+
+## `last_verdict` mixes whole counts with two real numbers (docs/08 §3.4), so it cannot go through
+## `_normalise_data`'s "every integral float is an int" rule — that would turn `accuracy 1.0` into
+## `1` and the round-trip would stop being byte-stable. Each field is re-typed by name instead.
+const VERDICT_BUCKETS := ["missing", "extra", "wrong_brand", "wrong_count", "refused"]
+const VERDICT_COUNTS := ["line", "qty", "want", "got"]
+
+static func _normalise_verdict(verdict: Dictionary) -> Dictionary:
+	if verdict.is_empty():
+		return {}
+	verdict["ok"] = bool(verdict.get("ok", false))
+	verdict["accuracy"] = float(verdict.get("accuracy", 0.0))
+	verdict["errors"] = float(verdict.get("errors", 0.0))
+	verdict["wanted_units"] = int(verdict.get("wanted_units", 0))
+	for bucket in VERDICT_BUCKETS:
+		for entry in (verdict.get(bucket, []) as Array):
+			for key in VERDICT_COUNTS:
+				if (entry as Dictionary).has(key):
+					(entry as Dictionary)[key] = int((entry as Dictionary)[key])
+	return verdict
 
 ## Act/season label from the calendar (Summer → Autumn → Winter thirds).
 static func act_of(s: Dictionary) -> String:

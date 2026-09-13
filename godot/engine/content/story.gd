@@ -190,7 +190,11 @@ const DATA: Array[Dictionary] = [
 		},
 	},
 	{
-		"id": "aylinjonas", "character": "Aylin & Jonas", "character_id": "aylinjonas", "archetype_id": "raver",
+		"id": "aylinjonas", "character": "Aylin", "character_id": "aylin", "archetype_id": "raver",
+		# STAGING (docs/09 §2.10): two people cannot share one 160×193 leaning bust without shrinking
+		# both faces or cropping one to a shoulder, so S4 is HER arc and Jonas's absence becomes the arc
+		# itself — one bag instead of two. The strand id stays `aylinjonas`, so its beats, outcomes and
+		# epilogue keys are untouched; only the face at the counter and the name in `met` changed.
 		"start": "aj_meet", "priority": 5,
 		"beats": {
 			"aj_meet": {
@@ -385,4 +389,194 @@ const DATA: Array[Dictionary] = [
 			"pushedout": {"living_history": "Frau Schulz notes the closing date in her old GDR hand. \"So that it is remembered.\"", "forgotten": "The last witness to what stood here watches the shutter come down, and says nothing."},
 		},
 	},
+	{
+		# S13 — the lever. Not a conspirator: a man who read a term sheet on a Tuesday and went to lunch.
+		# Seven beats, Truby's seven steps keyed to the year (docs/09 §2.11): Summer 1–2 · Autumn 3–4 ·
+		# Winter 5–6 · Spring 7. `b_patron` is gated on `bley_tip` — if you never got the clause out of
+		# him he stays a customer in a good coat, and `b_seen`'s outcome is where his story stops.
+		"id": "bley", "character": "Herr Bley", "character_id": "bley", "archetype_id": "insomniac",
+		"start": "b_water", "priority": 4,
+		"beats": {
+			"b_water": {
+				"id": "b_water", "speaker": "Herr Bley", "after_day": 2,
+				"lines": ["03:10. A good coat, a good watch, and an order given with the crispness of a man who considers you staff. \"Water. Still — the other is undrinkable.\"", "Then he does not leave. He stands nine minutes over a four-euro transaction, turning the bottle a quarter turn on the laminate."],
+				"choices": [
+					{"label": "Let him stand. Wipe the counter down slowly.", "kiez": 1, "next": "b_youngman"},
+					{"label": "\"Anything else, or is that us?\"", "next": "b_youngman"},
+				],
+			},
+			"b_youngman": {
+				"id": "b_youngman", "speaker": "Herr Bley", "after_day": 5,
+				"lines": ["\"Young man,\" he says, for the ninth night running, and it is armour, worn politely.", "\"In Grunewald there is nothing open at three. Not even the people.\""],
+				"choices": [
+					{"label": "\"I've got a name. So have you, presumably.\"", "kiez": 1, "flags": ["bley_talks"], "next": "b_eleven"},
+					{"label": "\"Young man's fine. Four twenty, bitte.\"", "next": "b_eleven"},
+				],
+			},
+			"b_eleven": {
+				"id": "b_eleven", "speaker": "Herr Bley", "after_day": 9,
+				"lines": ["Eleven minutes tonight. He buys a bar of chocolate and leaves it on the counter, which he does most nights, and you have started putting it out again.", "\"You are open at three. Remarkable.\" He says it the way one remarks on a species."],
+				"choices": [
+					{"label": "\"Somebody's always awake. I just sell to them.\"", "kiez": 1, "next": "b_tuesday"},
+					{"label": "Put the chocolate back in his bag without a word.", "kiez": 1, "integrity": 1, "next": "b_tuesday"},
+				],
+			},
+			"b_tuesday": {
+				"id": "b_tuesday", "speaker": "Herr Bley", "after_day": 12,
+				"lines": ["\"This street, by the way. Somebody put a paper in front of me on Tuesday. Block acquisition, mixed use. A very tidy structure.\"", "\"I signed off the financing on page eleven and went to lunch. One does not look at the street name.\" He has no idea he is standing in it."],
+				"choices": [
+					{"label": "\"What does page eleven give them, exactly?\"", "kiez": 1, "flags": ["bley_lindner", "bley_tip", "main_lever_hint"], "next": "b_armour"},
+					{"label": "\"Tidy for who?\"", "flags": ["bley_lindner"], "next": "b_armour"},
+					{"label": "Say nothing. Ring up the water.", "next": "b_armour"},
+				],
+			},
+			"b_armour": {
+				"id": "b_armour", "speaker": "Herr Bley", "after_day": 16,
+				"lines": ["He is not crisp tonight. The coat is the same coat and everything under it has come apart: a house in Grunewald with one person in it, a daughter who forwards his letters unopened.", "\"I am not —\" He stops. \"I would like the water. That is all I would like.\""],
+				"choices": [
+					{"label": "Pour him a coffee he did not order. Say nothing.", "cash": -1, "kiez": 1, "integrity": 1, "next": "b_seen"},
+					{"label": "\"Sit down, Rüdiger. The crate's clean.\"", "kiez": 2, "next": "b_seen"},
+					{"label": "Ring up the water. It is 3am and he is a customer.", "next": "b_seen"},
+				],
+			},
+			"b_seen": {
+				"id": "b_seen", "speaker": "Herr Bley", "after_day": 19,
+				"lines": ["\"Thirty-one years in corporate finance,\" he says, to the fridge rather than to you, \"and the only person who has asked me a question that was not about a price works nights in a Späti.\"", "The coat is over his arm. He has been here fifty minutes."],
+				"choices": [
+					{"label": "Stay open. Let him talk until it gets light.", "kiez": 2, "integrity": 1, "outcome": "seen_him", "flags": ["bley_seen"], "next": "b_patron"},
+					{"label": "\"Same time tomorrow, Herr Bley.\" Cash up.", "outcome": "back_in_the_coat"},
+				],
+			},
+			"b_patron": {
+				"id": "b_patron", "speaker": "Herr Bley", "after_day": 23, "requires_flag": "bley_tip",
+				"lines": ["An envelope goes on the counter beside the chocolate, squared to the edge. A year of the Mieterverein retainer, paid, with no name on the transfer.", "\"You will not mention this. Not to the greengrocer, not to the loud one with the flyers. I would like to keep coming at three.\""],
+				"choices": [
+					{"label": "\"Nobody hears it from me. Same time tomorrow.\"", "kiez": 2, "integrity": 1, "outcome": "quiet_patron"},
+					{"label": "\"Keep your money, Rüdiger. Just keep coming.\"", "kiez": 1, "outcome": "seen_him"},
+				],
+			},
+		},
+		"epilogue": {
+			"institution": {
+				"quiet_patron": "Herr Bley's retainer is still paid, still anonymous, and the Mieterverein has not lost a case on this street since.",
+				"seen_him": "Herr Bley comes at three, sits on the crate, and tells the room what the numbers are actually doing. Nobody calls him young man.",
+				"back_in_the_coat": "A man in a good coat buys still water at three in the morning and never stays. The new staff find him odd.",
+			},
+			"held": {
+				"quiet_patron": "The retainer covers the lawyer who keeps the rent letters honest. He has never once mentioned it.",
+				"seen_him": "Herr Bley drives in from Grunewald at three, and for nine minutes a night he is not a man who signs things.",
+				"back_in_the_coat": "He kept coming and kept the coat on. Neither of you ever decided that; it just stayed true.",
+			},
+			"soldout": {
+				"quiet_patron": "He paid for a fight you stopped fighting. The envelope went back uncashed, and he understood, and that was worse.",
+				"seen_him": "\"You were the only one who asked,\" he says on the last night, and buys still water from you one final time.",
+				"back_in_the_coat": "Two men who signed the tidy structure drink at different counters now. His is nicer.",
+			},
+			"pushedout": {
+				"quiet_patron": "Herr Bley pays for the appeal out of his own account, loses, and turns up anyway on the day you carry the fridges out.",
+				"seen_him": "He reads the closing notice on the glass for a long time. \"Page eleven,\" he says. \"I am sorry. That is not nothing, is it.\"",
+				"back_in_the_coat": "He drove past on the Tuesday it shut, at three in the morning, and did not stop.",
+			},
+		},
+	},
 ]
+
+## THE FLAG ECONOMY (docs/09 §4.10). A flag nobody reads is a lie in the save file: the branch simply
+## never happens, and nothing at runtime can show you that. `test_content.gd` already guards the READ
+## side (every `requires_flag` names a flag some choice writes); this table is the WRITE side, and
+## `test_flags.gd` fails the build on any flag set by any choice that nothing consumes.
+##
+## Three reader kinds count, and a flag needs exactly one of them:
+##   1. a beat's or vignette's `requires_flag`  — a real gate, checked by StoryFlow.eligible_beats;
+##   2. an `Economy.FLAG_LABEL` entry           — the Manage screen's corner-status panel prints it;
+##   3. an entry HERE                           — a reader that is written and scheduled but not yet
+##      shipped: the seasonal trees and the later arc beats of docs/09 §2. The value names the beat
+##      that will consume it, so "who reads this?" is answerable from the data instead of from memory.
+##
+## Namespace (docs/09 §4.10): `<character_id>_<event>` strand-local · `kiez_*` corner-wide · `main_*`
+## anything the 22-step arc reads. Lower snake, set-only, never cleared, stored in `story.flags`.
+## Budget: 2–5 flags per guest per season. DELETE the entry when the real reader lands — the day a
+## seasonal tree gates on `karim_zackig`, kind 1 takes over and this row becomes a dead declaration,
+## which `test_flags.gd` also fails on.
+const FLAG_READERS: Dictionary = {
+	# — the main arc —
+	"heard_offer": "main/climax — the second offer reads whether she has already made the first",
+	"refused_early": "main/climax — Brandt's approach hardens if you refused her on day 6",
+	"sold": "Finale.main_ending — mirrors story.main_outcome into the epilogue copy",
+	"stood": "Finale.main_ending — mirrors story.main_outcome into the epilogue copy",
+	"main_lever_hint": "main step 17 — the lever; set by three independent routes (Bley's clause, Tobias's March date, Aylin's fence notice) and read once",
+
+	# — S1 Lena —
+	"lena_kind": "lena/l_show — The Show: the tab decides whether she can afford to hang the honest piece",
+
+	# — S2 Jürgen —
+	"j_welcome": "juergen/j_cold — The Night He Doesn't Come",
+
+	# — S3 Mehmet —
+	"m_trust": "mehmet/m_word — Legacy Is People",
+
+	# — S11 Yusuf —
+	"y_grace": "yusuf/y_job — the shelf-stacking offer only lands if you gave him the grace first",
+
+	# — S5 Frau Schulz —
+	"schulz_reserved": "S5 autumn — the luxor row runs out as a story beat, not a stock-out",
+	"schulz_listen": "S5 winter — They Take The Signal Box Down",
+	"schulz_hand": "S5 winter — They Do Want The Stories: the price cards in her own hand",
+	"schulz_bag": "S5 spring — The Corner's Memory: she narrates the Kiezversammlung",
+	"schulz_brandt_visit": "main step 15 — the Brandt pressure beat knows she was approached first",
+
+	# — S6 Karim —
+	"karim_kind": "karim/k_battle — This Is Already Home",
+	"karim_word": "S6 winter — the Behörde deadline: he says the brand name instead of pointing",
+	"karim_zackig": "S6 spring — He Cooks For The Street Party",
+	"karim_form": "S6 winter — the Behörde deadline",
+	"karim_helped": "S6 winter — the Behörde deadline: the photocopy is the document they wanted",
+
+	# — S7 Achim —
+	"achim_listen": "achim/a_battle — The Fight Is The Scene",
+	"achim_maths": "S7 autumn — The Folding Table",
+	"achim_ally": "main step 19 — the Kiezversammlung: he brings the PA",
+	"achim_poster": "main step 19 — the Kiezversammlung: turnout is the window's readership",
+	"achim_poster_inside": "main step 19 — the Kiezversammlung: half the turnout",
+	"achim_route": "main step 19 — the Kiezversammlung: the sixty-poster route fills the room",
+	"achim_cem_story": "S7 winter — The Squat Becomes Lofts: Cem was at the '96 rent strike",
+
+	# — S8 Tobias —
+	"tobias_warn": "tobias/t_choice — His Company Or The Corner",
+	"tobias_lindner": "main steps 15–17 — you knew whose money was under the fund",
+	"tobias_fund_offered": "S8 autumn — The Kiez Fund",
+	"tobias_digging": "main step 17 — the lever: he finds the break clause from the inside",
+	"tobias_warned": "S8 winter — Belonging Is Paid In Care",
+	"tobias_invited": "S8 winter — Belonging Is Paid In Care: he came, and came alone",
+	"tobias_gouged": "S8 winter — His Company Or The Corner: you priced him once, and he remembers",
+	"took_fund": "main steps 15–17 — the fund's strings close around the corner",
+
+	# — S9 Nadia —
+	"nadia_tab": "S9 winter — Childcare Falls Through Mid-Shift",
+	"nadia_seen": "S9 winter — It Takes A Kiez: she can only ask if she has been seen",
+	"nadia_held": "S9 winter — It Takes A Kiez: the wall stayed shut",
+	"nadia_offered": "S9 winter — It Takes A Kiez: you left the choice with her",
+	"nadia_kid": "S9 spring — Leo Does Homework On The Crate",
+	"nadia_open_at_four": "S9 spring — Leo Does Homework On The Crate",
+
+	# — S10 Robin —
+	"robin_safe": "robin/r_battle — Chosen Family Is Real And It's Here",
+	"robin_name": "S10 winter — Chosen Family Is Real And It's Here",
+	"robin_crate": "S10 autumn — Orbiting The Light",
+	"robin_rolled": "S10 autumn — Orbiting The Light",
+	"robin_summer": "S10 winter — First Heartbreak, 2am, Your Counter",
+
+	# — S4 Aylin —
+	"aylin_jonas_two": "S4 winter — The Job In Leipzig",
+	"aylin_named_it": "S4 winter — The Magic Was Each Other",
+	"aylin_bench": "S4 winter — The Magic Was Each Other",
+	"aylin_bench_talk": "S4 winter — The Magic Was Each Other",
+	"aylin_bring_jonas": "S4 spring — They Come At Eight In The Evening Now",
+	"aylin_lighter_jar": "S4 spring — They Come At Eight In The Evening Now: the jar is still there",
+	"aylin_fence": "main step 17 — the lever: the fence notice on the door",
+
+	# — S13 Herr Bley —  (`bley_tip` is a REAL gate: bley/b_patron.requires_flag)
+	"bley_talks": "S13 winter — The Armour Comes Off",
+	"bley_lindner": "main step 17 — the lever: you know which desk signed it",
+	"bley_seen": "S13 spring — A Quiet Patron",
+}

@@ -30,12 +30,157 @@ const TIER_RANK := {"steal": 0, "fair": 1, "high": 2, "gouge": 3}
 const TIER_SATISFACTION := {"steal": 0.25, "fair": 0.15, "high": -0.05, "gouge": -0.35}
 const TIER_KIEZ := {"steal": 0.4, "fair": 0.2, "high": -0.2, "gouge": -0.8}
 
-## `promptness` is 0..1 patience remaining at serve time.
-static func satisfaction(got_wanted: bool, tier: String, promptness: float) -> float:
-	var s := 0.7 if got_wanted else 0.25
+## `promptness` is 0..1 patience remaining at serve time. `accuracy` is 0..1 — how much of the order
+## the register actually got right (docs/08 §3.4). The widening is exact: the legacy call sites pass a
+## bool `got_wanted`, which GDScript converts to 1.0 / 0.0, and `0.25 + 0.45 × accuracy` reproduces the
+## old endpoints (false → 0.25, true → 0.70) to the cent — which is why test_economy.gd stays green.
+static func satisfaction(accuracy: float, tier: String, promptness: float) -> float:
+	var s := 0.25 + 0.45 * clampf(accuracy, 0.0, 1.0)
 	s += float(TIER_SATISFACTION.get(tier, 0.0))
 	s += 0.15 * clampf(promptness, 0.0, 1.0)
 	return clampf(s, 0.0, 1.0)
+
+# ─────────────────────── the register's verdict (docs/08 §3.4) ───────────────────────
+
+## The Pfand crate rides the same multiset as everything else: her empties are a request like any
+## other, so FORGETTING the deposit scores as `missing`. It is not a SKU — `Content.sku("pfand")` is
+## `{}` — which is exactly why nothing charges for it and nothing tries to take it off a shelf.
+const PFAND_KEY := "pfand"
+
+## Two multisets keyed `(sku, brand)` — what she asked for, and what you actually rang — reduced to
+## five buckets and one score (docs/08 §3.4). PURE: it reads the basket and the register lines and
+## writes nothing. `lines` are `active.register.lines` (plus the Pfand pseudo-line the reducer
+## appends), so every entry carries the `line` index the UI flags and the reducer voids.
+##
+##   missing      — an ordered key that was never rung at all.
+##   extra        — a rung key that was never ordered; the units are VOIDED (no revenue, no stock).
+##   wrong_brand  — right `sku`, wrong `brand`; weighted HALF of `extra` (reaching for the navy pack
+##                  is a different sin from inventing a sale), and still sold.
+##   wrong_count  — right key, wrong quantity; the delta counts.
+##   refused      — a restricted line for an underage guest you actually ID'd: dropped from BOTH
+##                  sides before scoring, so doing the right thing is never scored as `missing`.
+static func order_accuracy(basket: Array, lines: Array, arch: Dictionary, id_checked: bool = false) -> Dictionary:
+	var refuse := bool(arch.get("underage", false)) and id_checked
+	var missing: Array = []
+	var extra: Array = []
+	var wrong_brand: Array = []
+	var wrong_count: Array = []
+	var refused: Array = []
+	# Ordered key lists, so the buckets come out in basket order / register order and a replay of the
+	# same night produces the same verdict dictionary byte for byte.
+	var want_keys: Array = []
+	var want: Dictionary = {}
+	var want_row: Dictionary = {}
+	var wanted_units := 0
+	for entry in basket:
+		var row: Dictionary = entry
+		var sku_id := String(row.get("sku", ""))
+		var qty := int(row.get("qty", 0))
+		if sku_id == "" or qty <= 0:
+			continue
+		if refuse and is_restricted(sku_id):
+			continue  # off both sides before scoring
+		var key := _order_key(sku_id, String(row.get("brand", "")))
+		if not want.has(key):
+			want_keys.append(key)
+			want[key] = 0
+			want_row[key] = {"sku": sku_id, "brand": String(row.get("brand", ""))}
+		want[key] = int(want[key]) + qty
+		wanted_units += qty
+	var got_keys: Array = []
+	var got: Dictionary = {}
+	var got_row: Dictionary = {}
+	for i in lines.size():
+		var line: Dictionary = lines[i]
+		var sku_id := String(line.get("sku", ""))
+		var qty := int(line.get("qty", 0))
+		if sku_id == "" or qty <= 0:
+			continue
+		var brand := String(line.get("brand", ""))
+		if refuse and is_restricted(sku_id):
+			refused.append({"line": i, "sku": sku_id, "brand": brand, "qty": qty})
+			continue
+		var key := _order_key(sku_id, brand)
+		if not got.has(key):
+			got_keys.append(key)
+			got[key] = 0
+			got_row[key] = {"sku": sku_id, "brand": brand, "line": i}
+		got[key] = int(got[key]) + qty
+	# 1. Exact key matches: the same thing, possibly the wrong number of them.
+	var want_left: Dictionary = want.duplicate()
+	var got_left: Dictionary = got.duplicate()
+	for key in want_keys:
+		if not got.has(key):
+			continue
+		var delta := int(got[key]) - int(want[key])
+		if delta != 0:
+			wrong_count.append({"line": int(got_row[key]["line"]), "sku": String(want_row[key]["sku"]),
+				"brand": String(want_row[key]["brand"]), "want": int(want[key]), "got": int(got[key]),
+				"qty": absi(delta)})
+		want_left.erase(key)
+		got_left.erase(key)
+	# 2. What is left of the order looks for the same SKU under another mark — that is the half-sin.
+	#    UNLESS she never named a mark: an unbranded line is "whatever you've got", so any facing of
+	#    that SKU satisfies it. That is the whole nameless parade, which asks for "cigarettes".
+	for key in want_keys:
+		if not want_left.has(key):
+			continue
+		var need := int(want_left[key])
+		var sku_id := String(want_row[key]["sku"])
+		var any_mark := String(want_row[key]["brand"]) == ""
+		for gkey in got_keys:
+			if need <= 0:
+				break
+			if not got_left.has(gkey) or String(got_row[gkey]["sku"]) != sku_id:
+				continue
+			var paired := mini(need, int(got_left[gkey]))
+			if not any_mark:
+				wrong_brand.append({"line": int(got_row[gkey]["line"]), "sku": sku_id,
+					"brand": String(got_row[gkey]["brand"]), "wanted_brand": String(want_row[key]["brand"]),
+					"qty": paired})
+			need -= paired
+			if int(got_left[gkey]) - paired <= 0:
+				got_left.erase(gkey)
+			else:
+				got_left[gkey] = int(got_left[gkey]) - paired
+		if need > 0:
+			missing.append({"sku": sku_id, "brand": String(want_row[key]["brand"]), "qty": need})
+		want_left.erase(key)
+	# 3. Whatever is still on the register was never ordered at all.
+	for gkey in got_keys:
+		if not got_left.has(gkey):
+			continue
+		extra.append({"line": int(got_row[gkey]["line"]), "sku": String(got_row[gkey]["sku"]),
+			"brand": String(got_row[gkey]["brand"]), "qty": int(got_left[gkey])})
+	var errors := float(_units(missing)) + float(_units(extra)) + 0.5 * float(_units(wrong_brand)) + float(_units(wrong_count))
+	var accuracy := round2(clampf(1.0 - errors / maxf(1.0, float(wanted_units)), 0.0, 1.0))
+	return {
+		"ok": errors == 0.0,
+		"accuracy": accuracy,
+		"errors": errors,
+		"wanted_units": wanted_units,
+		"missing": missing,
+		"extra": extra,
+		"wrong_brand": wrong_brand,
+		"wrong_count": wrong_count,
+		"refused": refused,
+	}
+
+## A basket line and a register line are the same thing when the SKU *and* the mark agree — which is
+## the whole tobacco wall in one string.
+static func _order_key(sku_id: String, brand: String) -> String:
+	return sku_id + "|" + brand
+
+static func _units(bucket: Array) -> int:
+	var n := 0
+	for entry in bucket:
+		n += int((entry as Dictionary).get("qty", 0))
+	return n
+
+## Age-restricted? Asked of the SKU table, never of a hard-coded list, so a new restricted SKU is
+## restricted everywhere the moment it is written.
+static func is_restricted(sku_id: String) -> bool:
+	return bool(Content.sku(sku_id).get("restricted", false))
 
 static func tip_for(arch: Dictionary, total: float, sat: float) -> float:
 	if sat < 0.5 or arch.is_empty():

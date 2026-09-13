@@ -23,6 +23,7 @@ const DATA: Array[Dictionary] = [
 	{"id": "cigarettes", "name": "Cigarettes", "category": "tobacco", "cost": 6.5, "base_price": 8.0, "fair_lo": 7.5, "fair_hi": 9.0, "demand": 1.0, "restricted": true, "icon": "sku/cigarettes"},
 	{"id": "tobacco", "name": "Rolling tobacco", "category": "tobacco", "cost": 9.0, "base_price": 11.0, "fair_lo": 10.5, "fair_hi": 12.5, "demand": 0.5, "restricted": true, "icon": "sku/tobacco"},
 	{"id": "papers", "name": "Rolling papers", "category": "tobacco", "cost": 0.4, "base_price": 1.0, "fair_lo": 0.8, "fair_hi": 1.6, "demand": 0.5, "icon": "sku/papers"},
+	{"id": "filters", "name": "Filters", "category": "tobacco", "cost": 0.35, "base_price": 1.0, "fair_lo": 0.8, "fair_hi": 1.6, "demand": 0.5, "icon": "sku/filters"},
 	# — Essentials —
 	{"id": "tp", "name": "Toilet paper", "category": "essentials", "cost": 0.6, "base_price": 1.5, "fair_lo": 1.2, "fair_hi": 2.4, "demand": 0.4, "icon": "sku/tp"},
 	{"id": "condoms", "name": "Condoms", "category": "essentials", "cost": 1.5, "base_price": 3.5, "fair_lo": 3.0, "fair_hi": 5.0, "demand": 0.4, "icon": "sku/condoms"},

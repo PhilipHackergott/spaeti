@@ -1164,3 +1164,97 @@ conversation is open — and the log rows now carry `queue` and `talking`.
   - **Unreachable content.** `set_sunday_open` is legal every manage hour and had no control anywhere, so the Sunday ×1.6 spike, the Ordnungsamt roll, the fine and `ordnungsamt_heat` were dead systems → a **Sonntag toggle in the pinned foot** (`view.manage.open_sunday` carries the state; the standing panel prints the heat). Locked modules were dropped from the board, so `Economy.unlock_reason`'s strings were computed and thrown away → every module gets a row, actionable first, the locked roadmap under them.
   - **Smaller:** `ScrollContainer.follow_focus` on the board's body and the shelf (28 of 56 tab stops were clipped out of the window); focus is preserved across the board's rebuild (one Enter on a "+" used to kill the ring outright); a 4-px dead band above the foot so a click that slips off a half-visible stepper cannot start the night; `StepButton/styles/disabled` (its absence raised a greyed stepper to 24 px and latched the Serve toggle 6 px over its token); `render()` no longer dispatches (`close_night` is deferred) and a detached screen no longer re-renders itself from the capture mock; `SpatiState.from_json` rejects a shape `_normalise` cannot walk and `Session.has_save()` validates instead of `file_exists` (a truncated save lit Continue and threw a script error).
   - **Flagged, not fixed (its own change):** `components/Transition.tscn`'s root has no `script = ExtResource("1_script")`, so `%Transition as Transition` is null and **every screen change has always been an instant cut** — attaching it turns the fade on for the first time and wants its own capture check.
+
+## 2026-09-13 — the register lands, and the loop closes (integrator)
+
+Three lanes (engine · cast · UI) landed `docs/08` + `docs/09` in parallel and each was green on its own. This
+pass integrated them on the REAL engine. The suite was already at 200/0 when it started, which is exactly why
+the interesting failures were the ones no test was asking about.
+
+- **The loop did not actually close, and nothing failed.** `_end_talk` auto-served the guest's single `want` and
+  dismissed them (docs/06 §7, written when a guest *had* one want). Every one of the eleven authored trees
+  therefore rang itself up and walked out at `next:""` — the register, the tray, the wall and the whole of
+  `docs/08` were **unreachable for the entire cast**, and every lane's tests passed because each drove the
+  reducer directly. Probed on the read-model: after Aylin's tree closed, `legal_actions` offered `close_night`
+  and `tick`. Now a guest whose **basket is on the counter** stays standing when the box slides away — the talk
+  ending is the sale *starting* — and the auto-serve survives only for a guest with no basket (the nameless
+  parade, the serve-loop sims, `config.auto_take_next`). `AutoPlayer` gained the matching policy
+  (`serve_register`: what she asked for minus what is on the counter *is* the wall trip), or the competent
+  shopkeeper would have stood there while the patience clock ran out.
+- **`{logo.<sku>}` printed its asset id into four order lines.** Verified live: Robin's opener read *"Drei Ringe
+  tobacco — tob/pouch_dreiringe — short Feder papers"*. The token is a picture (docs/09 §1 rule 3), so the
+  DialogueBox now lays a line that carries one out as a **word flow** — one Label per word, one `BrandMark` per
+  facing, the typewriter counting a mark as one character. Recognition is data-driven (`Content.brand_by_icon`),
+  never a guess at the shape of the string; a line with no mark keeps the single autowrapped Label it always had.
+  `RichTextLabel` was rejected: its `[img]` needs a file on disk, which loses `BrandMark`'s code-drawn fallback —
+  the thing that ships the mechanic before the art.
+- **The `mark` speech tier had no words.** `brands.gd` gained `phrase` (article-free: "eagle", "fox", "cream
+  booklet") and `Content.brand_phrase`, which is what fills `Strings.ASK_MARK_PHRASE`. The engine now composes
+  `order[i].said` from the `ASK_*` table (mirrored into `Rules`, pinned by `test_the_two_ask_tables_agree`), and
+  `regular` / `insomniac` carry `speech:"name"` so the tier is real: a regular says *"1x Kranich — cigarettes."*,
+  a stranger says *"1x the ones with the pearl — cigarettes."* Booklets and filter boxes have no emblem to point
+  at, so they take `ASK_POINT` ("the cream booklet") instead — "the ones with the slim ones" is what the other
+  template produces. Every count uses a lowercase `x`, because Jersey 10 has no `×` and a missing glyph is a hole.
+- **The OrderCard printed the wrong name.** `view.order` carries two: `name` (the SKU's — "Cigarettes") and
+  `brand_name` (the brand's — "Adler", withheld as `""` until `name_shown`). The card read `name` on the
+  `name_shown` branch, so a regular who named her brand got a chip saying "Cigarettes", and in `mark` mode it
+  printed the raw category. Its test had enshrined both. The leak assertion now asks the CATALOGUE what the brand
+  is called and checks the chip does not say it — checking `entry.brand_name` passes no matter what the card
+  prints, because the engine already blanked it.
+- **`MockView` had drifted from the reducer, and only top-level keys were guarded.** A new key-for-key comparison
+  against a real `Rules.view` (docs/08 §6) found `origin` missing from every counter row, `icon` from every wall
+  cell, `correction_kind` from the register, and the crate named where the reducer leaves it to the string table.
+  A mock that drifts means every screen is tuned against a shape the game never produces.
+- **The wall was four shelves against a three-row grid.** The reducer emitted one shelf per SKU; `Palette.wall_cell_rect`
+  knows three rows and folds anything past the second onto the third — so the four filter boxes drew **on top of**
+  the first four paper booklets, both visible, both clickable, the later one swallowing the other's clicks. Nothing
+  failed; the wall simply lied. The bottom rail now carries papers *and* filters with `col` running across it, as
+  `docs/08` §4.3 always said. Caught by the first reachability test to ask the REAL read-model instead of the mock.
+- **A soft-lock from the other direction.** `legal_actions` advertised one representative quantity per register
+  line ("the one the + would send"), while the row ships a "−" *and* a "+" that each route to their own control.
+  So a visible, pressable chip dispatched an action the engine never admitted was legal. Both steps are offered
+  now. The rule is two-way: **every legal action needs a control, and every control needs a legal action.**
+- **`serve_active` left the counter's offer** (docs/08 §3.6) now that `RegisterPanel` ships. It stays legal as the
+  alias the sims dispatch by hand; it simply has no visible control any more, and offering it would have failed
+  the reachability rule above.
+- **The correction is split the way everything else is:** the reducer names the bucket (`correction_kind`), the
+  string table owns the sentence (`Strings.CORRECTION_BY_KIND`). The mock had been carrying *"That was the red
+  one, love. The one with the bird."* — the wrong animal for its own Adler/Nordstern case, a line the brand seam
+  had already retired elsewhere.
+- **`play.mjs` now plays the register, pointer-first and by name never.** Each step reads `legal_actions`, asks
+  `Night.controls_for(action)` which node offers it, synthesises a real move-press-release at that node's own rect
+  centre, and asserts the register actually moved; two standing guards run after every step (`legal_actions`
+  non-empty, no drag stuck). It walks a guest through the talk, turns to the wall, takes the facings her order
+  names, comes back, **scans by clicking the tray items**, steps a quantity wrong and puts it right (proving
+  `matches` is the reducer's opinion and not the screen's), and rings up. `PLAY ok steps=20 guests=65`, with
+  `register-counter`, `wall` and `register-ok` required by the run itself — a night that never turned around
+  would otherwise have passed as "ok" with the loop untested. Three fixes came out of writing it: the clock ran
+  4× while the driver took shots so the first guest balked mid-scan (the register drives at 0.35× now); the
+  wall's 160-ms pivot keeps a full-frame overlay over the counter for a quarter-second *after* `view_mode` flips,
+  and a click in that window is swallowed in silence (every click now waits for its target to actually be on
+  top); and a guest whose order the shelf cannot fill at all is **waved off**, which is a real control, a real
+  action and a real outcome, rather than a stalled till.
+
+- **The scripted night was selling beer to the Kassenkind.** The old `play_night` fallback refused an underage
+  restricted sale explicitly; the new register path had no such rule, so the baseline run rang a Sterni for a
+  minor every night (−8 Integrity), and `play-16-register-ok.png` was a picture of it. Both drivers now
+  **check ID** when a minor has a restricted line — which REFUSES it (dropped from both sides of the verdict,
+  never charged, Integrity +1, docs/08 §3.4) instead of selling it. The competent shopkeeper is the honest one;
+  the dark path drives Integrity down deliberately, not by accident in the baseline.
+- **Two bugs in that one fix, both worth the entry.** `(s["active"] as Dictionary)["register"]["lines"]` is a hard
+  index on a guest who may have run out of patience and left, so `active` is `{}` and the whole season went down
+  with it — `test_determinism.gd` caught it as "another seed tells another story | both {}", which is what an
+  aborted season looks like from the outside. And `check_id` moved nothing as far as `play.mjs` was concerned
+  because `id_checked` was not in the driver's state fingerprint: the click worked, the screen dispatched, and
+  the driver called it a dead control. A fingerprint that does not cover an action's effect is a false negative
+  wearing the costume of the exact failure the driver exists to find.
+- **The proof frame has to be earned.** `register-ok` was captured *after* the ring, so it showed an empty
+  counter with the next guest already stepping up — a picture of nothing. It is now taken at the instant before
+  the committing ring (every chip ticked, every line matching, the total standing), re-checked immediately after
+  the shot's 28 settle frames, and **withdrawn** (row and file) if that ring does not commit, so a later guest
+  retakes it. Asserting the verdict against it also has to name the customer: the first version compared a clean
+  register for guest 6 against a `last_verdict` left behind by somebody else entirely.
+
+**Suite 200 → 205, 0 failed, `PLAY ok steps=20 guests=65`.** Five of the seven defects above were invisible to
+205 passing tests, and all five were found the same way: by asking the real read-model what the player would
+actually see. Nothing here was found by reading the lanes' reports, which were accurate.

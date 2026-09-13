@@ -1,0 +1,92 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://components/tobacco_wall.gd" id="1_script"]
+[ext_resource type="Theme" path="res://components/Theme.tres" id="2_theme"]
+[ext_resource type="PackedScene" path="res://components/PixelButton.tscn" id="3_button"]
+
+[node name="TobaccoWall" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+visible = false
+theme = ExtResource("2_theme")
+script = ExtResource("1_script")
+
+[node name="Backdrop" type="TextureRect" parent="."]
+unique_name_in_owner = true
+offset_right = 480.0
+offset_bottom = 270.0
+mouse_filter = 2
+stretch_mode = 2
+
+[node name="Rails" type="Control" parent="."]
+unique_name_in_owner = true
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Cells" type="Control" parent="."]
+unique_name_in_owner = true
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="TotalPlate" type="Panel" parent="."]
+unique_name_in_owner = true
+offset_left = 372.0
+offset_top = 6.0
+offset_right = 476.0
+offset_bottom = 22.0
+mouse_filter = 2
+
+[node name="Total" type="Label" parent="."]
+unique_name_in_owner = true
+offset_left = 374.0
+offset_top = 6.0
+offset_right = 474.0
+offset_bottom = 22.0
+mouse_filter = 2
+horizontal_alignment = 2
+vertical_alignment = 1
+text = "0,00 €"
+
+[node name="HandPlate" type="Panel" parent="."]
+unique_name_in_owner = true
+offset_left = 8.0
+offset_top = 232.0
+offset_right = 248.0
+offset_bottom = 258.0
+mouse_filter = 2
+
+[node name="HandLabel" type="Label" parent="."]
+unique_name_in_owner = true
+offset_left = 11.0
+offset_top = 237.0
+offset_right = 61.0
+offset_bottom = 253.0
+mouse_filter = 2
+theme_type_variation = &"SmallLabel"
+vertical_alignment = 1
+text = "In hand"
+
+[node name="Hand" type="Control" parent="."]
+unique_name_in_owner = true
+offset_left = 64.0
+offset_top = 234.0
+offset_right = 244.0
+offset_bottom = 256.0
+mouse_filter = 2
+
+[node name="Back" parent="." instance=ExtResource("3_button")]
+unique_name_in_owner = true
+offset_left = 400.0
+offset_top = 232.0
+offset_right = 472.0
+offset_bottom = 252.0
+theme_type_variation = &"StepButton"
+text = "Back"

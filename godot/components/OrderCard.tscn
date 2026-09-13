@@ -1,0 +1,50 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://components/order_card.gd" id="1_script"]
+[ext_resource type="Theme" path="res://components/Theme.tres" id="2_theme"]
+
+[node name="OrderCard" type="Control"]
+custom_minimum_size = Vector2(132, 106)
+offset_left = 4.0
+offset_top = 56.0
+offset_right = 136.0
+offset_bottom = 162.0
+mouse_filter = 2
+theme = ExtResource("2_theme")
+script = ExtResource("1_script")
+
+[node name="Plate" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+offset_right = 132.0
+offset_bottom = 106.0
+mouse_filter = 2
+
+[node name="Who" type="Label" parent="."]
+unique_name_in_owner = true
+offset_left = 3.0
+offset_top = 1.0
+offset_right = 129.0
+offset_bottom = 17.0
+mouse_filter = 2
+theme_type_variation = &"SpeakerLabel"
+clip_text = true
+text = "Nadia"
+
+[node name="Chips" type="Control" parent="."]
+unique_name_in_owner = true
+offset_left = 3.0
+offset_top = 18.0
+offset_right = 129.0
+offset_bottom = 104.0
+mouse_filter = 2
+
+[node name="Empty" type="Label" parent="."]
+unique_name_in_owner = true
+offset_left = 3.0
+offset_top = 18.0
+offset_right = 129.0
+offset_bottom = 34.0
+mouse_filter = 2
+theme_type_variation = &"SmallLabel"
+clip_text = true
+text = "they haven't asked yet"

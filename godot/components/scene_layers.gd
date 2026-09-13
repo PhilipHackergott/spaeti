@@ -62,7 +62,16 @@ func _ready() -> void:
 ## Where the customer bust goes: in front of the backdrop, behind the counter — or, for a LEANING bust
 ## (Assets.staging), in front of the counter so its forearms rest on the laminate.
 func mount(node: Node, in_front: bool = false) -> void:
-	var slot := get_node_or_null("%Leaners" if in_front else "%Characters") as Control
+	_mount_into("%Leaners" if in_front else "%Characters", node)
+
+## The goods ON the laminate (docs/08-register-and-tobacco.md 4.3): the `OnCounter` slot sits after the
+## counter art and before the tint, which is the whole reason a scanned Mate reads as sitting in front
+## of the bust rather than floating over the frame. The CounterTray and the Scanner live here.
+func mount_on_counter(node: Node) -> void:
+	_mount_into("%OnCounter", node)
+
+func _mount_into(slot_name: String, node: Node) -> void:
+	var slot := get_node_or_null(slot_name) as Control
 	if slot == null or node == null or node.get_parent() == slot:
 		return
 	# reparent() keeps `owner`; remove_child()+add_child() would clear it and with it the node's

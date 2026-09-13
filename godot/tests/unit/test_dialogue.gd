@@ -3,7 +3,11 @@ extends "res://tests/TestCase.gd"
 ## a D&D-shaped tree whose choices roll or gate against the six stats. Everything here must be pure
 ## and seeded: a night replays from {config, seed, actions}, every d20 included.
 
-const REGULARS := ["lena", "juergen", "mehmet"]
+## Every guest with a tree of their own (docs/09 §2). Extended from three to eleven when the cast
+## landed: `test_every_graph_is_playable` already walks all of DIALOGUES, but the 5-8-node/two-roll
+## story budget is per REGULAR, and a tree that quietly grows to twelve nodes is a visual novel.
+const REGULARS := ["lena", "juergen", "mehmet", "schulz", "achim", "karim", "nadia", "tobias",
+	"robin", "aylin", "bley"]
 
 func _fresh(seed_value: int = 5) -> Dictionary:
 	return SpatiState.new_game({"seed": seed_value})
@@ -396,7 +400,7 @@ func test_every_graph_is_playable() -> void:
 					assert_true(Rules.STAT_IDS.has(String(requires["stat"])), "%s/%s gates on a real stat" % [id, node_id])
 					assert_true(String(c["label"]).begins_with("["), "%s/%s wears its gate tag" % [id, node_id])
 
-func test_the_three_regulars_carry_the_slices_story_budget() -> void:
+func test_the_eleven_regulars_carry_the_casts_story_budget() -> void:
 	for id in REGULARS:
 		assert_true(Content.DIALOGUES.has(id), "%s has a tree" % id)
 		assert_false(Content.character(id).is_empty(), "%s is in the cast registry" % id)

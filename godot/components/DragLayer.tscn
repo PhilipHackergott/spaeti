@@ -1,0 +1,18 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://components/drag_layer.gd" id="1_script"]
+[ext_resource type="Theme" path="res://components/Theme.tres" id="2_theme"]
+[ext_resource type="PackedScene" path="res://components/DragItem.tscn" id="3_item"]
+
+[node name="DragLayer" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme = ExtResource("2_theme")
+script = ExtResource("1_script")
+
+[node name="DragItem" parent="." instance=ExtResource("3_item")]
+unique_name_in_owner = true
+visible = false

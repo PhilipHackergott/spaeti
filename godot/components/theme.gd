@@ -165,6 +165,126 @@ const SERVE_TOGGLE_RECT := Rect2i(5, 25, 62, 18)   # under the inset HUD (which 
 ## The dialogue box hands the right column back to the queue whenever the line is on screen.
 const DIALOGUE_W_QUEUE := 300
 
+# --- the ring-up: counter, scanner, register, wall (docs/08-register-and-tobacco.md 4.3) ----
+## The night's THIRD chrome mode. Once a basket is on the counter the right column stops being the
+## queue and becomes the register, the left gutter becomes the OrderCard, and the counter band holds
+## the tray and the scanner. Every rectangle below is authored here, never in a scene (docs/04 rule 1)
+## — `test_scenes.gd::test_the_ring_up_columns_do_not_overlap` is what keeps them from colliding.
+## The customer's words, one RequestChip per basket line. Tab swaps it for the StatsStrip, which is
+## why the two share the left gutter and never appear together.
+const ORDER_RECT := Rect2i(4, 56, 132, 106)
+## ...and where it re-docks while you are turned around: the wall has no bust and no HUD, so the card
+## climbs into the corner and the running total takes the opposite one.
+const ORDER_RECT_WALL := Rect2i(4, 4, 132, 62)
+## The laminate in front of the bust: 7 slots at pitch 38, sprites bottom-aligned on TRAY_BASELINE_Y.
+## The reducer caps a basket at 3 placed + 3 fetched + 1 crate (docs/08 3.1), so the tray cannot
+## overflow — the cap is in the engine, not here, and `test_the_tray_never_overflows` pins it.
+const TRAY_RECT := Rect2i(6, 172, 272, 42)
+const TRAY_SLOTS := 7
+const TRAY_PITCH := 38
+const TRAY_BASELINE_Y := 210
+## The drop target. The hot zone bleeds TRAY_DROP_BLEED px on every side (at x4 that is 16 screen px
+## of slack on each edge), so a drag that is one base pixel short still lands.
+const SCANNER_RECT := Rect2i(284, 174, 52, 48)
+const SCANNER_BLEED := 4
+## The right column, top to bottom. It replaces DICE_RECT + QUEUE_RECT while the register is open;
+## the line collapses into the HUD's "N waiting" tail, which is the only place it is then written.
+const REGISTER_RECT := Rect2i(340, 30, 138, 232)
+const REGISTER_HEAD_RECT := Rect2i(344, 32, 62, 18)
+## "Check ID" shares the head row with the title instead of the button stack: the stack's three rects
+## are pinned by docs/08 4.1 and the verb is a lookup, not a commitment (docs/08 3.2 — free in the
+## reducer), so it belongs beside the word "Register", not under "Ring up".
+const CHECK_ID_RECT := Rect2i(408, 32, 66, 18)
+## The one free correction, spoken in the reducer's words, over the lines it flagged (docs/08 3.4).
+const REGISTER_BANNER_RECT := Rect2i(344, 50, 130, 18)
+## Four rows of REGISTER_ROW_H: a basket is capped at 4 distinct lines, so the list never scrolls.
+## 18, not the 16 the first draft assumed: Jersey 10 at 16 px has a 23-px line box, so a 16-px row
+## printed two lines of the register on top of each other (measured, not eyeballed —
+## test_scenes.gd::test_a_register_line_fits_the_row_it_is_in).
+const REGISTER_LINES_RECT := Rect2i(344, 70, 130, 72)
+const REGISTER_ROW_H := 18
+const REGISTER_SUBTOTAL_RECT := Rect2i(344, 144, 130, 16)
+## The deposit is a ROW, not only a button: the crate drags onto it and its -/+ tune the count.
+## docs/08 4.1 pins it at y 154; it moves down 8 px because the taller lines above it need the room,
+## and the three verbs below keep their authored rects exactly.
+const PFAND_ROW_RECT := Rect2i(344, 162, 130, 16)
+const REGISTER_TOTAL_RECT := Rect2i(344, 180, 130, 20)
+const TURN_AROUND_RECT := Rect2i(344, 202, 130, 18)
+const RING_UP_RECT := Rect2i(344, 222, 130, 18)
+const WAVE_OFF_RECT := Rect2i(344, 242, 130, 18)
+## `talk_next` stays LEGAL with a guest at the counter (docs/06 4: it opens their conversation), so
+## the queue strip may not simply vanish when the register takes the right column — it re-docks to a
+## button-sized plate under the HUD and drops the line, which the HUD's "N waiting" tail carries
+## instead. Collapsing a list is fine; hiding a legal action is the soft-lock this project has
+## already shipped once. It shares its row with SERVE_TOGGLE_RECT, and the two are never both up.
+const QUEUE_RECT_RING := Rect2i(4, 24, 116, 18)
+## The bust steps left of PORTRAIT_CENTRE_X while the register owns the right column, and the
+## dialogue box narrows to the gutter left of it (the correction floats there, nothing else does).
+const PORTRAIT_CENTRE_X_RING := 210
+const DIALOGUE_W_RING := 264
+## Drag is a SKIN over scan{uid} (docs/08 4.2): under DRAG_GRAB_PX of motion it is a click, and a
+## click on a tray item scans it. A miss springs home over DRAG_SPRING_MS; the preview re-snaps to
+## whole base pixels every frame, which is the whole reason Godot's built-in DnD was rejected.
+const DRAG_GRAB_PX := 3.0
+const DRAG_SPRING_MS := 120
+const DRAG_LIFT := 2
+const DROP_TARGETS := "drop_targets"
+
+# --- the tobacco wall: a camera turn, not a location (docs/08 4.3) ---------------------
+## A full-frame overlay inside Night, with no rain, no neon, no counter and no bust — so it is one
+## Control, not a second SceneLayers stack. It enters with a horizontal pivot (the shop slides out
+## left, the wall in from the right) because your body did something; instant under reduce_motion.
+const WALL_PIVOT_MS := 160
+const WALL_RAIL_H := 16
+const WALL_RAIL_PAD := 8
+## Shelf 1: eight cigarette facings (26x34) standing on their rail.
+const WALL_SHELF1_TOP := 66
+const WALL_SHELF1_X0 := 32
+const WALL_SHELF1_PITCH := 52
+const WALL_RAIL1_Y := 102
+## Shelf 2: four pouches (28x26). They are BOTTOM-aligned on the rail's top edge — docs/08 4.3's
+## "y 130" is a top edge, and 130 + 26 runs 4 px into its own rail at y 152.
+const WALL_SHELF2_BOTTOM := 152
+const WALL_SHELF2_X0 := 118
+const WALL_SHELF2_PITCH := 72
+const WALL_RAIL2_Y := 152
+## Shelf 3: six paper booklets and four filter boxes, bottom-aligned so the LENGTH is the silhouette.
+const WALL_SHELF3_BOTTOM := 208
+const WALL_SHELF3_X0 := 40
+const WALL_SHELF3_PITCH := 42
+const WALL_RAIL3_Y := 210
+## What you are carrying back: HAND_MAX 4 in the reducer, so the strip is never fuller than it draws.
+const WALL_HAND_RECT := Rect2i(8, 232, 240, 26)
+const WALL_BACK_RECT := Rect2i(400, 232, 72, 20)
+## The money never leaves the screen, even with your back to the counter.
+const WALL_TOTAL_RECT := Rect2i(372, 6, 104, 16)
+
+## Where a wall cell sits, given its shelf row (0..2) and column. One place, so the wall, the
+## reachability test and any future capture preset all measure the same grid.
+static func wall_cell_rect(row: int, col: int, cell_size: Vector2i) -> Rect2i:
+	match row:
+		0:
+			return Rect2i(WALL_SHELF1_X0 + col * WALL_SHELF1_PITCH, WALL_SHELF1_TOP, cell_size.x, cell_size.y)
+		1:
+			return Rect2i(WALL_SHELF2_X0 + col * WALL_SHELF2_PITCH, WALL_SHELF2_BOTTOM - cell_size.y, cell_size.x, cell_size.y)
+		_:
+			return Rect2i(WALL_SHELF3_X0 + col * WALL_SHELF3_PITCH, WALL_SHELF3_BOTTOM - cell_size.y, cell_size.x, cell_size.y)
+
+## The price rail under a shelf row, stretched to hold the cells it serves.
+static func wall_rail_rect(row: int, cells: int, pitch: int, x0: int, cell_w: int) -> Rect2i:
+	var y := WALL_RAIL1_Y if row == 0 else (WALL_RAIL2_Y if row == 1 else WALL_RAIL3_Y)
+	var span := maxi(cell_w, (cells - 1) * pitch + cell_w)
+	return Rect2i(x0 - WALL_RAIL_PAD, y, span + WALL_RAIL_PAD * 2, WALL_RAIL_H)
+
+## Where tray slot `i` is, in the tray's own coordinates. The sprite inside it is bottom-aligned on
+## TRAY_BASELINE_Y, so a 36-px bottle and a 22-px filter box stand on the same laminate line.
+static func tray_slot_rect(i: int) -> Rect2i:
+	return Rect2i(TRAY_RECT.position.x + i * TRAY_PITCH, TRAY_RECT.position.y, TRAY_PITCH, TRAY_RECT.size.y)
+
+## The scanner's hot zone: the glass plus SCANNER_BLEED on every side (docs/08 1).
+static func scanner_hot_zone() -> Rect2i:
+	return SCANNER_RECT.grow(SCANNER_BLEED)
+
 # --- accessibility --------------------------------------------------------------------
 ## Scenes and components check this before starting rain / flicker / breathing tweens.
 static var reduce_motion: bool = false
@@ -241,6 +361,22 @@ static func flat_row(fill: Color = CHOICE_FILL, rule: Color = RULE) -> StyleBoxF
 	sb.border_width_bottom = 1
 	sb.content_margin_left = PAD
 	sb.content_margin_right = PAD
+	sb.content_margin_top = 0
+	sb.content_margin_bottom = 0
+	sb.anti_aliasing = false
+	return sb
+
+## A plate with NO padding at all, for the places where a 16-px row has room for one glyph, a 1-px
+## edge and nothing else — the register's -/+/x steppers (docs/08 4.1). `box(pad: 0)` still keeps 2 px
+## top and bottom, which is 4 px more than a 16-px row has to give.
+static func tight_box(fill: Color = INK_DEEP, edge: Color = EDGE) -> StyleBoxFlat:
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = fill
+	sb.border_color = edge
+	sb.set_border_width_all(1)
+	sb.set_corner_radius_all(2)
+	sb.content_margin_left = 1
+	sb.content_margin_right = 1
 	sb.content_margin_top = 0
 	sb.content_margin_bottom = 0
 	sb.anti_aliasing = false

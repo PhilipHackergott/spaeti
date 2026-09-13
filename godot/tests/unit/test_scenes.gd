@@ -26,17 +26,29 @@ const COMPONENTS := [
 	"res://components/QueueStrip.tscn",
 	"res://components/StatsStrip.tscn",
 	"res://components/DiceResult.tscn",
+	# The ring-up (docs/08-register-and-tobacco.md section 4.1).
+	"res://components/BrandMark.tscn",
+	"res://components/StepChip.tscn",
+	"res://components/DragItem.tscn",
+	"res://components/DragLayer.tscn",
+	"res://components/CounterTray.tscn",
+	"res://components/Scanner.tscn",
+	"res://components/RegisterPanel.tscn",
+	"res://components/OrderCard.tscn",
+	"res://components/TobaccoWall.tscn",
 ]
 
 const SCENE_PRESETS := {
 	"res://scenes/Title.tscn": ["title"],
 	"res://scenes/Night.tscn": ["empty_counter", "customer_at_counter", "dialogue_choice", "serving", "pfand", "late_night",
-		"queue_waiting", "talk_lines", "talk_choice", "talk_result"],
+		"queue_waiting", "talk_lines", "talk_choice", "talk_result",
+		"register_counter", "register_wall", "register_error"],
 	"res://scenes/Manage.tscn": ["manage"],
 	"res://scenes/Summary.tscn": ["summary"],
 	"res://scenes/Ending.tscn": ["ending"],
 	"res://scenes/Main.tscn": ["title", "customer_at_counter", "dialogue_choice", "serving", "pfand", "empty_counter", "late_night", "manage", "summary",
-		"queue_waiting", "talk_lines", "talk_choice", "talk_result", "ending"],
+		"queue_waiting", "talk_lines", "talk_choice", "talk_result", "ending",
+		"register_counter", "register_wall", "register_error"],
 }
 
 ## The keys `Rules.view(state)` must hand a scene (docs/05 section 5).
@@ -45,6 +57,8 @@ const VIEW_KEYS := [
 	"pfand_rate", "reputation", "hud", "active", "queue_len", "dialogue", "shelf", "summary", "manage", "ending",
 	# docs/06-dialogue-and-stats.md section 4: the line, the conversation and the character sheet.
 	"queue", "talk", "player",
+	# docs/08-register-and-tobacco.md section 3.3: the counter, the register, her words and the wall.
+	"counter", "register", "order", "view_mode", "wall",
 ]
 
 func test_components_instantiate() -> void:
@@ -960,3 +974,673 @@ func test_a_step_button_keeps_its_height_in_every_state() -> void:
 		if t.has_stylebox(state, "StepButton"):
 			assert_eq(t.get_stylebox(state, "StepButton").get_minimum_size().y, 0.0,
 				state + " adds no vertical padding, so the plate is the font's own height")
+
+# ── the ring-up (docs/08-register-and-tobacco.md) ─────────────────────────────────────────────
+
+## The three columns of the register mode, kept as arithmetic instead of an eyeball: the tray never
+## runs into the glass, the glass never into the register, the card never into the counter band or
+## the HUD, and the narrowed dialogue box stops short of the register the way it stops short of the
+## queue. Every rect is a `Palette` constant, so this is the table checking itself.
+func test_the_ring_up_columns_do_not_overlap() -> void:
+	var frame := Rect2i(Vector2i.ZERO, Palette.BASE)
+	for rect in [Palette.ORDER_RECT, Palette.TRAY_RECT, Palette.SCANNER_RECT, Palette.REGISTER_RECT,
+			Palette.ORDER_RECT_WALL, Palette.WALL_HAND_RECT, Palette.WALL_BACK_RECT, Palette.WALL_TOTAL_RECT]:
+		assert_true(frame.encloses(rect), "the ring-up stays inside the frame: " + str(rect))
+	assert_false(Palette.TRAY_RECT.intersects(Palette.SCANNER_RECT), "the tray never runs into the glass")
+	assert_false(Palette.TRAY_RECT.intersects(Palette.REGISTER_RECT), "nor into the register")
+	assert_false(Palette.SCANNER_RECT.intersects(Palette.REGISTER_RECT), "the glass clears the register")
+	assert_false(Palette.ORDER_RECT.intersects(Palette.TRAY_RECT), "the card clears the counter band")
+	assert_false(Palette.ORDER_RECT.intersects(Palette.REGISTER_RECT), "and the register column")
+	assert_false(Palette.ORDER_RECT.intersects(Rect2i(0, 0, Palette.BASE.x, 22)), "and the HUD")
+	assert_true(Palette.DIALOGUE_RECT.position.x + Palette.DIALOGUE_W_RING <= Palette.REGISTER_RECT.position.x,
+			"the box narrowed for the ring-up stops short of the register")
+	# Every row of the register column inside the panel, and no two of them stacked on each other.
+	var rows: Array = [Palette.REGISTER_HEAD_RECT, Palette.CHECK_ID_RECT, Palette.REGISTER_BANNER_RECT,
+		Palette.REGISTER_LINES_RECT, Palette.REGISTER_SUBTOTAL_RECT, Palette.PFAND_ROW_RECT,
+		Palette.REGISTER_TOTAL_RECT, Palette.TURN_AROUND_RECT, Palette.RING_UP_RECT, Palette.WAVE_OFF_RECT]
+	for i in rows.size():
+		assert_true(Palette.REGISTER_RECT.encloses(rows[i]), "inside the register column: " + str(rows[i]))
+		for j in range(i + 1, rows.size()):
+			assert_false((rows[i] as Rect2i).intersects(rows[j]),
+					"%s and %s do not stack" % [str(rows[i]), str(rows[j])])
+	# Seven slots at pitch 38 fit the tray exactly, and the last one does not hang off the end.
+	assert_true(Palette.TRAY_RECT.encloses(Palette.tray_slot_rect(Palette.TRAY_SLOTS - 1)),
+			"the last tray slot is inside the tray")
+	# ...and every wall facing is on screen, at the footprint the catalogue declares.
+	for row in 3:
+		var sku_ids: Array = [["cigarettes"], ["tobacco"], ["papers", "filters"]][row]
+		var col := 0
+		for sku_id in sku_ids:
+			for brand in Content.brands_for(String(sku_id)):
+				var cell := Palette.wall_cell_rect(row, col, BrandMark.facing_size(brand))
+				assert_true(frame.encloses(cell), "wall facing on screen: " + String((brand as Dictionary)["id"]))
+				assert_false(cell.intersects(Palette.WALL_HAND_RECT), "and clear of the hand strip")
+				col += 1
+
+## A 16-px register line cannot hold a 20-px button, and a Control never shrinks below its own
+## minimum — so the row's controls are measured, not assumed (the Serve toggle latched 6 px taller
+## exactly this way, test_a_step_button_keeps_its_height_in_every_state).
+func test_a_register_line_fits_the_row_it_is_in() -> void:
+	var panel := (load("res://components/RegisterPanel.tscn") as PackedScene).instantiate() as RegisterPanel
+	panel.call("_ready")
+	panel.set_can_serve(true)
+	panel.render(MockView.view("register_error")["register"])
+	# The panel's own rows keep the rects Palette authored for them.
+	for unique in ["%TurnAround", "%RingUp", "%WaveOff", "%CheckId", "%PfandDown", "%PfandUp"]:
+		var n := panel.get_node(unique) as Control
+		assert_true(n.size.y <= 20.0, "%s is %d px tall" % [unique, int(n.size.y)])
+	# A StepChip has NO intrinsic minimum — that is the whole reason it exists — so the row's rect
+	# survives entering a tree, where a Button's would have grown to 31 px.
+	for unique in ["%PfandDown", "%PfandUp"]:
+		var chip := panel.get_node(unique) as StepChip
+		assert_true(chip != null, unique + " is a row chip, not a Button")
+		if chip != null:
+			assert_eq(chip.get_combined_minimum_size(), Vector2(chip.size), unique + " is exactly its rect")
+	var host := panel.get_node("%Lines") as Control
+	assert_true(host.get_child_count() >= 2, "the error preset rings two lines")
+	for i in host.get_child_count():
+		var row := host.get_child(i) as Control
+		for c in row.get_children():
+			var control := c as Control
+			if control == null:
+				continue
+			# A LABEL may be taller than its row — Jersey's line box is 23 px and it prints from the
+			# top — but anything the pointer or the focus ring can land on must fit, or it covers the
+			# row underneath and the click goes to the wrong line.
+			if control.focus_mode != Control.FOCUS_NONE or control.mouse_filter == Control.MOUSE_FILTER_STOP:
+				assert_true(control.size.y <= float(Palette.REGISTER_ROW_H),
+						"%s is %d px tall in a %d-px row" % [String(control.name), int(control.size.y), Palette.REGISTER_ROW_H])
+			assert_true(control.position.x + control.size.x <= float(Palette.REGISTER_LINES_RECT.size.x),
+					"%s stays inside the 130-px line" % String(control.name))
+		assert_true(row.position.y + row.size.y <= float(Palette.REGISTER_LINES_RECT.size.y),
+				"row %d stays inside the list" % i)
+	_dispose(panel)
+
+## The tray cannot overflow, and that is a fact about the REDUCER, not a hope about the content:
+## docs/08 section 3.1 caps a basket at 3 placed + 3 fetched + 1 crate, which is exactly seven.
+func test_the_tray_holds_the_reducers_whole_basket() -> void:
+	assert_eq(Palette.TRAY_SLOTS, 7, "3 placed + 3 fetched + 1 crate")
+	var tray := (load("res://components/CounterTray.tscn") as PackedScene).instantiate() as CounterTray
+	tray.call("_ready")
+	var rows: Array = []
+	var source: Array = MockView.view("register_counter")["counter"]
+	for i in Palette.TRAY_SLOTS:
+		var row: Dictionary = (source[i % source.size()] as Dictionary).duplicate(true)
+		row["uid"] = 100 + i
+		row["slot"] = i
+		rows.append(row)
+	tray.render(rows)
+	assert_eq(tray.filled_slots().size(), Palette.TRAY_SLOTS, "a full basket fills the tray and no more")
+	var frame := Rect2(Vector2.ZERO, Vector2(Palette.BASE))
+	for slot in tray.filled_slots():
+		assert_true(frame.encloses(slot.get_global_rect()), "every slot is on screen: " + String(slot.name))
+		assert_eq(slot.focus_mode, Control.FOCUS_ALL, "and focusable, so the keyboard reaches it")
+	assert_true(tray.slot_for(103) != null, "the tray finds a slot by the uid the view names")
+	assert_true(tray.slot_for(999) == null, "and finds nothing for a uid it was never given")
+	_dispose(tray)
+
+## THE anti-soft-lock test (docs/08 section 6). For every action the read-model makes legal, the
+## screen must offer a control that is (1) on the frame, (2) not greyed, and (3) the node a pointer at
+## its own centre would actually land on. Today's soft-lock shipped because a driver pressed buttons
+## by NAME; nothing here names one.
+func test_the_register_puts_every_action_on_a_control_you_can_hit() -> void:
+	var night := _ring_night("register_counter")
+	var v: Dictionary = MockView.view("register_counter")
+	var wanted := _ring_up_actions(v)
+	assert_true(wanted.size() >= 8, "the counter offers a real set of actions, not one button")
+	for action in wanted:
+		var controls: Array = night.call("controls_for", action)
+		assert_false(controls.is_empty(), "a live control offers " + JSON.stringify(action))
+		if controls.is_empty():
+			continue
+		var c := controls[0] as Control
+		var r := c.get_global_rect()
+		assert_true(Rect2(Vector2.ZERO, Vector2(Palette.BASE)).encloses(r),
+				"it is inside 480x270: %s at %s" % [JSON.stringify(action), str(r)])
+		var hit := night.call("control_at", r.get_center()) as Control
+		assert_true(hit == c or (hit != null and c.is_ancestor_of(hit)),
+				"and nothing covers it: %s hits %s" % [JSON.stringify(action), str(hit)])
+	_dispose(night)
+
+## The pointer, for real. A press and a release on the slot the READ-MODEL names, at the rect the
+## screen actually draws, must produce exactly `scan{uid}` — asserted as a dictionary, not as "the
+## button called Slot2 was pressed".
+func test_a_click_on_the_counter_scans_the_uid_the_view_names() -> void:
+	var night := _ring_night("register_counter")
+	var seen: Array = []
+	night.connect("acted", func(a: Dictionary) -> void: seen.append(a))
+	var v: Dictionary = MockView.view("register_counter")
+	var uid := -1
+	for row in v["counter"]:
+		var r: Dictionary = row
+		if String(r.get("kind", "")) == "item" and not bool(r.get("scanned", false)):
+			uid = int(r["uid"])
+			break
+	assert_true(uid >= 0, "the preset has something left to scan")
+	var controls: Array = night.call("controls_for", {"type": "scan", "uid": uid})
+	assert_false(controls.is_empty(), "and a control that offers it")
+	if controls.is_empty():
+		_dispose(night)
+		return
+	var slot := controls[0] as Button
+	# The pointer part: the node under a click at the slot's own centre IS this slot.
+	var hit: Control = night.call("control_at", slot.get_global_rect().get_center())
+	assert_true(hit == slot or (hit != null and slot.is_ancestor_of(hit)), "a click there lands on the slot")
+	slot.pressed.emit()
+	assert_eq(seen.size(), 1, "one press, one action")
+	if seen.is_empty():
+		_dispose(night)
+		return
+	assert_eq(String((seen[0] as Dictionary)["type"]), "scan", "and the action is a scan")
+	assert_eq(int((seen[0] as Dictionary)["uid"]), uid, "of the uid the read-model named")
+	_dispose(night)
+
+## Drag is a SKIN over `scan{uid}` (docs/08 section 4.2), and this is what proves it: a real
+## `InputEventMouseButton` + `InputEventMouseMotion` past the 3-px grab threshold lifts the item, and
+## releasing it over the scanner's hot zone emits the SAME dictionary the click did.
+func test_drag_is_a_skin_over_scan() -> void:
+	var night := _ring_night("register_counter")
+	var seen: Array = []
+	night.connect("acted", func(a: Dictionary) -> void: seen.append(a))
+	var tray := night.get_node_or_null("%CounterTray") as CounterTray
+	var drag := night.get_node_or_null("%DragLayer") as DragLayer
+	var scanner := night.get_node_or_null("%Scanner") as Scanner
+	assert_true(tray != null and drag != null and scanner != null, "the counter has a tray, a layer and a glass")
+	if tray == null or drag == null or scanner == null:
+		_dispose(night)
+		return
+	var slot: Button = tray.filled_slots()[2]   # the first unscanned item in the register_counter preset
+	var uid := int(slot.get_meta("uid", -1))
+	var index := int(slot.get_meta("slot", -1))
+	var press := InputEventMouseButton.new()
+	press.button_index = MOUSE_BUTTON_LEFT
+	press.pressed = true
+	press.position = Vector2(4, 4)
+	tray.call("_on_slot_input", press, index)
+	assert_false(drag.is_dragging(), "a press alone is not a drag")
+	var move := InputEventMouseMotion.new()
+	move.position = Vector2(4 + Palette.DRAG_GRAB_PX + 2.0, 4)
+	tray.call("_on_slot_input", move, index)
+	assert_true(drag.is_dragging(), "past the grab threshold the item is in the air")
+	# The glass arms only while the carried item is actually over it.
+	drag.move_to(scanner.get_global_rect().get_center())
+	assert_true(scanner.is_armed(), "the glass arms under the carried item")
+	drag.release_at(scanner.get_global_rect().get_center())
+	assert_false(drag.is_dragging(), "the release ends the drag")
+	assert_eq(seen.size(), 1, "a drop is one action, not two")
+	if not seen.is_empty():
+		assert_eq(seen[0], {"type": "scan", "uid": uid}, "and it is the same scan a click makes")
+	# A miss springs home and moves nothing.
+	tray.call("_on_slot_input", press, index)
+	tray.call("_on_slot_input", move, index)
+	drag.release_at(Vector2(2, 2))
+	assert_false(drag.is_dragging(), "a miss ends the drag too")
+	assert_eq(seen.size(), 1, "and dispatches nothing at all")
+	_dispose(night)
+
+## THE RELEASE ITSELF, not a call to `release_at`. The press that starts a drag is taken by the tray
+## SLOT, so Godot keeps the mouse grab there for the whole gesture: the drop target under the cursor
+## never sees a button event at all, and the scanner's `_gui_input` fires on a PRESS, which during a
+## drag has already happened somewhere else. So nothing ended a real pointer drag - the item hung on
+## the cursor, `is_dragging()` stayed true for the rest of the night, the glass stayed armed, and
+## `Turn around` (which stands down mid-drag, docs/08 section 3.2) was dead from then on. It shipped
+## because every test above calls `release_at()` by hand; the pointer probe found it in ten seconds.
+##
+## The second half is the other end of the same gesture: a drag that ends on the GLASS releases
+## OUTSIDE the slot, so the slot's own `pressed` never fires and the guard that exists to swallow
+## that release was never spent - the slot then ate the next real click on it in silence.
+func test_the_mouse_up_ends_the_drag_and_the_slot_still_takes_the_next_click() -> void:
+	var night := _ring_night("register_counter")
+	var seen: Array = []
+	night.connect("acted", func(a: Dictionary) -> void: seen.append(a))
+	var tray := night.get_node_or_null("%CounterTray") as CounterTray
+	var drag := night.get_node_or_null("%DragLayer") as DragLayer
+	var scanner := night.get_node_or_null("%Scanner") as Scanner
+	assert_true(tray != null and drag != null and scanner != null, "the counter has a tray, a layer and a glass")
+	if tray == null or drag == null or scanner == null:
+		_dispose(night)
+		return
+	var slot: Button = tray.filled_slots()[2]
+	var uid := int(slot.get_meta("uid", -1))
+	var index := int(slot.get_meta("slot", -1))
+	var press := InputEventMouseButton.new()
+	press.button_index = MOUSE_BUTTON_LEFT
+	press.pressed = true
+	press.position = Vector2(4, 4)
+	var move := InputEventMouseMotion.new()
+	move.position = Vector2(4 + Palette.DRAG_GRAB_PX + 2.0, 4)
+	tray.call("_on_slot_input", press, index)
+	tray.call("_on_slot_input", move, index)
+	assert_true(drag.is_dragging(), "the item is in the air")
+	drag.move_to(scanner.get_global_rect().get_center())
+	var up := InputEventMouseButton.new()
+	up.button_index = MOUSE_BUTTON_LEFT
+	up.pressed = false
+	up.position = scanner.get_global_rect().get_center()
+	drag.call("_input", up)
+	assert_false(drag.is_dragging(), "the mouse-UP ends the drag by itself - nobody calls release_at")
+	assert_eq(seen.size(), 1, "and it is one scan, not none and not two")
+	if not seen.is_empty():
+		assert_eq(seen[0], {"type": "scan", "uid": uid}, "of the uid that was carried")
+	# The slot the drag left is still a live click target: a fresh press spends the drag guard.
+	tray.call("_on_slot_input", press, index)
+	tray.call("_on_slot_pressed", index)
+	assert_eq(seen.size(), 2, "the slot a drag started on still takes the next click")
+	_dispose(night)
+
+## The crate is a DEPOSIT, not a sale: the scanner refuses it and the Pfand row takes it, and the row
+## is the hot zone, so a crate dropped on Ring up is a miss (docs/08 section 3.5).
+func test_the_crate_belongs_to_the_pfand_row_and_not_to_the_glass() -> void:
+	var night := _ring_night("register_counter")
+	var seen: Array = []
+	night.connect("acted", func(a: Dictionary) -> void: seen.append(a))
+	var scanner := night.get_node_or_null("%Scanner") as Scanner
+	var reg := night.get_node_or_null("%RegisterPanel") as RegisterPanel
+	var crate := {"kind": "crate", "uid": 1, "count": 3}
+	assert_false(scanner.accepts(crate), "the glass does not read a crate of empties")
+	assert_true(reg.accepts(crate), "the Pfand row does")
+	assert_false(reg.accepts({"kind": "item", "uid": 3}), "and it does not take a pack of cigarettes")
+	var row := night.get_node_or_null("%RegisterPanel/PfandRow") as Control
+	assert_true(reg.hot_zone().has_point(row.get_global_rect().get_center()), "the hot zone is the ROW")
+	assert_false(reg.hot_zone().has_point((night.get_node("%RegisterPanel/RingUp") as Control).get_global_rect().get_center()),
+			"and not the whole panel")
+	reg.take(crate)
+	assert_eq(seen.size(), 1, "the drop is one action")
+	if not seen.is_empty():
+		assert_eq(seen[0], {"type": "set_pfand", "bottles": 3}, "and it is the count the crate carried")
+	_dispose(night)
+
+## Turned around: every in-stock facing and the way back are on the frame and hittable, the OrderCard
+## rides along in the corner, and the money is still on screen (docs/08 section 1).
+func test_the_wall_offers_every_facing_and_the_way_back() -> void:
+	var night := _ring_night("register_wall")
+	var v: Dictionary = MockView.view("register_wall")
+	var wall := night.get_node_or_null("%TobaccoWall") as TobaccoWall
+	assert_true(wall != null and wall.visible, "turning around opens the wall")
+	var wanted := _ring_up_actions(v)
+	assert_true(wanted.size() >= 20, "a wall with 22 facings offers most of them")
+	for action in wanted:
+		var controls: Array = night.call("controls_for", action)
+		assert_false(controls.is_empty(), "a live control offers " + JSON.stringify(action))
+		if controls.is_empty():
+			continue
+		var c := controls[0] as Control
+		assert_true(Rect2(Vector2.ZERO, Vector2(Palette.BASE)).encloses(c.get_global_rect()),
+				"it is inside 480x270: " + JSON.stringify(action))
+		var hit := night.call("control_at", c.get_global_rect().get_center()) as Control
+		assert_true(hit == c or (hit != null and c.is_ancestor_of(hit)),
+				"and nothing covers it: " + JSON.stringify(action))
+	# Out of stock is visible, not hidden: the facing greys where it stands.
+	var out_of_stock := wall.cell_for("cigarettes", "bergmann")
+	assert_true(out_of_stock != null and out_of_stock.disabled, "an empty row stays on the wall, greyed")
+	var card := night.get_node_or_null("%OrderCard") as OrderCard
+	assert_true(card != null and card.visible, "the card rides along")
+	assert_eq(Vector2i(card.position), Palette.ORDER_RECT_WALL.position, "docked in the wall's corner")
+	assert_false(night.get_node_or_null("%CounterTray").visible, "and the counter is behind you")
+	assert_false(night.get_node_or_null("%RegisterPanel").visible, "register column too")
+	_dispose(night)
+
+## The wrong pack: the line is flagged BEFORE you press Ring up, the reducer's own sentence is on
+## screen, and the way to fix it is reachable. That is what makes one free correction fair rather
+## than a gotcha (docs/08 section 1, section 3.4).
+func test_the_wrong_pack_is_flagged_before_you_ring_up() -> void:
+	var night := _ring_night("register_error")
+	var v: Dictionary = MockView.view("register_error")
+	var register: Dictionary = v["register"]
+	var flagged := -1
+	for i in (register["lines"] as Array).size():
+		if not bool((register["lines"][i] as Dictionary)["matches"]):
+			flagged = i
+	assert_true(flagged >= 0, "the preset rings the navy pack against her red chip")
+	var reg := night.get_node_or_null("%RegisterPanel") as RegisterPanel
+	var row := (night.get_node_or_null("%RegisterPanel/Lines") as Control).get_child(flagged) as Control
+	var name_label := row.get_node_or_null("Name") as Label
+	assert_eq(name_label.get_theme_color("font_color"), Palette.WARN, "the flagged line wears the warning colour")
+	var ok_label := ((night.get_node_or_null("%RegisterPanel/Lines") as Control).get_child(0) as Control).get_node_or_null("Name") as Label
+	assert_eq(ok_label.get_theme_color("font_color"), Palette.TEXT, "and a matching line does not")
+	var banner := night.get_node_or_null("%RegisterPanel/Banner") as Label
+	assert_true(banner.visible, "the register flags itself beside the line it flagged")
+	assert_eq(banner.text, Strings.CORRECTION, "with the short tell a 130-px column can hold")
+	# ...and her actual words go over the counter, in the box, where there is room for a sentence.
+	var box := night.get_node_or_null("%DialogueBox") as Control
+	assert_true(box.visible, "she says it out loud")
+	# The REDUCER chose the complaint; the STRING TABLE chose the words (docs/08 §3.4). Both halves
+	# are asserted, so neither the bucket nor the sentence can drift without this failing.
+	assert_eq(String(register["correction_kind"]), "wrong_brand", "the reducer named the bucket")
+	assert_eq((box.get_node_or_null("%Body") as Label).text,
+			String(Strings.CORRECTION_BY_KIND[String(register["correction_kind"])]),
+			"and the box says it in the string table's words, not its own")
+	# ...and the fix is one press away, on a control a pointer can reach.
+	var seen: Array = []
+	night.connect("acted", func(a: Dictionary) -> void: seen.append(a))
+	var controls: Array = night.call("controls_for", {"type": "register_remove", "line": flagged})
+	assert_false(controls.is_empty(), "the flagged line can be unrung")
+	if controls.is_empty():
+		_dispose(night)
+		return
+	var remove := controls[0] as StepChip
+	assert_true(remove != null, "and it is a row chip, sized to the row")
+	var hit: Control = night.call("control_at", remove.get_global_rect().get_center())
+	assert_true(hit == remove, "and a click at its centre lands on it")
+	remove.press()
+	assert_eq(seen.size(), 1, "one press, one action")
+	if not seen.is_empty():
+		assert_eq(seen[0], {"type": "register_remove", "line": flagged}, "which unrings THAT line")
+	# Her line covers the counter band while it is up (mode exclusivity), so it has to go away again —
+	# otherwise the tray she is telling you to fix is unreachable for the rest of the customer.
+	night.set("_capture_mode", false)
+	night.call("_on_dialogue_finished")
+	night.call("render", v)
+	assert_false((night.get_node_or_null("%DialogueBox") as Control).visible, "a click puts her line away")
+	var tray := night.get_node_or_null("%CounterTray") as CounterTray
+	var slot: Button = tray.filled_slots()[2]
+	var back: Control = night.call("control_at", slot.get_global_rect().get_center())
+	assert_true(back == slot, "and the counter is yours again")
+	# The restricted line is what Check ID is about, and the verb is live until it is used.
+	assert_false((night.get_node_or_null("%RegisterPanel/CheckId") as Button).disabled, "Check ID is on offer")
+	assert_true(reg.register.has("id_checked"), "and the panel reads the engine's answer, never its own")
+	_dispose(night)
+
+## The chip on the order card and the facing on the wall are the SAME pixels (docs/08 section 2), and
+## the code-drawn fallback ships the mechanic before the art does: every brand in the catalogue draws
+## a mark, and no two marks are the same shape.
+func test_a_brand_mark_draws_the_shape_the_catalogue_names() -> void:
+	var seen := {}
+	for brand in Content.BRANDS:
+		var row: Dictionary = brand
+		var shape := BrandMark.shape_of(String(row["mark"]))
+		assert_true(shape.size() > 0, String(row["id"]) + " draws something")
+		assert_ne(shape, BrandMark.UNKNOWN, String(row["id"]) + "'s mark names a shape the pool can draw")
+		seen[JSON.stringify(shape)] = int(seen.get(JSON.stringify(shape), 0)) + 1
+		# Every block of every shape fits the 16x16 window the facing reserves at (4,6).
+		for b in shape:
+			var blocks: Array = b
+			assert_true(int(blocks[0]) + int(blocks[2]) <= BrandMark.GRID, String(row["id"]) + " fits its grid")
+			assert_true(int(blocks[1]) + int(blocks[3]) <= BrandMark.GRID, String(row["id"]) + " fits its grid")
+	# Cigarettes and rolling tobacco are the matching game; one shape each, no repeats.
+	var smoked := 0
+	for brand in Content.BRANDS:
+		if String((brand as Dictionary)["family"]) in ["cigarettes", "tobacco"]:
+			smoked += 1
+	assert_eq(smoked, 12, "twelve packs and pouches are the puzzle")
+	var mark := (load("res://components/BrandMark.tscn") as PackedScene).instantiate() as BrandMark
+	var adler: Dictionary = Content.brand("adler")
+	mark.set_brand(adler, 16)
+	assert_eq(Vector2i(mark.size), Vector2i(16, 16), "a chip is its asked-for size")
+	assert_true(mark.get_child_count() >= 1, "and it draws something")
+	if Assets.is_real(String(adler["icon"])):
+		# The shipping path: the chip is LITERALLY the facing's own 16x16 window, cropped 1:1, so the
+		# chip on the card and the pack on the wall can never be two different pictures.
+		var crop := mark.get_child(0) as TextureRect
+		assert_true(crop != null and crop.texture is AtlasTexture, "a real pack is cropped, not redrawn")
+		if crop != null and crop.texture is AtlasTexture:
+			assert_eq((crop.texture as AtlasTexture).region,
+					Rect2(Rect2i(BrandMark.WINDOW_POS, Vector2i(BrandMark.WINDOW, BrandMark.WINDOW))),
+					"out of the documented window at (4,6)")
+	else:
+		assert_true(mark.get_child_count() > 1, "and without art it is drawn from {mark, colour}")
+	# The fallback is exercised whatever the art lane has shipped: this is what makes the puzzle
+	# playable and testable on day one (docs/08 section 2, "Fallback").
+	var drawn := (load("res://components/BrandMark.tscn") as PackedScene).instantiate() as BrandMark
+	drawn.set_brand({"mark": String(adler["mark"]), "colour": String(adler["colour"]), "icon": ""}, 16)
+	assert_true(drawn.get_child_count() > 1, "a brand with no art still draws its mark")
+	_dispose(drawn)
+	mark.set_facing(adler)
+	assert_eq(Vector2i(mark.size), BrandMark.facing_size(adler), "a facing is the catalogue's footprint")
+	assert_eq(Vector2i(mark.size), Assets.size_of(String(adler["icon"])), "which is the spec's footprint too")
+	# A wall cell carries only the identity; the catalogue fills in the facing (`BrandMark.merge`).
+	var cell := {"sku_id": "cigarettes", "brand": "adler", "name": "Adler",
+		"mark": String(adler["mark"]), "colour": String(adler["colour"]), "stock": 4, "row": 0, "col": 0}
+	var merged := BrandMark.merge(cell)
+	assert_eq(String(merged["icon"]), String(adler["icon"]), "merge finds the facing the view did not carry")
+	assert_eq(String(merged["name"]), "Adler", "and the VIEW wins wherever it said something")
+	_dispose(mark)
+
+## The card prints the swatch and the CATEGORY, never the brand name — unless the engine says the
+## customer used it. That is the difference between reading a list and running a shop (docs/08 §2).
+func test_the_order_card_keeps_the_brand_name_to_itself() -> void:
+	var card := (load("res://components/OrderCard.tscn") as PackedScene).instantiate() as OrderCard
+	card.call("_ready")
+	var order: Array = MockView.view("register_counter")["order"]
+	card.render(order, "Nadia")
+	var chips := card.get_node_or_null("%Chips") as Control
+	assert_eq(chips.get_child_count(), order.size(), "one chip per basket line")
+	for i in order.size():
+		var entry: Dictionary = order[i]
+		var what := (chips.get_child(i) as Control).get_node_or_null("What") as Label
+		assert_true(what != null, "a chip says what it is")
+		if what == null:
+			continue
+		if bool(entry.get("name_shown", false)):
+			assert_eq(what.text, String(entry["brand_name"]), "a named request prints the BRAND's name")
+		else:
+			var sku_name := String(entry["name"])
+			var expected := sku_name if sku_name != "" else Strings.PFAND
+			assert_eq(what.text, expected, "an unnamed one prints the SKU's own word, never the brand's")
+			# The real leak test: ask the CATALOGUE what that brand is called and assert the chip does
+			# not say it. `entry.brand_name` is "" here — the engine already withheld it — so checking
+			# against the row alone would pass no matter what the card printed.
+			var secret := String(Content.brand(String(entry["brand"])).get("name", ""))
+			if secret != "":
+				assert_false(what.text.contains(secret), "and never leaks the brand: " + secret)
+		var tick := (chips.get_child(i) as Control).get_node_or_null("Tick") as ColorRect
+		assert_eq(tick.visible, bool(entry["satisfied"]), "the tick is the reducer's, not the card's")
+	assert_eq((card.get_node_or_null("%Who") as Label).text, "Nadia", "and it is in her name")
+	_dispose(card)
+
+## docs/08 §6: the register presets are checked KEY FOR KEY against a real `Rules.view(state)`. The
+## mock is what every capture and half the component tests render, so a mock that drifts from the
+## reducer means the screens are tuned against a shape the game never produces — which is exactly how
+## the OrderCard came to print the SKU's name where the brand's name belonged (2026-09-13).
+func test_the_mock_register_rows_carry_the_engines_own_keys() -> void:
+	var real := _a_real_register_view()
+	assert_false((real["order"] as Array).is_empty(), "the real read-model put a basket on the counter")
+	assert_false((real["counter"] as Array).is_empty(), "…and items on the tray")
+	var mock: Dictionary = MockView.view("register_counter")
+	for section in ["order", "counter"]:
+		var want: Dictionary = (real[section] as Array)[0]
+		for row in (mock[section] as Array):
+			for key in want:
+				assert_true((row as Dictionary).has(key),
+					"mock %s row carries the engine's `%s`" % [section, key])
+	for key in (real["register"] as Dictionary):
+		assert_true((mock["register"] as Dictionary).has(key), "mock register carries `%s`" % key)
+	# …and the wall, which only exists while you are turned around.
+	var turned := Rules.apply(_a_real_register_state(), {"type": "turn_around", "on": true})
+	var real_cell: Dictionary = (((Rules.view(turned)["wall"] as Dictionary)["shelves"] as Array)[0] as Dictionary)["cells"][0]
+	var mock_cell: Dictionary = ((MockView.view("register_wall")["wall"]["shelves"] as Array)[0] as Dictionary)["cells"][0]
+	for key in real_cell:
+		assert_true(mock_cell.has(key), "mock wall cell carries the engine's `%s`" % key)
+
+## The reducer may not import `Strings`, so it mirrors the table — and a mirror that drifts is worse
+## than no mirror. Same contract as `test_the_two_stat_tables_agree`.
+func test_the_two_ask_tables_agree() -> void:
+	assert_eq(Rules.ASK_CIGS, Strings.ASK_CIGS, "the cigarette line")
+	assert_eq(Rules.ASK_POUCH, Strings.ASK_POUCH, "the pouch line")
+	assert_eq(Rules.ASK_ITEM, Strings.ASK_ITEM, "everything else")
+	assert_eq(Rules.ASK_PFAND, Strings.ASK_PFAND, "the deposit")
+	assert_eq(Rules.ASK_MARK_PHRASE, Strings.ASK_MARK_PHRASE, "pointing at a mark")
+	assert_eq(Rules.ASK_POINT, Strings.ASK_POINT, "pointing at an object")
+	# The correction is the same sentence on both sides, so the box can take the words from the table
+	# without the reducer and the screen ever disagreeing about what she said.
+	for kind in Rules.CORRECTION_LINES:
+		assert_eq(String(Strings.CORRECTION_BY_KIND.get(kind, "")), String(Rules.CORRECTION_LINES[kind]),
+			"the correction table agrees on `%s`" % kind)
+
+## The two verbs the NIGHT dispatches for the player rather than offering as a control: the clock
+## ticks itself, and `night.gd` closes the books at 06:00. Everything else must be pressable.
+const SCREENLESS := ["tick", "close_night"]
+
+## docs/08 §6's standing reachability rule, on the REAL read-model instead of the mock. The mock
+## version of this test can only check the shapes somebody typed into `MockView`; this one checks the
+## shapes the REDUCER emits, in states the game actually reaches — at the counter and at the wall.
+##
+## This is the test that would have caught today's soft-lock, and it is the one that now holds the
+## line after `serve_active` left the counter's offer (docs/08 §3.6) and both quantity steps joined
+## it: an action the engine offers with nothing on screen to press IS the soft-lock, whichever
+## direction the drift came from.
+func test_every_legal_action_at_a_real_register_has_a_control() -> void:
+	var counter := _a_real_register_state()
+	var wall := Rules.apply(counter, {"type": "turn_around", "on": true})
+	assert_eq(String(wall.get("view_mode", "")), "wall", "the guest let us turn around")
+	for s in [counter, wall]:
+		var night := _night_on(Rules.view(s))
+		var checked := 0
+		for entry in Rules.legal_actions(s):
+			var action: Dictionary = entry
+			if String(action["type"]) in SCREENLESS:
+				continue
+			checked += 1
+			var controls: Array = night.call("controls_for", action)
+			assert_false(controls.is_empty(), "a live control offers " + JSON.stringify(action))
+			if controls.is_empty():
+				continue
+			var c := controls[0] as Control
+			var r := c.get_global_rect()
+			assert_true(Rect2(Vector2.ZERO, Vector2(Palette.BASE)).encloses(r),
+				"it is inside 480x270: %s at %s" % [JSON.stringify(action), str(r)])
+			var hit := night.call("control_at", r.get_center()) as Control
+			assert_true(hit == c or (hit != null and c.is_ancestor_of(hit)),
+				"and nothing covers it: %s hits %s" % [JSON.stringify(action), str(hit)])
+		assert_true(checked >= 4, "the state offers a real set of actions, not one button")
+		_dispose(night)
+
+## Both chips on a register row are real: the reducer offers the step UP and the step DOWN, and each
+## one routes to its own control. Advertising only one of them left a pressable "−" whose action the
+## engine never admitted was legal, which is how `play.mjs` got stuck putting a quantity back.
+func test_a_register_row_offers_both_of_its_steps() -> void:
+	var s := _a_real_register_state()
+	var uid := -1
+	for entry in Rules.legal_actions(s):
+		if String((entry as Dictionary)["type"]) == "scan":
+			uid = int((entry as Dictionary)["uid"])
+			break
+	assert_true(uid >= 0, "there is something on the counter to scan")
+	s = Rules.apply(s, {"type": "scan", "uid": uid})
+	var qty := int(((Rules.view(s)["register"] as Dictionary)["lines"] as Array)[0]["qty"])
+	var offered: Array = []
+	for entry in Rules.legal_actions(s):
+		var a: Dictionary = entry
+		if String(a["type"]) == "register_set_qty" and int(a["line"]) == 0:
+			offered.append(int(a["qty"]))
+	assert_true(offered.has(qty + 1), "the + step is offered")
+	assert_true(offered.has(qty - 1) or qty == 1, "and so is the - step, unless the row is at 1")
+	var night := _night_on(Rules.view(s))
+	var up: Array = night.call("controls_for", {"type": "register_set_qty", "line": 0, "qty": qty + 1})
+	var down: Array = night.call("controls_for", {"type": "register_set_qty", "line": 0, "qty": maxi(1, qty - 1)})
+	assert_false(up.is_empty(), "a control sends the row up")
+	assert_false(down.is_empty(), "and a different one sends it down")
+	# At a quantity of 1 there is nowhere to step down TO, so `control_for` sends both to the "+".
+	if qty > 1 and not up.is_empty() and not down.is_empty():
+		assert_ne(up[0], down[0], "and they are not the same chip")
+	_dispose(night)
+
+## Both steps the PFAND row takes, each to its own chip - the register line's rule, one row down.
+## Offering "all of them at once" instead described a control the screen does not have: `control_for`
+## routed that entry to the `+` chip, pressing `+` staged ONE bottle, and the ring came back
+## `wrong_count` on a register the driver had every reason to believe was exact. `-` was meanwhile a
+## live, enabled chip whose action the engine never admitted was legal - the mirror image, again.
+## (Pointer probe, 2026-09-13. `set_pfand{all}` stays LEGAL: it is what the crate's drag dispatches.)
+func test_the_pfand_row_offers_both_of_its_steps() -> void:
+	var s := _a_real_register_state()
+	(s["active"] as Dictionary)["bottles"] = 3
+	s = Rules.apply(s, {"type": "set_pfand", "bottles": 1})
+	assert_eq(int(((s["active"] as Dictionary)["register"] as Dictionary)["pfand_bottles"]), 1, "one empty staged")
+	var offered: Array = []
+	for entry in Rules.legal_actions(s):
+		var a: Dictionary = entry
+		if String(a["type"]) == "set_pfand":
+			offered.append(int(a["bottles"]))
+	assert_true(offered.has(2), "the + step is offered")
+	assert_true(offered.has(0), "and so is the - step")
+	assert_false(offered.has(3), "and never a jump no chip on the row can make in one press")
+	var night := _night_on(Rules.view(s))
+	var up: Array = night.call("controls_for", {"type": "set_pfand", "bottles": 2})
+	var down: Array = night.call("controls_for", {"type": "set_pfand", "bottles": 0})
+	assert_false(up.is_empty(), "a chip sends the row up")
+	assert_false(down.is_empty(), "and a different one sends it down")
+	if not up.is_empty() and not down.is_empty():
+		assert_ne(up[0], down[0], "and they are not the same chip")
+		var seen: Array = []
+		night.connect("acted", func(a: Dictionary) -> void: seen.append(a))
+		(up[0] as StepChip).press()
+		assert_eq(seen, [{"type": "set_pfand", "bottles": 2}],
+			"and pressing it produces the DICTIONARY the engine advertised, not a different one")
+	_dispose(night)
+
+## A Night rendered from a view — the real one, here, rather than a capture preset.
+func _night_on(v: Dictionary) -> Node:
+	var night := (load("res://scenes/Night.tscn") as PackedScene).instantiate()
+	night.call("_ready")
+	night.call("render", v)
+	return night
+
+## A real night, walked to the point where a guest is standing at the counter with her basket on it.
+func _a_real_register_state() -> Dictionary:
+	var s := SpatiState.new_game({"seed": 7})
+	s["phase"] = "night"
+	s["queue"] = [SpatiState.new_customer(1, String(Content.character("robin")["archetype_id"]), "mate", 90000, "robin")]
+	s = Rules.apply(s, {"type": "talk_next"})
+	var guard := 0
+	while Talk.is_open(s) and guard < 40:
+		guard += 1
+		var advanced := false
+		for a in Rules.legal_actions(s):
+			if String(a["type"]) == "talk_advance":
+				s = Rules.apply(s, a)
+				advanced = true
+				break
+		if not advanced:
+			s = Rules.apply(s, {"type": "talk_choose", "choice": 0})
+	return s
+
+func _a_real_register_view() -> Dictionary:
+	return Rules.view(_a_real_register_state())
+
+# ── helpers ───────────────────────────────────────────────────────────────────────────────────
+
+## A Night wound up the way the game winds it up: `_ready` (the runner has no tree, so it is called by
+## hand, exactly as the ManageBoard test does) and then a capture preset.
+func _ring_night(preset: String) -> Node:
+	var night := (load("res://scenes/Night.tscn") as PackedScene).instantiate()
+	night.call("_ready")
+	night.call("apply_capture_preset", preset)
+	return night
+
+## The actions docs/08 section 3.2 makes legal in THIS read-model. It stands in for
+## `Rules.legal_actions` until the engine lane lands it, and every entry is DERIVED from the view —
+## the whole point of the exercise is that nothing here is typed out by hand.
+func _ring_up_actions(v: Dictionary) -> Array:
+	var out: Array = []
+	var register: Dictionary = v.get("register", {})
+	if String(v.get("view_mode", "counter")) == "wall":
+		var wall: Dictionary = v.get("wall", {})
+		for shelf in wall.get("shelves", []):
+			for cell in (shelf as Dictionary).get("cells", []):
+				var c: Dictionary = cell
+				if int(c.get("stock", 0)) > 0:
+					out.append({"type": "take_from_wall", "sku": String(c["sku_id"]), "brand": String(c["brand"])})
+		for held in wall.get("hand", []):
+			out.append({"type": "put_back", "uid": int((held as Dictionary)["uid"])})
+		out.append({"type": "turn_around", "on": false})
+		return out
+	for row in v.get("counter", []):
+		var r: Dictionary = row
+		if String(r.get("kind", "")) == "item" and not bool(r.get("scanned", false)):
+			out.append({"type": "scan", "uid": int(r["uid"])})
+	var lines: Array = register.get("lines", [])
+	for i in lines.size():
+		out.append({"type": "register_remove", "line": i})
+		out.append({"type": "register_set_qty", "line": i, "qty": int((lines[i] as Dictionary).get("qty", 1)) + 1})
+	if int(register.get("pfand_bottles", 0)) > 0:
+		out.append({"type": "set_pfand", "bottles": int(register["pfand_bottles"]) - 1})
+	if not bool(register.get("id_checked", false)):
+		out.append({"type": "check_id"})
+	out.append({"type": "turn_around", "on": true})
+	# `talk_next` stays legal with a guest at the counter (docs/06 section 4) — the register mode
+	# collapses the LINE, never the verb, and this is the entry that proves it.
+	out.append({"type": "talk_next"})
+	if bool(register.get("can_ring", false)):
+		out.append({"type": "ring_up"})
+	out.append({"type": "skip_active"})
+	return out

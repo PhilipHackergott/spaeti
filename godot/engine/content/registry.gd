@@ -6,6 +6,7 @@ extends RefCounted
 ## a Späti with no strands and no vignettes is a bare shop, not a crash.
 
 const SkuData := preload("res://engine/content/skus.gd")
+const BrandData := preload("res://engine/content/brands.gd")
 const CustomerData := preload("res://engine/content/customers.gd")
 const UpgradeData := preload("res://engine/content/upgrades.gd")
 const StoryData := preload("res://engine/content/story.gd")
@@ -14,15 +15,34 @@ const CharacterData := preload("res://engine/content/characters.gd")
 const DialogueData := preload("res://engine/content/dialogues.gd")
 
 static var SKUS: Array = SkuData.DATA
+## Tobacco brands (docs/08 §2). A brand is a VARIANT of a SKU — identity only, never its own stock
+## line or its own price; `inventory[brand.sku]` stays the one number the wholesaler sees.
+static var BRANDS: Array = BrandData.DATA
 static var ARCHETYPES: Array = CustomerData.DATA
 static var UPGRADES: Array = UpgradeData.DATA
 static var STRANDS: Array = StoryData.DATA
 static var VIGNETTES: Array = VignetteData.DATA
 static var CHARACTERS: Array = CharacterData.DATA
+## The frozen six-id expression vocabulary (docs/09 §3). A tree may only name a face from this list,
+## and a character may only LIST one it actually has on disk — test_content.gd guards both, because
+## expression-id drift is the failure that ships silently (the portrait quietly falls back and nobody
+## sees that the face never changed).
+static var EXPRESSIONS: Array = CharacterData.EXPRESSIONS
+## flag id -> the reader that consumes it (docs/09 §4.10). The declared half of the flag economy: a
+## flag with no `requires_flag` gate and no Economy.FLAG_LABEL entry must name its future reader
+## or test_flags.gd fails the build. A flag nobody reads is a lie in the save file.
+static var FLAG_READERS: Dictionary = StoryData.FLAG_READERS
 ## id -> conversation graph (docs/06 §3). Keyed by CHARACTER id, plus the generic DIALOGUE_FALLBACK.
 static var DIALOGUES: Dictionary = DialogueData.DATA
 
 static var SKU_BY_ID: Dictionary = {}
+static var BRAND_BY_ID: Dictionary = {}
+## sku id -> Array of brand rows, in registry order, so the tobacco wall never reshuffles.
+static var BRANDS_BY_SKU: Dictionary = {}
+## facing asset id -> brand row. `{logo.<sku>}` substitutes a brand's FACING ASSET ID into a spoken
+## line (docs/09 §1 rule 3), and the DialogueBox has to turn that id back into a mark to draw it —
+## without guessing from the string's shape. This is the lookup that makes the glyph data-driven.
+static var BRAND_BY_ICON: Dictionary = {}
 static var ARCHETYPE_BY_ID: Dictionary = {}
 static var UPGRADE_BY_ID: Dictionary = {}
 static var STRAND_BY_ID: Dictionary = {}
@@ -39,6 +59,13 @@ const DIALOGUE_MINOR := "oneoff_minor"
 
 static func _static_init() -> void:
 	_index(SKUS, SKU_BY_ID)
+	_index(BRANDS, BRAND_BY_ID)
+	for row in BRANDS:
+		var sku_id: String = row["sku"]
+		if not BRANDS_BY_SKU.has(sku_id):
+			BRANDS_BY_SKU[sku_id] = []
+		(BRANDS_BY_SKU[sku_id] as Array).append(row)
+		BRAND_BY_ICON[String(row["icon"])] = row
 	_index(ARCHETYPES, ARCHETYPE_BY_ID)
 	_index(UPGRADES, UPGRADE_BY_ID)
 	_index(STRANDS, STRAND_BY_ID)
@@ -55,6 +82,36 @@ static func _index(rows: Array, out: Dictionary) -> void:
 static func sku(id: String) -> Dictionary:
 	return SKU_BY_ID.get(id, {})
 
+## One brand row, or {} — `brand` is "" on every non-tobacco basket line, and that resolves to {}.
+static func brand(id: String) -> Dictionary:
+	return BRAND_BY_ID.get(id, {})
+
+## Every brand/variant of one SKU, in registry order (the wall's shelf order). [] for a SKU with none.
+static func brands_for(sku_id: String) -> Array:
+	return BRANDS_BY_SKU.get(sku_id, [])
+
+## The noun phrase a customer SAYS for a brand — what `{brand.<sku>}` substitutes to (docs/09 §0).
+## "" for an unbranded line, so a basket without tobacco simply says nothing instead of saying "null".
+static func brand_spoken(id: String) -> String:
+	return String(brand(id).get("spoken", ""))
+
+## The asset id of a brand's facing — what `BrandMark` crops its 16×16 window out of, and what
+## `{logo.<sku>}` resolves to. "" for an unbranded line.
+static func brand_logo(id: String) -> String:
+	return String(brand(id).get("icon", ""))
+
+## The brand's LOGO PHRASE, article-free — the emblem as a customer names it out loud ("eagle",
+## "fox", "cream booklet"). `Strings.ASK_MARK_PHRASE "the ones with the %s"` is what wraps it, which
+## is why the article is not stored here: "the ones with the the fox" is how that bug reads.
+## This is the `mark` speech tier's only source of words; "" for an unbranded line.
+static func brand_phrase(id: String) -> String:
+	return String(brand(id).get("phrase", ""))
+
+## The brand whose facing is this asset id, or {} — the inverse of `brand_logo`, so a component that
+## meets a bare asset id in a sentence can ask the catalogue instead of parsing the string.
+static func brand_by_icon(icon_id: String) -> Dictionary:
+	return BRAND_BY_ICON.get(icon_id, {})
+
 static func archetype(id: String) -> Dictionary:
 	return ARCHETYPE_BY_ID.get(id, {})
 
@@ -69,6 +126,17 @@ static func vignette(id: String) -> Dictionary:
 
 static func character(id: String) -> Dictionary:
 	return CHARACTER_BY_ID.get(id, {})
+
+## What the register serves this person: the persona card's authored basket rows (docs/09 §5), or []
+## for a face with no card. This is the SINGLE SOURCE of an order — the register seeds
+## `state.active.basket` from it and `Talk.subs_for` builds {qty.*} / {brand.*} / {logo.*} out of
+## the same rows, so the want-list and the spoken line cannot drift apart.
+static func basket_for(character_id: String) -> Array:
+	return character(character_id).get("basket", [])
+
+## The declared reader of a flag, or "" (docs/09 §4.10) — authoring metadata, never read by the reducer.
+static func flag_reader(flag: String) -> String:
+	return String(FLAG_READERS.get(flag, ""))
 
 ## The conversation graph a guest gets: their own if one is written, else the nameless parade's.
 static func dialogue_id_for(character_id: String) -> String:

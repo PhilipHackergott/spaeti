@@ -57,14 +57,14 @@ static func node_of(s: Dictionary) -> Dictionary:
 			raw = Content.dialogue_node(String(talk.get("dialogue_id", "")).trim_prefix(DIALOGUE_PREFIX), node_id)
 	if raw.is_empty():
 		return {}
-	var want_name := want_name_of(s)
+	var subs := subs_for(s)
 	var lines: Array = []
 	for line in raw.get("lines", []):
-		lines.append(String(line).replace("{want}", want_name))
+		lines.append(_apply(String(line), subs))
 	var choices: Array = []
 	for choice in raw.get("choices", []):
 		var copy: Dictionary = (choice as Dictionary).duplicate(true)  # the DATA consts are read-only
-		copy["label"] = String(copy.get("label", "")).replace("{want}", want_name)
+		copy["label"] = _apply(String(copy.get("label", "")), subs)
 		choices.append(copy)
 	var active: Dictionary = s.get("active", {})
 	return {
@@ -74,6 +74,37 @@ static func node_of(s: Dictionary) -> Dictionary:
 		"choices": choices,
 		"kind": kind,
 	}
+
+## Every token a line or a label may carry, built ONCE per node (docs/09 §0). Substitution is PER
+## BASKET LINE, not per character: Achim orders three different tobacco products in one breath, and a
+## single `habits.brand` field cannot serve that sentence.
+##   {want}          the SKU the guest came in for — unchanged, and still what a plain order says
+##   {qty.<sku>}     how many of that line she asked for
+##   {brand.<sku>}   the noun phrase she SAYS ("long Feder papers") — Content.brand_spoken
+##   {logo.<sku>}    the facing's ASSET id, i.e. an inline mark glyph, never spoken text — brand_logo
+## An unbranded line resolves `{brand.*}` / `{logo.*}` to "", so a basket without tobacco says nothing
+## rather than saying "null".
+static func subs_for(s: Dictionary) -> Dictionary:
+	var out := {"{want}": want_name_of(s)}
+	for entry in ((s.get("active", {}) as Dictionary).get("basket", []) as Array):
+		var row: Dictionary = entry
+		var sku_id := String(row.get("sku", ""))
+		if sku_id == "":
+			continue
+		var brand := String(row.get("brand", ""))
+		out["{qty." + sku_id + "}"] = str(int(row.get("qty", 1)))
+		out["{brand." + sku_id + "}"] = Content.brand_spoken(brand)
+		out["{logo." + sku_id + "}"] = Content.brand_logo(brand)
+	return out
+
+## Replace what we know and LEAVE THE REST ALONE: a tree is never broken by a basket that lacks the
+## SKU it names (docs/09 §0). `test_tokens.gd` is what fails the build when that happens — the same
+## rule as the soft-lock: never trust a name, assert against the read-model.
+static func _apply(text: String, subs: Dictionary) -> String:
+	var out := text
+	for token in subs:
+		out = out.replace(String(token), String(subs[token]))
+	return out
 
 ## The SKU name `{want}` stands for — what the person at the counter actually came in for.
 static func want_name_of(s: Dictionary) -> String:

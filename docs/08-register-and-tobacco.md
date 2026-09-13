@@ -98,8 +98,10 @@ box and slides out, the QueueStrip un-greys. Empty counter, amber light, 22:43.
 **Brands are variants of an existing SKU, not new SKUs.** `inventory["cigarettes"]` keeps one stock number and
 one price for the wholesaler and the ManageBoard; a brand carries identity only — a name, a **mark** (a shape a
 26×34 pack can hold and a 16×16 chip can repeat) and a colour. Per-brand stock and per-brand prices are
-explicitly out of the slice (§7). New content file `godot/engine/content/tobacco.gd`, shape
-`{id, sku, name, mark, colour, band}`:
+explicitly out of the slice (§7). Shipped as `godot/engine/content/brands.gd` (`Content.BRANDS`),
+shape `{id, sku, family, name, spoken, mark, colour, band, size, icon}` — `spoken` is the noun phrase
+a customer says ("long Feder papers"), `size` the facing's base-pixel footprint and `icon` its §5
+asset id, so the wall, the tray and the talk graph all read one row:
 
 **Cigarettes** — `sku:"cigarettes"`, 8,00 €, pack sprite **26×34**.
 
@@ -199,7 +201,7 @@ frame. Tested.
 | `register_set_qty{line, qty}` | line in range · `1 ≤ qty ≤ 9` · `qty ≤ inventory[sku].stock`; lowering below `uids.size()` un-scans the last uid |
 | `turn_around{on:bool}` | `active` · no talk open · no drag in flight; costs `TURN_MS 1200` of night clock |
 | `take_from_wall{sku, brand}` | `view_mode=="wall"` · `inventory[sku].stock > 0` · `hand.size() < HAND_MAX` |
-| `put_back{uid}` | `view_mode=="wall"` · `origin=="wall"` · `not scanned` |
+| `put_back{uid}` | `view_mode=="wall"` · `origin=="wall"` · `not scanned` — **offered** only for what is still in the `hand`: a facing that already landed on the tray has no control at the wall (the tray is not on screen with your back turned), and an offer with nothing to press is the soft-lock |
 | `set_pfand{bottles}` | `0 ≤ bottles ≤ active.bottles` (the existing `_serve` clamp, unchanged) |
 | `check_id` | `active` · `not id_checked` — a real Späti verb, free in the reducer |
 | `ring_up` | `view_mode=="counter"` · (`lines` non-empty **or** `pfand_bottles > 0`) |
@@ -221,6 +223,13 @@ view.order:     [{ said, qty, category, brand, mark, colour, name_shown:bool, sa
 view.view_mode: String
 view.wall:      {} | { shelves:[{ label, price, cells:[{ sku_id, brand, name, mark, colour, stock, row, col }] }], hand:[…] }
 ```
+
+**`view.register` is `{}` with nobody at the counter**, like `view.wall` off the wall and `view.active` with
+an empty counter — not a zeroed row of keys. The whole Night chrome is derived from that one test
+(`night.gd::_note_mode`: `_ringing = not register.is_empty()`), so a zeroed dictionary put the real game in
+register mode all night: the queue never drew its line, and the want bubble, the plain order line and the d20
+plate — each of which stands down during a ring-up — were never seen again. Every capture reads `MockView`,
+which said `{}`, so nothing caught it until the pointer probe asked the reducer.
 
 `matches` and `satisfied` are **derived in the engine, never in the UI** — the ticks and the amber edges are
 the reducer's opinion, so a screen cannot lie about correctness. `total` includes `−pfand_line` and may go
@@ -277,6 +286,13 @@ order. Physically it is **one crate sprite** (30×34) in tray slot 0 with a `×3
 bottles, which would eat the tray. Dragging the crate onto the register's Pfand row `PFAND_ROW_RECT
 (344,154,130,16)` dispatches `set_pfand{bottles: count}`; the row's `−`/`+` `StepButton`s tune it. Two input
 paths, one action, one clamp — in the reducer, where a component cannot invent a quantity that moves cash.
+**`legal_actions` advertises the two STEPS the row can take** (`pfand_bottles ± 1`, in range), never a jump
+to the full count: `control_for` routes a `set_pfand` by direction, so an “all of them at once” entry pointed
+at the `+` chip and pressing it staged *one* — an offer whose own control does something else, and a ring
+that came back `wrong_count` on a register the driver had every reason to think was exact. And `−` was a
+live chip whose action the engine never admitted was legal: the mirror image, on the same row.
+`set_pfand{active.bottles}` stays **legal** — it is what the crate's drag dispatches — and is simply not
+offered, exactly like `serve_active` in §3.6.
 
 ### 3.6 New SKU, and the old path
 
