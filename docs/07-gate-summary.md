@@ -41,6 +41,8 @@ Godot 4.7.2; every screen is a real `.tscn` you can open in the editor.
 | Lena / Mehmet neutral | 79 / 79 | Lena since regenerated ×3 in the leaning format (composed only) |
 | One-offs (clubber, tourist) | 78 / 78 | |
 | You / Brandt / Tobias / Schulz / Nadia | 73 / 76 / 75 / 74 / 68 | outside the demo path |
+| Register view (composed, real playthrough) | 68 | first round; ui 57 (opaque panels), composition 63, placeholder SKU sprite on the tray |
+| Tobacco wall view | 61 | first round; sparse stock, heavy price bars, marks weak at pack scale |
 | **Hero screen (`dialogue_choice`, composed)** | **75** (v11) | trajectory 71 → 74 → 70/74 → 73 → 72 → 73 → 70 → 74 → 75 over eleven rounds; v11 = Lena drawn at 160 px leaning, counter edge 8 px lower (composition 77, character 75, Berlin 89, palette 63, ui 71) |
 
 What moved the composed score: the choices inside the panel (+3), the three HUD plates → minimal HUD in conversation,
